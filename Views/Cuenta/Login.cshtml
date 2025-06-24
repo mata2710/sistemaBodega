@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="mb-4 text-center">Iniciar sesión</h2>
+
+                @if (TempData["Mensaje"] != null)
+                {
+                    <div class="alert alert-success text-center">@TempData["Mensaje"]</div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo electrónico</label>
+                        <input type="email" name="correo" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="contrasena" class="form-label">Contraseña</label>
+                        <input type="password" name="contrasena" class="form-control" required />
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Ingresar</button>
+                    </div>
+
+                    <!-- 🔽 Enlace de recuperación debajo del botón -->
+                    <div class="text-center mt-3">
+                        <a asp-controller="Cuenta" asp-action="Recuperar">¿Olvidaste tu contraseña? Recupérala aquí</a>
+                    </div>
+                </form>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger mt-3 text-center">@ViewBag.Error</div>
+                }
+
+                <p class="mt-4 text-center">
+                    ¿No tienes cuenta?
+                    <a asp-controller="Cuenta" asp-action="Register">Regístrate aquí</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

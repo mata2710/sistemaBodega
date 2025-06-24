@@ -1,0 +1,182 @@
+﻿@{
+    ViewData["Title"] = "Inicio";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+    body {
+        background-color: #111;
+        color: white;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .sidebar {
+        height: 100vh;
+        background-color: #1b1b1b;
+        padding: 20px;
+    }
+
+    .sidebar .nav-link {
+        color: white;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+        background-color: #ffcc00;
+        color: #111;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .tile {
+        background-color: #222;
+        border: 1px solid #333;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        transition: background-color 0.3s;
+    }
+
+    .tile:hover {
+        background-color: #2d2d2d;
+    }
+
+    .tile i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .tile-yellow {
+        background-color: #ffcc00;
+        color: black;
+    }
+
+    .tile-yellow:hover {
+        background-color: #e6b800;
+        color: black;
+    }
+
+    .carousel-inner {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .carousel-inner img {
+        max-height: 420px;
+        object-fit: cover;
+        width: 100%;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar d-flex flex-column">
+            <h4 class="mb-4">SISTEMA</h4>
+            <a href="/Home/Index" class="nav-link active">Inicio</a>
+            <a href="/Home/Clientes" class="nav-link">Clientes</a>
+            <a href="/Home/Alquileres" class="nav-link">Alquileres</a>
+            <a href="/Home/Bodegas" class="nav-link">Bodegas</a>
+            <a href="/Home/Precios" class="nav-link">Precios de Bodegas</a>
+            <a href="/Home/Usuarios" class="nav-link">Usuarios</a>
+            <a href="/Home/Configuracion" class="nav-link">Configuración</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 content">
+            <!-- Carrusel -->
+            <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
+                <!-- Indicadores -->
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Imagen 1"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Imagen 2"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Imagen 3"></button>
+                </div>
+
+                <!-- Imágenes -->
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="/img/bodega1.jpg" class="d-block w-100" alt="bodega1">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/img/bodega2.jpg" class="d-block w-100" alt="bodega2">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/img/bodega3.jpg" class="d-block w-100" alt="bodega3">
+                    </div>
+                </div>
+
+                <!-- Controles -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Siguiente</span>
+                </button>
+            </div>
+
+            <!-- Accesos rápidos -->
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <a href="/Home/Clientes">
+                        <div class="tile tile-yellow">
+                            <i class="bi bi-list"></i>
+                            <div>Listar Clientes</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/Home/CrearCliente">
+                        <div class="tile tile-yellow">
+                            <i class="bi bi-plus-square"></i>
+                            <div>Crear Cliente</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/Home/RenovarAlquiler">
+                        <div class="tile tile-yellow">
+                            <i class="bi bi-arrow-repeat"></i>
+                            <div>Renovar Alquiler</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/Home/Bodegas">
+                        <div class="tile tile-yellow">
+                            <i class="bi bi-tools"></i>
+                            <div>Mant. Bodega</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/Home/PrecioBodegas">
+                        <div class="tile tile-yellow">
+                            <i class="bi bi-cash"></i>
+                            <div>Precios de Bodegas</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/Home/PerfilUsuario">
+                        <div class="tile tile-yellow">
+                            <i class="bi bi-person-circle"></i>
+                            <div>Perfil de Usuario</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

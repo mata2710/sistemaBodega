@@ -1,0 +1,78 @@
+﻿@{
+    ViewData["Title"] = "Nuevo Cliente";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Estilos adicionales -->
+<style>
+    body {
+        background-color: #111 !important;
+        color: white;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .form-control {
+        background-color: #1c1c1c;
+        border: 1px solid #444;
+        color: white;
+    }
+
+        .form-control:focus {
+            border-color: #ffcc00;
+            box-shadow: 0 0 0 0.2rem rgba(255, 204, 0, 0.25);
+            background-color: #1c1c1c;
+            color: white;
+        }
+
+    .btn-cancel {
+        background-color: transparent;
+        border: 1px solid #ffcc00;
+        color: #ffcc00;
+        transition: all 0.3s ease;
+    }
+
+        .btn-cancel:hover {
+            background-color: #ffcc00;
+            color: #111;
+        }
+</style>
+
+<div class="container mt-4">
+    <div class="card border-0 shadow">
+        <div class="card-header bg-warning text-dark fw-semibold">
+            <i class="bi bi-person-plus-fill me-2"></i>Agregar Nuevo Cliente
+        </div>
+        <div class="card-body bg-dark text-white">
+            <form>
+                <div class="mb-3">
+                    <label for="Nombre" class="form-label">Nombre completo</label>
+                    <input type="text" class="form-control" id="Nombre" placeholder="Ej. Juan Pérez">
+                </div>
+
+                <div class="mb-3">
+                    <label for="Telefono" class="form-label">Teléfono</label>
+                    <input type="text" class="form-control" id="Telefono" placeholder="+506 8888-9999">
+                </div>
+
+                <div class="mb-3">
+                    <label for="Email" class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control" id="Email" placeholder="cliente@ejemplo.com">
+                </div>
+
+                <div class="mb-3">
+                    <label for="Identificacion" class="form-label">Identificación</label>
+                    <input type="text" class="form-control" id="Identificacion" placeholder="1-1111-1111">
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <a href="/Home/Clientes" class="btn btn-cancel me-2">Cancelar</a>
+                    <button type="submit" class="btn btn-warning fw-semibold">Guardar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

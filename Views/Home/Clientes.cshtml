@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Listar Clientes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    body {
+        background-color: #111 !important;
+    }
+</style>
+
+<div class="container-fluid bg-dark py-4 px-4" style="min-height: 100vh;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-white">Listado de Clientes</h2>
+        <a href="#" class="btn btn-warning fw-semibold">
+            <i class="bi bi-plus-circle me-2"></i> Nuevo Cliente
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-warning text-dark fw-semibold">
+            <i class="bi bi-person-lines-fill me-2"></i> Clientes Registrados
+        </div>
+        <div class="card-body bg-dark text-white rounded-bottom">
+            <div class="table-responsive">
+                <table class="table table-dark table-striped table-hover align-middle mb-0">
+                    <thead class="table-secondary text-dark">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Identificación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Fila de ejemplo vacía -->
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No hay clientes registrados aún.</td>
+                        </tr>
+
+                        <!-- Ejemplo de cliente simulado -->
+                        @*
+                        <tr>
+                            <td>Juan Pérez</td>
+                            <td>+506 8888-9999</td>
+                            <td>juan@example.com</td>
+                            <td>1-1111-1111</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-info me-1"><i class="bi bi-eye"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-warning me-1"><i class="bi bi-pencil"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                        *@
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

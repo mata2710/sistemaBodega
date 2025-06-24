@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SistemaBodega</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SistemaBodega.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #ffcc00;">
+            <div class="container-fluid">
+                <a class="navbar-brand text-dark fw-bold" asp-area="" asp-controller="Home" asp-action="Index">SistemaBodega</a>
+
+                <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+
+                @{
+                    var controlador = HttpContextAccessor.HttpContext?.Request.RouteValues["controller"]?.ToString();
+                    var accion = HttpContextAccessor.HttpContext?.Request.RouteValues["action"]?.ToString();
+                    bool esHomeIndex = controlador == "Home" && accion == "Index";
+                }
+
+                @if (esHomeIndex)
+                {
+                    <div class="d-flex align-items-center">
+                        <span class="me-3 fw-semibold text-dark">
+                            Rol: @HttpContextAccessor.HttpContext?.Session.GetString("Rol")
+                        </span>
+                        <a asp-controller="Cuenta" asp-action="Logout" class="btn btn-danger btn-sm me-3">Salir</a>
+                        <img src="~/img/perfil.jpg" alt="Perfil" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid white;">
+                    </div>
+                }
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - SistemaBodega - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

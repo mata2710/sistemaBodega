@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Recuperar contraseña";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="mb-4 text-center">Recuperar contraseña</h2>
+
+                <form asp-action="Recuperar" method="post">
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo electrónico</label>
+                        <input type="email" name="correo" class="form-control" required />
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning">Enviar enlace</button>
+                    </div>
+                </form>
+
+                @if (ViewBag.Mensaje != null)
+                {
+                    <div class="alert alert-success mt-3 text-center">
+                        @Html.Raw(ViewBag.Mensaje)
+                    </div>
+                }
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger mt-3 text-center">@ViewBag.Error</div>
+                }
+
+                <p class="mt-4 text-center">
+                    <a asp-action="Login" asp-controller="Cuenta">Volver al inicio de sesión</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
