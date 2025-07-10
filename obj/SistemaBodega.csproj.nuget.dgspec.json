@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\DJ Mats\\Desktop\\SistemaBodega\\SistemaBodega\\SistemaBodega.csproj": {}
+    "C:\\Users\\DJ Mats\\sistemaBodega\\SistemaBodega.csproj": {}
   },
   "projects": {
-    "C:\\Users\\DJ Mats\\Desktop\\SistemaBodega\\SistemaBodega\\SistemaBodega.csproj": {
+    "C:\\Users\\DJ Mats\\sistemaBodega\\SistemaBodega.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\DJ Mats\\Desktop\\SistemaBodega\\SistemaBodega\\SistemaBodega.csproj",
+        "projectUniqueName": "C:\\Users\\DJ Mats\\sistemaBodega\\SistemaBodega.csproj",
         "projectName": "SistemaBodega",
-        "projectPath": "C:\\Users\\DJ Mats\\Desktop\\SistemaBodega\\SistemaBodega\\SistemaBodega.csproj",
+        "projectPath": "C:\\Users\\DJ Mats\\sistemaBodega\\SistemaBodega.csproj",
         "packagesPath": "C:\\Users\\DJ Mats\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\DJ Mats\\Desktop\\SistemaBodega\\SistemaBodega\\obj\\",
+        "outputPath": "C:\\Users\\DJ Mats\\sistemaBodega\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -63,6 +63,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[9.0.6, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[8.0.7, )"
             }
           },
           "imports": [

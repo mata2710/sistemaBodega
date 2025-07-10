@@ -18,4 +18,6 @@ public partial class Bodega
     public decimal? Precio { get; set; }
 
     public virtual ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
+    public virtual ICollection<Mantenimiento> Mantenimientos { get; set; } = new List<Mantenimiento>();
+
 }

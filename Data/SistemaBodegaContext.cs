@@ -24,6 +24,12 @@ public partial class SistemaBodegaContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+    public virtual DbSet<Cliente> Clientes { get; set; }
+
+    public virtual DbSet<Mantenimiento> Mantenimientos { get; set; }
+
+
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Server=DJ\\SQLEXPRESS;Database=SistemaBodegaDB;Trusted_Connection=True;TrustServerCertificate=True;");
 
@@ -41,6 +47,20 @@ public partial class SistemaBodegaContext : DbContext
             entity.Property(e => e.Precio).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Ubicacion).HasMaxLength(150);
         });
+        modelBuilder.Entity<Mantenimiento>(entity =>
+        {
+            entity.ToTable("Mantenimientos");
+
+            entity.Property(e => e.TipoMantenimiento).HasMaxLength(50);
+            entity.Property(e => e.EmpresaResponsable).HasMaxLength(100);
+            entity.Property(e => e.Costo).HasColumnType("decimal(10, 2)");
+
+            entity.HasOne(d => d.Bodega)
+                .WithMany(p => p.Mantenimientos)
+                .HasForeignKey(d => d.IdBodega)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
 
         modelBuilder.Entity<Contrato>(entity =>
         {

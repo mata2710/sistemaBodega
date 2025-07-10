@@ -18,17 +18,17 @@
         padding: 20px;
     }
 
-    .sidebar .nav-link {
-        color: white;
-        margin-bottom: 10px;
-        border-radius: 5px;
-    }
+        .sidebar .nav-link {
+            color: white;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
 
-    .sidebar .nav-link.active,
-    .sidebar .nav-link:hover {
-        background-color: #ffcc00;
-        color: #111;
-    }
+            .sidebar .nav-link.active,
+            .sidebar .nav-link:hover {
+                background-color: #ffcc00;
+                color: #111;
+            }
 
     .content {
         padding: 20px;
@@ -44,35 +44,35 @@
         transition: background-color 0.3s;
     }
 
-    .tile:hover {
-        background-color: #2d2d2d;
-    }
+        .tile:hover {
+            background-color: #2d2d2d;
+        }
 
-    .tile i {
-        font-size: 2rem;
-        margin-bottom: 10px;
-    }
+        .tile i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
 
     .tile-yellow {
         background-color: #ffcc00;
         color: black;
     }
 
-    .tile-yellow:hover {
-        background-color: #e6b800;
-        color: black;
-    }
+        .tile-yellow:hover {
+            background-color: #e6b800;
+            color: black;
+        }
 
     .carousel-inner {
         border-radius: 10px;
         overflow: hidden;
     }
 
-    .carousel-inner img {
-        max-height: 420px;
-        object-fit: cover;
-        width: 100%;
-    }
+        .carousel-inner img {
+            max-height: 420px;
+            object-fit: cover;
+            width: 100%;
+        }
 </style>
 
 <div class="container-fluid">
@@ -81,7 +81,7 @@
         <div class="col-md-2 sidebar d-flex flex-column">
             <h4 class="mb-4">SISTEMA</h4>
             <a href="/Home/Index" class="nav-link active">Inicio</a>
-            <a href="/Home/Clientes" class="nav-link">Clientes</a>
+            <a asp-controller="Clientes" asp-action="Index" class="nav-link">Clientes</a>
             <a href="/Home/Alquileres" class="nav-link">Alquileres</a>
             <a href="/Home/Bodegas" class="nav-link">Bodegas</a>
             <a href="/Home/Precios" class="nav-link">Precios de Bodegas</a>
@@ -93,14 +93,12 @@
         <div class="col-md-10 content">
             <!-- Carrusel -->
             <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
-                <!-- Indicadores -->
                 <div class="carousel-indicators">
                     <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Imagen 1"></button>
                     <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Imagen 2"></button>
                     <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Imagen 3"></button>
                 </div>
 
-                <!-- Imágenes -->
                 <div class="carousel-inner">
                     <div class="carousel-item active">
                         <img src="/img/bodega1.jpg" class="d-block w-100" alt="bodega1">
@@ -113,7 +111,6 @@
                     </div>
                 </div>
 
-                <!-- Controles -->
                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Anterior</span>
@@ -127,7 +124,7 @@
             <!-- Accesos rápidos -->
             <div class="row g-4">
                 <div class="col-md-4">
-                    <a href="/Home/Clientes">
+                    <a asp-controller="Clientes" asp-action="Index">
                         <div class="tile tile-yellow">
                             <i class="bi bi-list"></i>
                             <div>Listar Clientes</div>
@@ -135,7 +132,7 @@
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="/Home/CrearCliente">
+                    <a asp-controller="Clientes" asp-action="Create">
                         <div class="tile tile-yellow">
                             <i class="bi bi-plus-square"></i>
                             <div>Crear Cliente</div>
@@ -143,28 +140,29 @@
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="/Home/RenovarAlquiler">
+                    <a asp-controller="Bodegas" asp-action="Index">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-arrow-repeat"></i>
-                            <div>Renovar Alquiler</div>
+                            <i class="bi bi-box-seam"></i>
+                            <div>Ver Bodegas</div>
                         </div>
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="/Home/Bodegas">
+                    <a asp-controller="Bodegas" asp-action="Index">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-tools"></i>
-                            <div>Mant. Bodega</div>
+                            <i class="bi bi-pencil-square"></i>
+                            <div>Modificar Bodegas</div>
                         </div>
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="/Home/PrecioBodegas">
+                    <a asp-controller="Mantenimientos" asp-action="Index">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-cash"></i>
-                            <div>Precios de Bodegas</div>
+                            <i class="bi bi-wrench-adjustable"></i>
+                            <div>Mantenimientos</div>
                         </div>
                     </a>
+
                 </div>
                 <div class="col-md-4">
                     <a href="/Home/PerfilUsuario">
