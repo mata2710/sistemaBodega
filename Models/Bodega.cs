@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace SistemaBodega.Models;
 
@@ -7,7 +8,8 @@ public partial class Bodega
 {
     public int Id { get; set; }
 
-    public string Nombre { get; set; } = null!;
+    [Required(ErrorMessage = "El nombre de la bodega es obligatorio")]
+    public string Nombre { get; set; }
 
     public string Ubicacion { get; set; } = null!;
 

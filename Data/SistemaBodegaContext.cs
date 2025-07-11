@@ -28,6 +28,8 @@ public partial class SistemaBodegaContext : DbContext
 
     public virtual DbSet<Mantenimiento> Mantenimientos { get; set; }
 
+    public DbSet<Alquiler> Alquileres { get; set; }
+
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -1,15 +1,20 @@
-﻿namespace SistemaBodega.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SistemaBodega.Models
 {
     public class Cliente
     {
         public int Id { get; set; }
 
-        public string Nombre { get; set; } = null!;
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        public string Nombre { get; set; }
 
-        public string Identificacion { get; set; } = null!;
+        // Puedes agregar otros campos si los tienes
 
         public string? Telefono { get; set; }
 
         public string? Email { get; set; }
     }
 }
+
+

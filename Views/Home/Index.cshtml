@@ -82,7 +82,7 @@
             <h4 class="mb-4">SISTEMA</h4>
             <a href="/Home/Index" class="nav-link active">Inicio</a>
             <a asp-controller="Clientes" asp-action="Index" class="nav-link">Clientes</a>
-            <a href="/Home/Alquileres" class="nav-link">Alquileres</a>
+            <a asp-controller="Alquileres" asp-action="Index" class="nav-link">Alquileres</a>
             <a href="/Home/Bodegas" class="nav-link">Bodegas</a>
             <a href="/Home/Precios" class="nav-link">Precios de Bodegas</a>
             <a href="/Home/Usuarios" class="nav-link">Usuarios</a>
@@ -148,10 +148,10 @@
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a asp-controller="Bodegas" asp-action="Index">
+                    <a asp-controller="Alquileres" asp-action="Index">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-pencil-square"></i>
-                            <div>Modificar Bodegas</div>
+                            <i class="bi bi-journal-text"></i>
+                            <div>Alquileres</div>
                         </div>
                     </a>
                 </div>
@@ -162,7 +162,6 @@
                             <div>Mantenimientos</div>
                         </div>
                     </a>
-
                 </div>
                 <div class="col-md-4">
                     <a href="/Home/PerfilUsuario">
