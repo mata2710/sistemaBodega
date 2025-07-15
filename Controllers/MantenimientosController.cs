@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SistemaBodega.Data;
 using SistemaBodega.Models;
+using SistemaBodega.Filters; // ✅ Para usar el filtro personalizado
 
 namespace SistemaBodega.Controllers
 {
@@ -19,42 +20,37 @@ namespace SistemaBodega.Controllers
             _context = context;
         }
 
-        // GET: Mantenimientoes
+        // GET: Mantenimientos
         public async Task<IActionResult> Index()
         {
             var sistemaBodegaContext = _context.Mantenimientos.Include(m => m.Bodega);
             return View(await sistemaBodegaContext.ToListAsync());
         }
 
-        // GET: Mantenimientoes/Details/5
+        // GET: Mantenimientos/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var mantenimiento = await _context.Mantenimientos
                 .Include(m => m.Bodega)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (mantenimiento == null)
-            {
                 return NotFound();
-            }
 
             return View(mantenimiento);
         }
 
-        // GET: Mantenimientoes/Create
+        // GET: Mantenimientos/Create
         public IActionResult Create()
         {
             ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id");
             return View();
         }
 
-        // POST: Mantenimientoes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Mantenimientos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega")] Mantenimiento mantenimiento)
@@ -69,34 +65,27 @@ namespace SistemaBodega.Controllers
             return View(mantenimiento);
         }
 
-        // GET: Mantenimientoes/Edit/5
+        // GET: Mantenimientos/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var mantenimiento = await _context.Mantenimientos.FindAsync(id);
             if (mantenimiento == null)
-            {
                 return NotFound();
-            }
+
             ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
             return View(mantenimiento);
         }
 
-        // POST: Mantenimientoes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Mantenimientos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega")] Mantenimiento mantenimiento)
         {
             if (id != mantenimiento.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -108,42 +97,38 @@ namespace SistemaBodega.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!MantenimientoExists(mantenimiento.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
             return View(mantenimiento);
         }
 
-        // GET: Mantenimientoes/Delete/5
+        // GET: Mantenimientos/Delete/5
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var mantenimiento = await _context.Mantenimientos
                 .Include(m => m.Bodega)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (mantenimiento == null)
-            {
                 return NotFound();
-            }
 
             return View(mantenimiento);
         }
 
-        // POST: Mantenimientoes/Delete/5
+        // POST: Mantenimientos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var mantenimiento = await _context.Mantenimientos.FindAsync(id);

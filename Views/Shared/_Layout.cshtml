@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +12,11 @@
     <link rel="stylesheet" href="~/SistemaBodega.styles.css" asp-append-version="true" />
 </head>
 <body>
+    @{
+        var rol = HttpContextAccessor.HttpContext?.Session.GetString("Rol");
+        var usuario = HttpContextAccessor.HttpContext?.Session.GetString("Usuario");
+    }
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #ffcc00;">
             <div class="container-fluid">
@@ -19,41 +25,54 @@
                 <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+
+                        @if (!string.IsNullOrEmpty(rol))
+                        {
+                            @* Opciones solo para Administrador *@
+                            if (rol == "Administrador")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Clientes" asp-action="Index">Clientes</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Bodegas" asp-action="Index">Bodegas</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Usuarios" asp-action="Index">Usuarios</a>
+                                </li>
+                            }
+
+                            @* Común para todos los roles *@
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Mantenimientos" asp-action="Index">Mantenimientos</a>
+                            </li>
+                        }
                     </ul>
+
+                    @if (!string.IsNullOrEmpty(usuario))
+                    {
+                        <div class="d-flex align-items-center">
+                            <span class="me-3 fw-semibold text-dark">
+                                @usuario (@rol)
+                            </span>
+                            <a asp-controller="Cuenta" asp-action="Logout" class="btn btn-danger btn-sm me-3">Salir</a>
+                            <img src="~/img/perfil.jpg" alt="Perfil" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid white;">
+                        </div>
+                    }
                 </div>
-
-                @{
-                    var controlador = HttpContextAccessor.HttpContext?.Request.RouteValues["controller"]?.ToString();
-                    var accion = HttpContextAccessor.HttpContext?.Request.RouteValues["action"]?.ToString();
-                    bool esHomeIndex = controlador == "Home" && accion == "Index";
-                }
-
-                @if (esHomeIndex)
-                {
-                    <div class="d-flex align-items-center">
-                        <span class="me-3 fw-semibold text-dark">
-                            Rol: @HttpContextAccessor.HttpContext?.Session.GetString("Rol")
-                        </span>
-                        <a asp-controller="Cuenta" asp-action="Logout" class="btn btn-danger btn-sm me-3">Salir</a>
-                        <img src="~/img/perfil.jpg" alt="Perfil" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid white;">
-                    </div>
-                }
             </div>
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container mt-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-4">
         <div class="container">
             &copy; 2025 - SistemaBodega - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
@@ -65,4 +84,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-

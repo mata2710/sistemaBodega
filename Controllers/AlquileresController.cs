@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SistemaBodega.Data;
 using SistemaBodega.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace SistemaBodega.Controllers
 {
@@ -45,6 +46,9 @@ namespace SistemaBodega.Controllers
         // GET: Alquileres/Create
         public IActionResult Create()
         {
+            if (HttpContext.Session.GetString("Rol") != "Administrador")
+                return RedirectToAction("Index", "Home");
+
             ViewData["BodegaId"] = new SelectList(_context.Bodegas, "Id", "Nombre");
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Nombre");
             return View();
@@ -55,12 +59,16 @@ namespace SistemaBodega.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,ClienteId,BodegaId,FechaInicio,FechaFin,RenovacionAutomatica,Activo")] Alquiler alquiler)
         {
+            if (HttpContext.Session.GetString("Rol") != "Administrador")
+                return RedirectToAction("Index", "Home");
+
             if (ModelState.IsValid)
             {
                 _context.Add(alquiler);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["BodegaId"] = new SelectList(_context.Bodegas, "Id", "Nombre", alquiler.BodegaId);
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Nombre", alquiler.ClienteId);
             return View(alquiler);
@@ -69,6 +77,9 @@ namespace SistemaBodega.Controllers
         // GET: Alquileres/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            if (HttpContext.Session.GetString("Rol") != "Administrador")
+                return RedirectToAction("Index", "Home");
+
             if (id == null) return NotFound();
 
             var alquiler = await _context.Alquileres.FindAsync(id);
@@ -84,6 +95,9 @@ namespace SistemaBodega.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,ClienteId,BodegaId,FechaInicio,FechaFin,RenovacionAutomatica,Activo")] Alquiler alquiler)
         {
+            if (HttpContext.Session.GetString("Rol") != "Administrador")
+                return RedirectToAction("Index", "Home");
+
             if (id != alquiler.Id) return NotFound();
 
             if (ModelState.IsValid)
@@ -100,6 +114,7 @@ namespace SistemaBodega.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["BodegaId"] = new SelectList(_context.Bodegas, "Id", "Nombre", alquiler.BodegaId);
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Nombre", alquiler.ClienteId);
             return View(alquiler);
@@ -108,6 +123,9 @@ namespace SistemaBodega.Controllers
         // GET: Alquileres/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (HttpContext.Session.GetString("Rol") != "Administrador")
+                return RedirectToAction("Index", "Home");
+
             if (id == null) return NotFound();
 
             var alquiler = await _context.Alquileres
@@ -124,6 +142,9 @@ namespace SistemaBodega.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (HttpContext.Session.GetString("Rol") != "Administrador")
+                return RedirectToAction("Index", "Home");
+
             var alquiler = await _context.Alquileres.FindAsync(id);
             if (alquiler != null)
                 _context.Alquileres.Remove(alquiler);
@@ -138,4 +159,3 @@ namespace SistemaBodega.Controllers
         }
     }
 }
-

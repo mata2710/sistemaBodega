@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaBodega.Data;
 using SistemaBodega.Models;
+using SistemaBodega.Filters; // ✅ Necesario para usar [AuthorizeRol]
+using Microsoft.AspNetCore.Http;
 
 namespace SistemaBodega.Controllers
 {
@@ -44,7 +46,7 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
-        // Vista de Registro
+        // Vista de Registro (solo visible para Admins si se desea proteger)
         public IActionResult Register()
         {
             return View();
@@ -65,7 +67,7 @@ namespace SistemaBodega.Controllers
             {
                 NombreCompleto = nombreCompleto,
                 Correo = correo,
-                Contrasena = contrasena, // ⚠️ En producción, usar hash seguro
+                Contrasena = contrasena,
                 Rol = rol
             };
 
@@ -120,16 +122,13 @@ namespace SistemaBodega.Controllers
                 return View();
             }
 
-            // Generar token y guardar
             string token = Guid.NewGuid().ToString();
             usuario.TokenRecuperacion = token;
             _context.SaveChanges();
 
-            // Enlace de recuperación
             var url = Url.Action("Restablecer", "Cuenta", new { token }, Request.Scheme);
             ViewBag.Mensaje = $"Se ha enviado un enlace de recuperación: <a href='{url}'>{url}</a>";
 
-            // Aquí podrías enviar el correo real
             return View();
         }
 
@@ -163,8 +162,11 @@ namespace SistemaBodega.Controllers
             TempData["Mensaje"] = "Contraseña actualizada correctamente.";
             return RedirectToAction("Login");
         }
+
+        // ✅ Acción para acceso denegado
+        public IActionResult AccesoDenegado()
+        {
+            return View();
+        }
     }
 }
-
-
-

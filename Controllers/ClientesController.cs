@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SistemaBodega.Data;
 using SistemaBodega.Models;
+using SistemaBodega.Filters; // ✅ necesario para el filtro personalizado
 
 namespace SistemaBodega.Controllers
 {
@@ -44,16 +44,16 @@ namespace SistemaBodega.Controllers
         }
 
         // GET: Clientes/Create
+        [AuthorizeRol("Administrador")]
         public IActionResult Create()
         {
             return View();
         }
 
         // POST: Clientes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Create([Bind("Id,Nombre,Identificacion,Telefono,Email")] Cliente cliente)
         {
             if (ModelState.IsValid)
@@ -66,6 +66,7 @@ namespace SistemaBodega.Controllers
         }
 
         // GET: Clientes/Edit/5
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -82,10 +83,9 @@ namespace SistemaBodega.Controllers
         }
 
         // POST: Clientes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Identificacion,Telefono,Email")] Cliente cliente)
         {
             if (id != cliente.Id)
@@ -117,6 +117,7 @@ namespace SistemaBodega.Controllers
         }
 
         // GET: Clientes/Delete/5
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -137,6 +138,7 @@ namespace SistemaBodega.Controllers
         // POST: Clientes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var cliente = await _context.Clientes.FindAsync(id);
