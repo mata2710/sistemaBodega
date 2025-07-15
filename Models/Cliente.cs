@@ -7,9 +7,13 @@ namespace SistemaBodega.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "El nombre es obligatorio")]
-        public string Nombre { get; set; }
+        public string Nombre { get; set; } = string.Empty;
 
-        // Puedes agregar otros campos si los tienes
+        [Required(ErrorMessage = "La identificación es obligatoria")]
+        public string Identificacion { get; set; } = string.Empty ;
+
+
+       
 
         public string? Telefono { get; set; }
 
