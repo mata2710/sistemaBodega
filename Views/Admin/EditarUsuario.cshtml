@@ -1,0 +1,43 @@
+﻿@model SistemaBodega.Models.Usuario
+
+@{
+    ViewData["Title"] = "Editar Usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card border-0 shadow">
+        <div class="card-header bg-warning text-dark fw-semibold">
+            <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Editar Usuario</h4>
+        </div>
+
+        <div class="card-body bg-dark text-white">
+            <form method="post" asp-action="EditarUsuario" asp-controller="Admin">
+                <input type="hidden" name="Id" value="@Model.Id" />
+
+                <div class="mb-3">
+                    <label for="nombreCompleto" class="form-label">Nombre completo</label>
+                    <input type="text" name="NombreCompleto" class="form-control border-secondary" value="@Model.NombreCompleto" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="correo" class="form-label">Correo electrónico</label>
+                    <input type="email" name="Correo" class="form-control border-secondary" value="@Model.Correo" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="rol" class="form-label">Rol</label>
+                    <select name="Rol" class="form-select border-secondary" required>
+                        <option value="Empleado" selected="@((Model.Rol == "Empleado").ToString())">Empleado</option>
+                        <option value="Administrador" selected="@((Model.Rol == "Administrador").ToString())">Administrador</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-warning"><i class="bi bi-check-lg me-1"></i> Guardar Cambios</button>
+                    <a href="/Admin/Usuarios" class="btn btn-outline-light"><i class="bi bi-arrow-left me-1"></i> Volver</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

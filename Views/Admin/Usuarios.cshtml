@@ -1,0 +1,48 @@
+﻿@model List<SistemaBodega.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Administrar Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4 text-white">
+    <h2 class="mb-4">Administración de Usuarios</h2>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+
+    <table class="table table-dark table-striped align-middle">
+        <thead class="table-warning text-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.NombreCompleto</td>
+                    <td>@u.Correo</td>
+                    <td>@u.Rol</td>
+                    <td>
+                        <a asp-controller="Admin" asp-action="EditarUsuario" asp-route-id="@u.Id" class="btn btn-sm btn-warning me-2">
+                            Editar
+                        </a>
+
+                        <form asp-controller="Admin" asp-action="EliminarUsuario" asp-route-id="@u.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('¿Seguro que deseas eliminar este usuario?');">
+                                Eliminar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

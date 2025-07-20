@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaBodega.Data;
 using SistemaBodega.Models;
-using SistemaBodega.Filters; // ✅ Necesario para usar [AuthorizeRol]
 using Microsoft.AspNetCore.Http;
 
 namespace SistemaBodega.Controllers
@@ -16,10 +15,9 @@ namespace SistemaBodega.Controllers
             _context = context;
         }
 
-        // Función auxiliar para verificar sesión activa
         private bool UsuarioAutenticado()
         {
-            return !string.IsNullOrEmpty(HttpContext.Session.GetString("Usuario"));
+            return HttpContext.Session.GetInt32("UsuarioId") != null;
         }
 
         // Vista de Login
@@ -28,7 +26,7 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
-        // Procesar formulario de Login
+        // Procesar Login
         [HttpPost]
         public IActionResult Login(string correo, string contrasena)
         {
@@ -37,8 +35,9 @@ namespace SistemaBodega.Controllers
 
             if (usuario != null)
             {
-                HttpContext.Session.SetString("Usuario", usuario.NombreCompleto);
-                HttpContext.Session.SetString("Rol", usuario.Rol);
+                HttpContext.Session.SetInt32("UsuarioId", usuario.Id);
+                HttpContext.Session.SetString("Usuario", usuario.NombreCompleto ?? "");
+                HttpContext.Session.SetString("Rol", usuario.Rol ?? "Empleado");
                 return RedirectToAction("Index", "Home");
             }
 
@@ -46,16 +45,22 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
-        // Vista de Registro (solo visible para Admins si se desea proteger)
+        // Vista de Registro
         public IActionResult Register()
         {
             return View();
         }
 
-        // Procesar formulario de Registro
+        // Procesar Registro
         [HttpPost]
-        public IActionResult Register(string nombreCompleto, string correo, string contrasena, string rol)
+        public IActionResult Register(string nombreCompleto, string correo, string contrasena)
         {
+            if (string.IsNullOrWhiteSpace(nombreCompleto) || string.IsNullOrWhiteSpace(correo) || string.IsNullOrWhiteSpace(contrasena))
+            {
+                ViewBag.Error = "Todos los campos son obligatorios.";
+                return View();
+            }
+
             var existeUsuario = _context.Usuarios.Any(u => u.Correo == correo);
             if (existeUsuario)
             {
@@ -68,7 +73,7 @@ namespace SistemaBodega.Controllers
                 NombreCompleto = nombreCompleto,
                 Correo = correo,
                 Contrasena = contrasena,
-                Rol = rol
+                Rol = "Empleado"
             };
 
             _context.Usuarios.Add(nuevoUsuario);
@@ -80,41 +85,66 @@ namespace SistemaBodega.Controllers
         // Logout
         public IActionResult Logout()
         {
-            if (!UsuarioAutenticado())
-                return RedirectToAction("Login");
-
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
-        // Vista PerfilUsuario
+        // Vista de Perfil de Usuario
         public IActionResult PerfilUsuario()
         {
-            var nombre = HttpContext.Session.GetString("Usuario");
-            if (string.IsNullOrEmpty(nombre))
-            {
-                return RedirectToAction("Login");
-            }
+            var usuarioId = HttpContext.Session.GetInt32("UsuarioId");
+            var rol = HttpContext.Session.GetString("Rol");
 
-            var usuario = _context.Usuarios.FirstOrDefault(u => u.NombreCompleto == nombre);
+            if (usuarioId == null || string.IsNullOrEmpty(rol))
+                return RedirectToAction("Login");
+
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.Id == usuarioId);
             if (usuario == null)
-            {
                 return RedirectToAction("Login");
-            }
 
-            return View(usuario);
+            ViewBag.Rol = rol;
+            return View("PerfilUsuario", usuario); // 👈 MUY IMPORTANTE
         }
 
-        // Vista Recuperar contraseña
+
+        // Procesar actualización de perfil
+        [HttpPost]
+        public IActionResult ActualizarPerfil(int id, string nombreCompleto, string correo)
+        {
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.Id == id);
+            if (usuario == null)
+                return RedirectToAction("Login");
+
+            if (string.IsNullOrWhiteSpace(nombreCompleto) || string.IsNullOrWhiteSpace(correo))
+            {
+                TempData["Error"] = "Nombre y correo no pueden estar vacíos.";
+                return RedirectToAction("PerfilUsuario");
+            }
+
+            usuario.NombreCompleto = nombreCompleto;
+            usuario.Correo = correo;
+
+            _context.SaveChanges();
+
+            TempData["Mensaje"] = "Perfil actualizado correctamente.";
+            return RedirectToAction("PerfilUsuario");
+        }
+
+        // Vista de recuperación
         public IActionResult Recuperar()
         {
             return View();
         }
 
-        // Procesar recuperación (enviar enlace)
         [HttpPost]
         public IActionResult Recuperar(string correo)
         {
+            if (string.IsNullOrWhiteSpace(correo))
+            {
+                ViewBag.Error = "Debe ingresar un correo.";
+                return View();
+            }
+
             var usuario = _context.Usuarios.FirstOrDefault(u => u.Correo == correo);
             if (usuario == null)
             {
@@ -132,28 +162,28 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
-        // Vista para restablecer contraseña
         public IActionResult Restablecer(string token)
         {
+            if (string.IsNullOrWhiteSpace(token))
+                return RedirectToAction("Login");
+
             var usuario = _context.Usuarios.FirstOrDefault(u => u.TokenRecuperacion == token);
             if (usuario == null)
-            {
                 return RedirectToAction("Login");
-            }
 
             ViewBag.Token = token;
             return View();
         }
 
-        // Procesar nueva contraseña
         [HttpPost]
         public IActionResult Restablecer(string token, string nuevaContrasena)
         {
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(nuevaContrasena))
+                return RedirectToAction("Login");
+
             var usuario = _context.Usuarios.FirstOrDefault(u => u.TokenRecuperacion == token);
             if (usuario == null)
-            {
                 return RedirectToAction("Login");
-            }
 
             usuario.Contrasena = nuevaContrasena;
             usuario.TokenRecuperacion = null;
@@ -163,10 +193,12 @@ namespace SistemaBodega.Controllers
             return RedirectToAction("Login");
         }
 
-        // ✅ Acción para acceso denegado
+        // Vista de acceso denegado
         public IActionResult AccesoDenegado()
         {
             return View();
         }
     }
 }
+
+

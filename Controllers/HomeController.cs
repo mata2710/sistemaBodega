@@ -53,10 +53,10 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
+        // Redirige al controlador correcto donde sí se construye el modelo correctamente
         public IActionResult PerfilUsuario()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
-            return View();
+            return RedirectToAction("PerfilUsuario", "Cuenta");
         }
 
         public IActionResult Configuracion()
@@ -66,4 +66,3 @@ namespace SistemaBodega.Controllers
         }
     }
 }
-
