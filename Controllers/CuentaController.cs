@@ -1,18 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using SistemaBodega.Data;
 using SistemaBodega.Models;
-using Microsoft.AspNetCore.Http;
+using SistemaBodega.Helpers; // ✅ Para usar EmailProvidersSettings
+using Microsoft.Extensions.Options; // ✅ Para inyectar configuración SMTP
+using System.Net.Mail;
+using System.Net;
 
 namespace SistemaBodega.Controllers
 {
     public class CuentaController : Controller
     {
         private readonly SistemaBodegaContext _context;
+        private readonly EmailProvidersSettings _emailSettings; // ✅ Configuración SMTP inyectada
 
-        public CuentaController(SistemaBodegaContext context)
+        public CuentaController(SistemaBodegaContext context, IOptions<EmailProvidersSettings> emailSettings)
         {
             _context = context;
+            _emailSettings = emailSettings.Value; // ✅ Leer configuración desde appsettings.json
         }
 
         private bool UsuarioAutenticado()
@@ -20,13 +26,8 @@ namespace SistemaBodega.Controllers
             return HttpContext.Session.GetInt32("UsuarioId") != null;
         }
 
-        // Vista de Login
-        public IActionResult Login()
-        {
-            return View();
-        }
+        public IActionResult Login() => View();
 
-        // Procesar Login
         [HttpPost]
         public IActionResult Login(string correo, string contrasena)
         {
@@ -45,13 +46,8 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
-        // Vista de Registro
-        public IActionResult Register()
-        {
-            return View();
-        }
+        public IActionResult Register() => View();
 
-        // Procesar Registro
         [HttpPost]
         public IActionResult Register(string nombreCompleto, string correo, string contrasena)
         {
@@ -61,8 +57,7 @@ namespace SistemaBodega.Controllers
                 return View();
             }
 
-            var existeUsuario = _context.Usuarios.Any(u => u.Correo == correo);
-            if (existeUsuario)
+            if (_context.Usuarios.Any(u => u.Correo == correo))
             {
                 ViewBag.Error = "El correo ya está registrado.";
                 return View();
@@ -82,14 +77,12 @@ namespace SistemaBodega.Controllers
             return RedirectToAction("Login");
         }
 
-        // Logout
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
-        // Vista de Perfil de Usuario
         public IActionResult PerfilUsuario()
         {
             var usuarioId = HttpContext.Session.GetInt32("UsuarioId");
@@ -103,11 +96,9 @@ namespace SistemaBodega.Controllers
                 return RedirectToAction("Login");
 
             ViewBag.Rol = rol;
-            return View("PerfilUsuario", usuario); // 👈 MUY IMPORTANTE
+            return View("PerfilUsuario", usuario);
         }
 
-
-        // Procesar actualización de perfil
         [HttpPost]
         public IActionResult ActualizarPerfil(int id, string nombreCompleto, string correo)
         {
@@ -123,19 +114,16 @@ namespace SistemaBodega.Controllers
 
             usuario.NombreCompleto = nombreCompleto;
             usuario.Correo = correo;
-
             _context.SaveChanges();
 
             TempData["Mensaje"] = "Perfil actualizado correctamente.";
             return RedirectToAction("PerfilUsuario");
         }
 
-        // Vista de recuperación
-        public IActionResult Recuperar()
-        {
-            return View();
-        }
+        // ✅ Vista del formulario de recuperación
+        public IActionResult Recuperar() => View();
 
+        // ✅ Enviar enlace de recuperación por correo SMTP
         [HttpPost]
         public IActionResult Recuperar(string correo)
         {
@@ -156,12 +144,45 @@ namespace SistemaBodega.Controllers
             usuario.TokenRecuperacion = token;
             _context.SaveChanges();
 
+            // ✅ Construir el enlace
             var url = Url.Action("Restablecer", "Cuenta", new { token }, Request.Scheme);
-            ViewBag.Mensaje = $"Se ha enviado un enlace de recuperación: <a href='{url}'>{url}</a>";
+            var asunto = "Recuperación de contraseña";
+            var cuerpo = $"<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p><p><a href='{url}'>{url}</a></p>";
+
+            // ✅ Enviar correo con configuración SMTP
+            var proveedor = _emailSettings.DefaultProvider;
+            var config = _emailSettings.Providers[proveedor];
+
+            try
+            {
+                using (var smtpClient = new SmtpClient(config.Host, config.Port))
+                {
+                    smtpClient.Credentials = new NetworkCredential(config.User, config.Password);
+                    smtpClient.EnableSsl = config.EnableSsl;
+
+                    var mensaje = new MailMessage
+                    {
+                        From = new MailAddress(config.User, "Sistema Bodega"),
+                        Subject = asunto,
+                        Body = cuerpo,
+                        IsBodyHtml = true
+                    };
+
+                    mensaje.To.Add(correo);
+                    smtpClient.Send(mensaje);
+                }
+
+                ViewBag.Mensaje = "Se ha enviado el enlace de recuperación a su correo.";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al enviar el correo: " + ex.Message;
+            }
 
             return View();
         }
 
+        // ✅ Vista para ingresar nueva contraseña
         public IActionResult Restablecer(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -175,6 +196,7 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
+        // ✅ Procesar nueva contraseña
         [HttpPost]
         public IActionResult Restablecer(string token, string nuevaContrasena)
         {
@@ -193,12 +215,7 @@ namespace SistemaBodega.Controllers
             return RedirectToAction("Login");
         }
 
-        // Vista de acceso denegado
-        public IActionResult AccesoDenegado()
-        {
-            return View();
-        }
+        public IActionResult AccesoDenegado() => View();
     }
 }
-
 

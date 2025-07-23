@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SistemaBodega.Data;
+using SistemaBodega.Helpers;
+using SistemaBodega.Services; // Agregamos el servicio de envío de correo
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,10 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// ✅ Configuración SMTP
+builder.Services.Configure<EmailProvidersSettings>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddTransient<EmailService>();
 
 var app = builder.Build();
 
@@ -48,6 +54,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
-
 

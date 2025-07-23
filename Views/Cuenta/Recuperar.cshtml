@@ -1,4 +1,7 @@
-﻿@{
+﻿@model SistemaBodega.Models.ViewModels.RecuperarViewModel
+
+
+@{
     ViewData["Title"] = "Recuperar contraseña";
 }
 
@@ -8,16 +11,20 @@
             <div class="card-body">
                 <h2 class="mb-4 text-center">Recuperar contraseña</h2>
 
-                <form asp-action="Recuperar" method="post">
+                <form asp-action="Recuperar" method="post" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                     <div class="mb-3">
-                        <label for="correo" class="form-label">Correo electrónico</label>
-                        <input type="email" name="correo" class="form-control" required />
+                        <label asp-for="Correo" class="form-label"></label>
+                        <input asp-for="Correo" class="form-control" />
+                        <span asp-validation-for="Correo" class="text-danger"></span>
                     </div>
 
                     <div class="d-grid">
                         <button type="submit" class="btn btn-warning">Enviar enlace</button>
                     </div>
                 </form>
+
 
                 @if (ViewBag.Mensaje != null)
                 {
@@ -38,4 +45,11 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
 

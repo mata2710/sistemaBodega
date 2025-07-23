@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SistemaBodega.Data;
 using SistemaBodega.Models;
-using SistemaBodega.Filters; // ✅ Para usar el filtro personalizado
+using SistemaBodega.Filters;
 
 namespace SistemaBodega.Controllers
 {
@@ -53,7 +53,7 @@ namespace SistemaBodega.Controllers
         // POST: Mantenimientos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega")] Mantenimiento mantenimiento)
+        public async Task<IActionResult> Create([Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega,ComentariosAdministracion")] Mantenimiento mantenimiento)
         {
             if (ModelState.IsValid)
             {
@@ -61,6 +61,7 @@ namespace SistemaBodega.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
             return View(mantenimiento);
         }
@@ -82,7 +83,7 @@ namespace SistemaBodega.Controllers
         // POST: Mantenimientos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega")] Mantenimiento mantenimiento)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega,ComentariosAdministracion")] Mantenimiento mantenimiento)
         {
             if (id != mantenimiento.Id)
                 return NotFound();
@@ -147,3 +148,4 @@ namespace SistemaBodega.Controllers
         }
     }
 }
+

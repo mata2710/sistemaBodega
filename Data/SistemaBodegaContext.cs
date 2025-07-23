@@ -36,15 +36,20 @@ namespace SistemaBodega.Data
             modelBuilder.Entity<Mantenimiento>(entity =>
             {
                 entity.ToTable("Mantenimientos");
+
                 entity.Property(e => e.TipoMantenimiento).HasMaxLength(50);
                 entity.Property(e => e.EmpresaResponsable).HasMaxLength(100);
                 entity.Property(e => e.Costo).HasColumnType("decimal(10, 2)");
+
+                // 👇 Asegurarse de mapear correctamente
+                entity.Property(e => e.ComentariosAdministracion).HasColumnName("ComentariosAdministracion");
 
                 entity.HasOne(d => d.Bodega)
                     .WithMany(p => p.Mantenimientos)
                     .HasForeignKey(d => d.IdBodega)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
 
             modelBuilder.Entity<Contrato>(entity =>
             {

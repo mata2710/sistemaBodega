@@ -17,173 +17,173 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = SistemaBodega
 build_property.RootNamespace = SistemaBodega
-build_property.ProjectDir = C:\Users\fabri\Documents\SistemaBodega\
+build_property.ProjectDir = C:\Users\DJ Mats\sistemaBodega\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = true
-build_property.MSBuildProjectDirectory = C:\Users\fabri\Documents\SistemaBodega
+build_property.MSBuildProjectDirectory = C:\Users\DJ Mats\sistemaBodega
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Admin/EditarUsuario.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Admin/EditarUsuario.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdGFyVXN1YXJpby5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Admin/Usuarios.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Admin/Usuarios.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVXN1YXJpb3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Alquileres/Create.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Alquileres/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Alquileres/Delete.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Alquileres/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xEZWxldGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Alquileres/Details.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Alquileres/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Alquileres/Edit.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Alquileres/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Alquileres/Index.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Alquileres/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Bodegas/Create.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Bodegas/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQm9kZWdhc1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Bodegas/Delete.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Bodegas/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQm9kZWdhc1xEZWxldGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Bodegas/Details.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Bodegas/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQm9kZWdhc1xEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Bodegas/Edit.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Bodegas/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQm9kZWdhc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Bodegas/Index.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Bodegas/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQm9kZWdhc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Clientes/Create.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Clientes/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZXNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Clientes/Delete.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Clientes/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZXNcRGVsZXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Clientes/Details.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Clientes/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZXNcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Clientes/Edit.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Clientes/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZXNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Clientes/Index.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Clientes/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50ZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Cuenta/AccesoDenegado.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Cuenta/AccesoDenegado.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VlbnRhXEFjY2Vzb0RlbmVnYWRvLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Cuenta/Login.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Cuenta/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VlbnRhXExvZ2luLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Cuenta/PerfilUsuario.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Cuenta/PerfilUsuario.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VlbnRhXFBlcmZpbFVzdWFyaW8uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Cuenta/Recuperar.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Cuenta/Recuperar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VlbnRhXFJlY3VwZXJhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Cuenta/Register.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Cuenta/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VlbnRhXFJlZ2lzdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Cuenta/Restablecer.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Cuenta/Restablecer.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VlbnRhXFJlc3RhYmxlY2VyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Home/Bodegas.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Home/Bodegas.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxCb2RlZ2FzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Home/Clientes.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Home/Clientes.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDbGllbnRlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Home/CrearCliente.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Home/CrearCliente.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDcmVhckNsaWVudGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Home/Index.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Home/PrecioBodegas.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Home/PrecioBodegas.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcmVjaW9Cb2RlZ2FzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Home/Privacy.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Home/RenovarAlquiler.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Home/RenovarAlquiler.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxSZW5vdmFyQWxxdWlsZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Mantenimientos/Create.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Mantenimientos/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudGVuaW1pZW50b3NcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Mantenimientos/Delete.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Mantenimientos/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudGVuaW1pZW50b3NcRGVsZXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Mantenimientos/Details.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Mantenimientos/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudGVuaW1pZW50b3NcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Mantenimientos/Edit.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Mantenimientos/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudGVuaW1pZW50b3NcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Mantenimientos/Index.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Mantenimientos/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudGVuaW1pZW50b3NcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Shared/Error.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/_ViewImports.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/_ViewStart.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/fabri/Documents/SistemaBodega/Views/Shared/_Layout.cshtml]
+[C:/Users/DJ Mats/sistemaBodega/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-1j3qeqynec

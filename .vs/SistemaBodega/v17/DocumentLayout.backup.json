@@ -1,0 +1,298 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\DJ Mats\\sistemaBodega\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\controllers\\cuentacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:controllers\\cuentacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\views\\cuenta\\restablecer.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:views\\cuenta\\restablecer.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\views\\cuenta\\recuperar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:views\\cuenta\\recuperar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\models\\viewmodels\\recuperarviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:models\\viewmodels\\recuperarviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\helpers\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:helpers\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\helpers\\emailsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:helpers\\emailsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\data\\sistemabodegacontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:data\\sistemabodegacontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\models\\mantenimiento.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:models\\mantenimiento.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\views\\mantenimientos\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:views\\mantenimientos\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\views\\mantenimientos\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:views\\mantenimientos\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\controllers\\mantenimientoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:controllers\\mantenimientoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\models\\sistemabodegadbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:models\\sistemabodegadbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\views\\mantenimientos\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:views\\mantenimientos\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|c:\\users\\dj mats\\sistemabodega\\views\\mantenimientos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{0B9952A7-86CA-E5DF-073C-1AF0752FB3FA}|SistemaBodega.csproj|solutionrelative:views\\mantenimientos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Restablecer.cshtml",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Cuenta\\Restablecer.cshtml",
+              "RelativeDocumentMoniker": "Views\\Cuenta\\Restablecer.cshtml",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Cuenta\\Restablecer.cshtml",
+              "RelativeToolTip": "Views\\Cuenta\\Restablecer.cshtml",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAYwCoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-07-23T01:12:06.711Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "RecuperarViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Models\\ViewModels\\RecuperarViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\ViewModels\\RecuperarViewModel.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Models\\ViewModels\\RecuperarViewModel.cs",
+              "RelativeToolTip": "Models\\ViewModels\\RecuperarViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-23T01:07:49.473Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Recuperar.cshtml",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Cuenta\\Recuperar.cshtml",
+              "RelativeDocumentMoniker": "Views\\Cuenta\\Recuperar.cshtml",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Cuenta\\Recuperar.cshtml",
+              "RelativeToolTip": "Views\\Cuenta\\Recuperar.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-07-23T01:03:16.783Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-07-22T01:21:43.987Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CuentaController.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Controllers\\CuentaController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CuentaController.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Controllers\\CuentaController.cs",
+              "RelativeToolTip": "Controllers\\CuentaController.cs",
+              "ViewState": "AgIAAIwAAAAAAAAAAAAUwNwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-23T00:51:27.753Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-23T00:48:27.999Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "EmailService.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Helpers\\EmailService.cs",
+              "RelativeDocumentMoniker": "Helpers\\EmailService.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Helpers\\EmailService.cs",
+              "RelativeToolTip": "Helpers\\EmailService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-23T00:47:32.702Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "EmailSettings.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Helpers\\EmailSettings.cs",
+              "RelativeDocumentMoniker": "Helpers\\EmailSettings.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Helpers\\EmailSettings.cs",
+              "RelativeToolTip": "Helpers\\EmailSettings.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-23T00:44:05.52Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Mantenimiento.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Models\\Mantenimiento.cs",
+              "RelativeDocumentMoniker": "Models\\Mantenimiento.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Models\\Mantenimiento.cs",
+              "RelativeToolTip": "Models\\Mantenimiento.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAUwB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T02:22:08.829Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "SistemaBodegaContext.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Data\\SistemaBodegaContext.cs",
+              "RelativeDocumentMoniker": "Data\\SistemaBodegaContext.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Data\\SistemaBodegaContext.cs",
+              "RelativeToolTip": "Data\\SistemaBodegaContext.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAA0wDMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T02:34:22.005Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Mantenimientos\\Create.cshtml",
+              "RelativeDocumentMoniker": "Views\\Mantenimientos\\Create.cshtml",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Mantenimientos\\Create.cshtml",
+              "RelativeToolTip": "Views\\Mantenimientos\\Create.cshtml",
+              "ViewState": "AgIAAGAAAAAAAAAAAAAQwJ0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-07-22T02:26:28.615Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Mantenimientos\\Edit.cshtml",
+              "RelativeDocumentMoniker": "Views\\Mantenimientos\\Edit.cshtml",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Mantenimientos\\Edit.cshtml",
+              "RelativeToolTip": "Views\\Mantenimientos\\Edit.cshtml",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAEQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-07-22T02:27:57.262Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "MantenimientosController.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Controllers\\MantenimientosController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MantenimientosController.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Controllers\\MantenimientosController.cs",
+              "RelativeToolTip": "Controllers\\MantenimientosController.cs",
+              "ViewState": "AgIAAFsAAAAAAAAAAAAUwJYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T02:46:38.447Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "SistemaBodegaDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Models\\SistemaBodegaDbContext.cs",
+              "RelativeDocumentMoniker": "Models\\SistemaBodegaDbContext.cs",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Models\\SistemaBodegaDbContext.cs",
+              "RelativeToolTip": "Models\\SistemaBodegaDbContext.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAA1wH4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-22T02:24:39.941Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Mantenimientos\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Mantenimientos\\Details.cshtml",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Mantenimientos\\Details.cshtml",
+              "RelativeToolTip": "Views\\Mantenimientos\\Details.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACsAAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-07-22T02:29:52.279Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Mantenimientos\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Mantenimientos\\Index.cshtml",
+              "ToolTip": "C:\\Users\\DJ Mats\\sistemaBodega\\Views\\Mantenimientos\\Index.cshtml",
+              "RelativeToolTip": "Views\\Mantenimientos\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-07-22T02:28:32.116Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

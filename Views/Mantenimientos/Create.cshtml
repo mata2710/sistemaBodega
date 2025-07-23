@@ -1,52 +1,158 @@
-﻿@model SistemaBodega.Models.Mantenimiento
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using SistemaBodega.Data;
+using SistemaBodega.Models;
+using SistemaBodega.Filters;
 
-@{
-    ViewData["Title"] = "Create";
-}
+namespace SistemaBodega.Controllers
+{
+    public class MantenimientosController : Controller
+    {
+        private readonly SistemaBodegaContext _context;
 
-<h1>Create</h1>
+        public MantenimientosController(SistemaBodegaContext context)
+        {
+            _context = context;
+        }
 
-<h4>Mantenimiento</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="FechaMantenimiento" class="control-label"></label>
-                <input asp-for="FechaMantenimiento" class="form-control" />
-                <span asp-validation-for="FechaMantenimiento" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TipoMantenimiento" class="control-label"></label>
-                <input asp-for="TipoMantenimiento" class="form-control" />
-                <span asp-validation-for="TipoMantenimiento" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Costo" class="control-label"></label>
-                <input asp-for="Costo" class="form-control" />
-                <span asp-validation-for="Costo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EmpresaResponsable" class="control-label"></label>
-                <input asp-for="EmpresaResponsable" class="form-control" />
-                <span asp-validation-for="EmpresaResponsable" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdBodega" class="control-label"></label>
-                <select asp-for="IdBodega" class ="form-control" asp-items="ViewBag.IdBodega"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+        // GET: Mantenimientos
+        public async Task<IActionResult>
+    Index()
+    {
+    var sistemaBodegaContext = _context.Mantenimientos.Include(m => m.Bodega);
+    return View(await sistemaBodegaContext.ToListAsync());
+    }
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    // GET: Mantenimientos/Details/5
+    public async Task<IActionResult>
+        Details(int? id)
+        {
+        if (id == null)
+        return NotFound();
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+        var mantenimiento = await _context.Mantenimientos
+        .Include(m => m.Bodega)
+        .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (mantenimiento == null)
+        return NotFound();
+
+        return View(mantenimiento);
+        }
+
+        // GET: Mantenimientos/Create
+        public IActionResult Create()
+        {
+        ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id");
+        return View();
+        }
+
+        // POST: Mantenimientos/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult>
+            Create([Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega,ComentariosAdministracion")] Mantenimiento mantenimiento)
+            {
+            if (ModelState.IsValid)
+            {
+            _context.Add(mantenimiento);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+            }
+
+            ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
+            return View(mantenimiento);
+            }
+
+            // GET: Mantenimientos/Edit/5
+            public async Task<IActionResult>
+                Edit(int? id)
+                {
+                if (id == null)
+                return NotFound();
+
+                var mantenimiento = await _context.Mantenimientos.FindAsync(id);
+                if (mantenimiento == null)
+                return NotFound();
+
+                ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
+                return View(mantenimiento);
+                }
+
+                // POST: Mantenimientos/Edit/5
+                [HttpPost]
+                [ValidateAntiForgeryToken]
+                public async Task<IActionResult>
+                    Edit(int id, [Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega,ComentariosAdministracion")] Mantenimiento mantenimiento)
+                    {
+                    if (id != mantenimiento.Id)
+                    return NotFound();
+
+                    if (ModelState.IsValid)
+                    {
+                    try
+                    {
+                    _context.Update(mantenimiento);
+                    await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                    if (!MantenimientoExists(mantenimiento.Id))
+                    return NotFound();
+                    else
+                    throw;
+                    }
+                    return RedirectToAction(nameof(Index));
+                    }
+
+                    ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
+                    return View(mantenimiento);
+                    }
+
+                    // GET: Mantenimientos/Delete/5
+                    [AuthorizeRol("Administrador")]
+                    public async Task<IActionResult>
+                        Delete(int? id)
+                        {
+                        if (id == null)
+                        return NotFound();
+
+                        var mantenimiento = await _context.Mantenimientos
+                        .Include(m => m.Bodega)
+                        .FirstOrDefaultAsync(m => m.Id == id);
+
+                        if (mantenimiento == null)
+                        return NotFound();
+
+                        return View(mantenimiento);
+                        }
+
+                        // POST: Mantenimientos/Delete/5
+                        [HttpPost, ActionName("Delete")]
+                        [ValidateAntiForgeryToken]
+                        [AuthorizeRol("Administrador")]
+                        public async Task<IActionResult>
+                            DeleteConfirmed(int id)
+                            {
+                            var mantenimiento = await _context.Mantenimientos.FindAsync(id);
+                            if (mantenimiento != null)
+                            {
+                            _context.Mantenimientos.Remove(mantenimiento);
+                            }
+
+                            await _context.SaveChangesAsync();
+                            return RedirectToAction(nameof(Index));
+                            }
+
+                            private bool MantenimientoExists(int id)
+                            {
+                            return _context.Mantenimientos.Any(e => e.Id == id);
+                            }
+                            }
+                            }
+

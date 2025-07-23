@@ -8,6 +8,18 @@
             <div class="card-body">
                 <h2 class="text-center mb-4">Restablecer contraseña</h2>
 
+                <!-- 🔹 Mensaje en caso de éxito -->
+                @if (TempData["Mensaje"] != null)
+                {
+                    <div class="alert alert-success text-center">@TempData["Mensaje"]</div>
+                }
+
+                <!-- 🔸 Mensaje en caso de error -->
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger text-center">@ViewBag.Error</div>
+                }
+
                 <form asp-action="Restablecer" asp-controller="Cuenta" method="post">
                     <input type="hidden" name="token" value="@ViewBag.Token" />
 
@@ -28,4 +40,5 @@
         </div>
     </div>
 </div>
+
 

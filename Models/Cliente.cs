@@ -1,24 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
-namespace SistemaBodega.Models
+namespace SistemaBodega.Models;
+
+public partial class Cliente
 {
-    public class Cliente
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        public string Nombre { get; set; } = string.Empty;
+    public string Nombre { get; set; } = null!;
 
-        [Required(ErrorMessage = "La identificación es obligatoria")]
-        public string Identificacion { get; set; } = string.Empty ;
+    public string Identificacion { get; set; } = null!;
 
+    public string? Telefono { get; set; }
 
-       
+    public string? Email { get; set; }
 
-        public string? Telefono { get; set; }
-
-        public string? Email { get; set; }
-    }
+    public virtual ICollection<Alquilere> Alquileres { get; set; } = new List<Alquilere>();
 }
-
-

@@ -15,11 +15,17 @@ public partial class SistemaBodegaDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Alquilere> Alquileres { get; set; }
+
     public virtual DbSet<Bodega> Bodegas { get; set; }
+
+    public virtual DbSet<Cliente> Clientes { get; set; }
 
     public virtual DbSet<Contrato> Contratos { get; set; }
 
     public virtual DbSet<Factura> Facturas { get; set; }
+
+    public virtual DbSet<Mantenimiento> Mantenimientos { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
@@ -29,9 +35,26 @@ public partial class SistemaBodegaDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Alquilere>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Alquiler__3214EC077E7AFFD8");
+
+            entity.Property(e => e.Activo).HasDefaultValue(true);
+
+            entity.HasOne(d => d.Bodega).WithMany(p => p.Alquileres)
+                .HasForeignKey(d => d.BodegaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Alquilere__Bodeg__31EC6D26");
+
+            entity.HasOne(d => d.Cliente).WithMany(p => p.Alquileres)
+                .HasForeignKey(d => d.ClienteId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Alquilere__Clien__32E0915F");
+        });
+
         modelBuilder.Entity<Bodega>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Bodega__3214EC075A9BA732");
+            entity.HasKey(e => e.Id).HasName("PK__Bodega__3214EC07A85C1708");
 
             entity.ToTable("Bodega");
 
@@ -42,9 +65,19 @@ public partial class SistemaBodegaDbContext : DbContext
             entity.Property(e => e.Ubicacion).HasMaxLength(150);
         });
 
+        modelBuilder.Entity<Cliente>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Clientes__3214EC077FBCD9D4");
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.Identificacion).HasMaxLength(50);
+            entity.Property(e => e.Nombre).HasMaxLength(100);
+            entity.Property(e => e.Telefono).HasMaxLength(20);
+        });
+
         modelBuilder.Entity<Contrato>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Contrato__3214EC07A4F92959");
+            entity.HasKey(e => e.Id).HasName("PK__Contrato__3214EC07BD6BAEA3");
 
             entity.Property(e => e.NombreCliente).HasMaxLength(100);
             entity.Property(e => e.TotalApagar)
@@ -54,17 +87,17 @@ public partial class SistemaBodegaDbContext : DbContext
             entity.HasOne(d => d.IdBodegaNavigation).WithMany(p => p.Contratos)
                 .HasForeignKey(d => d.IdBodega)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Contratos__IdBod__3C69FB99");
+                .HasConstraintName("FK__Contratos__IdBod__33D4B598");
 
             entity.HasOne(d => d.IdUsuarioNavigation).WithMany(p => p.Contratos)
                 .HasForeignKey(d => d.IdUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Contratos__IdUsu__3B75D760");
+                .HasConstraintName("FK__Contratos__IdUsu__35BCFE0A");
         });
 
         modelBuilder.Entity<Factura>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Facturas__3214EC0799C96AEF");
+            entity.HasKey(e => e.Id).HasName("PK__Facturas__3214EC074F1A8A67");
 
             entity.Property(e => e.Estado).HasMaxLength(50);
             entity.Property(e => e.Nombre).HasMaxLength(100);
@@ -73,16 +106,33 @@ public partial class SistemaBodegaDbContext : DbContext
             entity.HasOne(d => d.IdContratoNavigation).WithMany(p => p.Facturas)
                 .HasForeignKey(d => d.IdContrato)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Facturas__IdCont__3F466844");
+                .HasConstraintName("FK__Facturas__IdCont__37A5467C");
         });
+
+        modelBuilder.Entity<Mantenimiento>(entity =>
+        {
+            entity.ToTable("Mantenimientos");
+
+            entity.Property(e => e.TipoMantenimiento).HasMaxLength(50);
+            entity.Property(e => e.EmpresaResponsable).HasMaxLength(100);
+            entity.Property(e => e.Costo).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.ComentariosAdministracion).HasMaxLength(1000); // opcional si querés limitarlo
+
+            entity.HasOne(d => d.Bodega)
+                .WithMany(p => p.Mantenimientos)
+                .HasForeignKey(d => d.IdBodega)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Mantenimientos_Bodegas"); // ← Podés dejar esto si lo deseás nombrado así
+        });
+
 
         modelBuilder.Entity<Usuario>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Usuario__3214EC07D5FC1902");
+            entity.HasKey(e => e.Id).HasName("PK__Usuario__3214EC077A0A4FC3");
 
             entity.ToTable("Usuario");
 
-            entity.HasIndex(e => e.Correo, "UQ__Usuario__60695A19E794BCD1").IsUnique();
+            entity.HasIndex(e => e.Correo, "UQ__Usuario__60695A1929042438").IsUnique();
 
             entity.Property(e => e.Contrasena).HasMaxLength(100);
             entity.Property(e => e.Correo).HasMaxLength(100);

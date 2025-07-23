@@ -9,21 +9,21 @@ namespace SistemaBodega.Models
         public int Id { get; set; }
 
         [Display(Name = "Fecha de Mantenimiento")]
-        [DataType(DataType.Date)]
         public DateTime FechaMantenimiento { get; set; }
 
         [Display(Name = "Tipo de Mantenimiento")]
-        public string TipoMantenimiento { get; set; } = null!;
+        public string TipoMantenimiento { get; set; }
 
         public decimal Costo { get; set; }
 
         [Display(Name = "Empresa Responsable")]
-        public string EmpresaResponsable { get; set; } = null!;
+        public string EmpresaResponsable { get; set; }
 
         public int IdBodega { get; set; }
 
-        [ForeignKey("IdBodega")]
-        public virtual Bodega? Bodega { get; set; }
+        public Bodega Bodega { get; set; }
+
+        [Display(Name = "Comentarios de la Administración")]
+        public string? ComentariosAdministracion { get; set; }  // <- ahora es opcional
     }
 }
-

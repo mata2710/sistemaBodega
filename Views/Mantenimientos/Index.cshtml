@@ -23,6 +23,7 @@
             <th>@Html.DisplayNameFor(model => model.Costo)</th>
             <th>@Html.DisplayNameFor(model => model.EmpresaResponsable)</th>
             <th>@Html.DisplayNameFor(model => model.Bodega.Id)</th>
+            <th>@Html.DisplayNameFor(model => model.ComentariosAdministracion)</th> <!-- Nueva columna -->
             <th>Acciones</th>
         </tr>
     </thead>
@@ -35,6 +36,7 @@
                 <td>@Html.DisplayFor(modelItem => item.Costo)</td>
                 <td>@Html.DisplayFor(modelItem => item.EmpresaResponsable)</td>
                 <td>@Html.DisplayFor(modelItem => item.Bodega.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.ComentariosAdministracion)</td> <!-- Valor de la columna -->
                 <td>
                     @if (rol == "Administrador")
                     {
@@ -47,4 +49,3 @@
         }
     </tbody>
 </table>
-
