@@ -74,8 +74,16 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 6,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{be4d7042-ba3f-11d2-840e-00c04f9902c1}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 2,
@@ -86,8 +94,7 @@
               "RelativeToolTip": "Views\\Cuenta\\Restablecer.cshtml",
               "ViewState": "AgIAAAcAAAAAAAAAAAAYwCoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-07-23T01:12:06.711Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-23T01:12:06.711Z"
             },
             {
               "$type": "Document",
@@ -99,8 +106,7 @@
               "RelativeToolTip": "Models\\ViewModels\\RecuperarViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-23T01:07:49.473Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-23T01:07:49.473Z"
             },
             {
               "$type": "Document",
@@ -112,8 +118,7 @@
               "RelativeToolTip": "Views\\Cuenta\\Recuperar.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-07-23T01:03:16.783Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-23T01:03:16.783Z"
             },
             {
               "$type": "Document",
@@ -125,8 +130,7 @@
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-07-22T01:21:43.987Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-22T01:21:43.987Z"
             },
             {
               "$type": "Document",
@@ -147,10 +151,6 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
-            },
-            {
-              "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
             },
             {
@@ -163,8 +163,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAADgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-23T00:48:27.999Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-23T00:48:27.999Z"
             },
             {
               "$type": "Document",
@@ -176,8 +175,7 @@
               "RelativeToolTip": "Helpers\\EmailService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAC4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-23T00:47:32.702Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-23T00:47:32.702Z"
             },
             {
               "$type": "Document",
@@ -189,8 +187,7 @@
               "RelativeToolTip": "Helpers\\EmailSettings.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-23T00:44:05.52Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-23T00:44:05.52Z"
             },
             {
               "$type": "Document",
@@ -202,8 +199,7 @@
               "RelativeToolTip": "Models\\Mantenimiento.cs",
               "ViewState": "AgIAAAEAAAAAAAAAAAAUwB0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-22T02:22:08.829Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-22T02:22:08.829Z"
             },
             {
               "$type": "Document",
@@ -215,8 +211,7 @@
               "RelativeToolTip": "Data\\SistemaBodegaContext.cs",
               "ViewState": "AgIAABMAAAAAAAAAAAA0wDMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-22T02:34:22.005Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-22T02:34:22.005Z"
             },
             {
               "$type": "Document",
