@@ -19,6 +19,8 @@ namespace SistemaBodega.Data
         public virtual DbSet<Cliente> Clientes { get; set; }
         public virtual DbSet<Mantenimiento> Mantenimientos { get; set; }
         public DbSet<Alquiler> Alquileres { get; set; }
+        public DbSet<CarruselImagen> CarruselImagenes { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

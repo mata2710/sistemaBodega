@@ -1,0 +1,37 @@
+﻿@model IEnumerable<SistemaBodega.Models.CarruselImagen>
+
+@{
+    ViewData["Title"] = "Imágenes del Carrusel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4 text-white">
+    <h2 class="mb-4">Administrar Imágenes del Carrusel</h2>
+
+    <a asp-action="Create" class="btn btn-success mb-3">Agregar Imagen</a>
+
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Título</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <img src="~/@item.RutaImagen" alt="Imagen carrusel" width="150" class="img-thumbnail" />
+                    </td>
+                    <td>@item.Titulo</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Editar</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

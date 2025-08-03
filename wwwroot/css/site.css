@@ -1,22 +1,278 @@
+/* ======== ESTRUCTURA BÁSICA GENERAL ======== */
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
     font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
+    scroll-behavior: smooth;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    background-color: #111 !important;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ======== TIPOGRAFÍA Y ENCABEZADOS ======== */
+h1, h2, h3, h4, h5, h6 {
+    color: #ffcc00;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+a {
+    color: #ffcc00;
+    text-decoration: none;
+}
+
+    a:hover {
+        color: #e6b800;
+        text-decoration: underline;
+    }
+
+/* ======== TARJETAS ======== */
+.card {
+    background-color: #1c1c1c;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .card:hover {
+        transform: scale(1.01);
+        box-shadow: 0 8px 24px rgba(255, 204, 0, 0.1);
+    }
+
+/* ======== FORMULARIOS ======== */
+input, textarea, select {
+    background-color: #222 !important;
+    color: #fff !important;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+    input:focus, textarea:focus, select:focus {
+        border-color: #ffcc00;
+        box-shadow: 0 0 0 0.25rem rgba(255, 204, 0, 0.2);
+    }
+
+label {
+    color: #ddd;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+/* ======== BOTONES ======== */
+.btn, .btn-primary, .btn-warning {
+    background-color: #ffcc00 !important;
+    border-color: #ffcc00 !important;
+    color: #111 !important;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    margin-top: 12px;
+}
+
+    .btn:hover, .btn-primary:hover, .btn-warning:hover {
+        background-color: #e6b800 !important;
+        border-color: #e6b800 !important;
+        color: #000 !important;
+    }
+
+.btn-danger {
+    background-color: #cc0000 !important;
+    border-color: #cc0000 !important;
+    color: #fff !important;
+}
+
+    .btn-danger:hover {
+        background-color: #a30000 !important;
+        border-color: #a30000 !important;
+    }
+
+/* ======== BOTONES PERSONALIZADOS ======== */
+.btn-editar {
+    background-color: #28a745 !important;
+    color: white !important;
+    font-weight: bold;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: 0.3s ease;
+}
+
+    .btn-editar:hover {
+        background-color: #218838 !important;
+    }
+
+.btn-eliminar {
+    background-color: #dc3545 !important;
+    color: white !important;
+    font-weight: bold;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: 0.3s ease;
+}
+
+    .btn-eliminar:hover {
+        background-color: #bd2130 !important;
+    }
+
+.btn-detalles {
+    background-color: #17a2b8 !important;
+    color: white !important;
+    font-weight: bold;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: 0.3s ease;
+}
+
+    .btn-detalles:hover {
+        background-color: #138496 !important;
+    }
+
+/* ======== TABLAS PERSONALIZADAS ======== */
+.table {
+    border: 2px solid #ffcc00;
+    color: #fff;
+}
+
+    .table thead th {
+        background-color: #ffcc00 !important;
+        color: #111 !important;
+        border: 1px solid #ffcc00;
+    }
+
+    .table tbody td {
+        background-color: #111 !important;
+        color: #fff !important;
+        border: 1px solid #ffcc00;
+    }
+
+    .table tbody tr:hover {
+        background-color: #222 !important;
+    }
+
+/* ======== BADGES ======== */
+.badge-custom {
+    background: #111;
+    border: 1px solid #ffcc00;
+    color: #ffcc00;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+/* ======== NAVBAR ======== */
+.navbar {
+    background-color: #ffcc00 !important;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #111 !important;
+    font-size: 1.4rem;
+}
+
+.nav-link {
+    color: #111 !important;
+    font-weight: 500;
+}
+
+    .nav-link:hover {
+        color: #000 !important;
+    }
+
+/* ======== FOOTER ======== */
+footer {
+    background-color: #000;
+    color: #aaa;
+    padding: 10px 0;
+    font-size: 0.9rem;
+    text-align: center;
+    border-top: 1px solid #333;
+}
+
+/* ======== SIDEBAR ======== */
+.sidebar {
+    height: 100vh;
+    background-color: #1b1b1b;
+    padding: 20px;
+}
+
+    .sidebar h4 {
+        color: #ffcc00;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .sidebar .nav-link {
+        color: #ffcc00 !important;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+        .sidebar .nav-link.active,
+        .sidebar .nav-link:hover {
+            background-color: #ffcc00;
+            color: #111 !important;
+            font-weight: bold;
+        }
+
+/* ======== CONTENIDO INDEX ======== */
+.content {
+    padding: 20px;
+}
+
+.tile {
+    background-color: #222;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+    .tile:hover {
+        background-color: #2d2d2d;
+    }
+
+    .tile i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+.tile-yellow {
+    background-color: #ffcc00;
+    color: black;
+}
+
+    .tile-yellow:hover {
+        background-color: #e6b800;
+        color: black;
+    }
+
+/* ======== CARRUSEL ======== */
+.carousel-inner {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+    .carousel-inner img {
+        max-height: 420px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+/* ======== TRANSICIONES GLOBALES ======== */
+button, .form-control, .card, .navbar, footer {
+    transition: all 0.3s ease;
 }

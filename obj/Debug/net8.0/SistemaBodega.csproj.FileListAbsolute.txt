@@ -2354,10 +2354,10 @@ C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\staticwebassets.build.js
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\SistemaB.A8A339DF.Up2Date
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\SistemaBodega.dll
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\refint\SistemaBodega.dll
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\SistemaBodega.pdb
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\SistemaBodega.genruntimeconfig.cache
 C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\ref\SistemaBodega.dll
+C:\Users\fabri\Documents\SistemaBodega\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

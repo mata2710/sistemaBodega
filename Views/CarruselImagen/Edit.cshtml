@@ -1,0 +1,28 @@
+﻿@model SistemaBodega.Models.CarruselImagen
+
+@{
+    ViewData["Title"] = "Editar Imagen";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4 text-white">
+    <h2>Editar Título de Imagen</h2>
+
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="RutaImagen" />
+
+        <div class="form-group mb-3">
+            <label asp-for="Titulo" class="form-label"></label>
+            <input asp-for="Titulo" class="form-control" />
+            <span asp-validation-for="Titulo" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <img src="~/@Model.RutaImagen" alt="Imagen actual" class="img-fluid" style="max-height: 200px;" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

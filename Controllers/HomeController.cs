@@ -1,10 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using SistemaBodega.Data;
+using SistemaBodega.Models;
+using System.Linq;
 
 namespace SistemaBodega.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly SistemaBodegaContext _context;
+
+        public HomeController(SistemaBodegaContext context)
+        {
+            _context = context;
+        }
+
         // Función auxiliar para validar sesión
         private bool UsuarioAutenticado()
         {
@@ -13,56 +23,73 @@ namespace SistemaBodega.Controllers
 
         public IActionResult Index()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
-            return View();
+            if (!UsuarioAutenticado())
+                return RedirectToAction("Login", "Cuenta");
+
+            // Cargar las imágenes del carrusel desde la base de datos
+            var imagenesCarrusel = _context.CarruselImagenes.ToList();
+            return View(imagenesCarrusel);
         }
 
         public IActionResult Clientes()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
+            if (!UsuarioAutenticado())
+                return RedirectToAction("Login", "Cuenta");
+
             return View();
         }
 
         public IActionResult CrearCliente()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
+            if (!UsuarioAutenticado())
+                return RedirectToAction("Login", "Cuenta");
+
             return View();
         }
 
         public IActionResult Alquileres()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
+            if (!UsuarioAutenticado())
+                return RedirectToAction("Login", "Cuenta");
+
             return View();
         }
 
         public IActionResult Bodegas()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
+            if (!UsuarioAutenticado())
+                return RedirectToAction("Login", "Cuenta");
+
             return View();
         }
 
         public IActionResult RenovarAlquiler()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
+            if (!UsuarioAutenticado())
+                return RedirectToAction("Login", "Cuenta");
+
             return View();
         }
 
         public IActionResult PrecioBodegas()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
-            return View();
-        }
+            if (!UsuarioAutenticado())
+                return RedirectToAction("Login", "Cuenta");
 
-        // Redirige al controlador correcto donde sí se construye el modelo correctamente
-        public IActionResult PerfilUsuario()
-        {
-            return RedirectToAction("PerfilUsuario", "Cuenta");
+            return View();
         }
 
         public IActionResult Configuracion()
         {
-            if (!UsuarioAutenticado()) return RedirectToAction("Login", "Cuenta");
+            if (!UsuarioAutenticado())
+                return RedirectToAction("Login", "Cuenta");
+
             return View();
+        }
+
+        public IActionResult PerfilUsuario()
+        {
+            return RedirectToAction("PerfilUsuario", "Cuenta");
         }
     }
 }

@@ -3,6 +3,7 @@ wwwroot\favicon.ico
 wwwroot\img\bodega1.jpg
 wwwroot\img\bodega2.jpg
 wwwroot\img\bodega3.jpg
+wwwroot\img\carrusel\13e95045-be1d-45ea-ad01-14884f969aec.jpg
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap.css
 wwwroot\lib\bootstrap\dist\css\bootstrap.css.map

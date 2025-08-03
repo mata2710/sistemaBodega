@@ -1,0 +1,46 @@
+﻿@model SistemaBodega.Models.CarruselImagen
+
+@{
+    ViewData["Title"] = "Agregar Imagen al Carrusel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4 text-white">
+    <h2 class="mb-4">Agregar Imagen</h2>
+
+    <form asp-action="Create" enctype="multipart/form-data">
+        <div class="form-group mb-3">
+            <label asp-for="Titulo" class="form-label"></label>
+            <input asp-for="Titulo" class="form-control" />
+            <span asp-validation-for="Titulo" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="form-label">Seleccionar imagen</label>
+            <input type="file" name="imagen" class="form-control" accept="image/*" onchange="mostrarPrevisualizacion(this)" required />
+        </div>
+
+        <div class="mb-3">
+            <img id="preview" src="#" alt="Previsualización" class="img-fluid" style="max-height: 200px; display: none;" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function mostrarPrevisualizacion(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var preview = document.getElementById('preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
