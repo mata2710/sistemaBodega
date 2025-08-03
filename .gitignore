@@ -1,0 +1,20 @@
+# Ignorar carpetas de build y generados
+bin/
+obj/
+
+# Ignorar archivos de Visual Studio y Copilot
+.vs/
+*.user
+*.suo
+*.vsidx
+*.v9.bin
+*.futdcache.v2
+*.dtbcache.v2
+DocumentLayout*.json
+CopilotIndices/
+
+# Ignorar otros generados
+*.cache
+*.pdb
+*.dll
+*.exe
