@@ -1,42 +1,36 @@
 ﻿@model SistemaBodega.Models.Cliente
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles del cliente";
 }
 
-<h1>Details</h1>
+<h1 class="mt-3">Detalles del cliente</h1>
+<hr />
 
-<div>
-    <h4>Cliente</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Identificacion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Identificacion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Telefono)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Telefono)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<dl class="row">
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Nombre)</dt>
+    <dd class="col-sm-9">@Html.DisplayFor(model => model.Nombre)</dd>
+
+    <dt class="col-sm-3">Cédula jurídica</dt>
+    <dd class="col-sm-9">@Html.DisplayFor(model => model.Identificacion)</dd>
+
+    <dt class="col-sm-3">Teléfono</dt>
+    <dd class="col-sm-9">@Html.DisplayFor(model => model.Telefono)</dd>
+
+    <dt class="col-sm-3">Teléfono secundario</dt>
+    <dd class="col-sm-9">@Html.DisplayFor(model => model.TelefonoSecundario)</dd>
+
+    <dt class="col-sm-3">Correo electrónico</dt>
+    <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+
+    <dt class="col-sm-3">Representante legal</dt>
+    <dd class="col-sm-9">@Html.DisplayFor(model => model.RepresentanteLegal)</dd>
+
+    <dt class="col-sm-3">Actividad de la empresa</dt>
+    <dd class="col-sm-9">@Html.DisplayFor(model => model.Actividad)</dd>
+</dl>
+
+<div class="mt-4">
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning text-white">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
 </div>

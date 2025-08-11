@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -23,105 +22,134 @@ namespace SistemaBodega.Controllers
         // GET: Mantenimientos
         public async Task<IActionResult> Index()
         {
-            var sistemaBodegaContext = _context.Mantenimientos.Include(m => m.Bodega);
-            return View(await sistemaBodegaContext.ToListAsync());
+            var lista = await _context.Mantenimientos
+                                      .AsNoTracking()
+                                      .Include(m => m.Bodega)
+                                      .OrderByDescending(m => m.FechaMantenimiento)
+                                      .ToListAsync();
+            return View(lista);
         }
 
         // GET: Mantenimientos/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var mantenimiento = await _context.Mantenimientos
-                .Include(m => m.Bodega)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (mantenimiento == null)
-                return NotFound();
+                                              .AsNoTracking()
+                                              .Include(m => m.Bodega)
+                                              .FirstOrDefaultAsync(m => m.Id == id);
+            if (mantenimiento == null) return NotFound();
 
             return View(mantenimiento);
         }
 
         // GET: Mantenimientos/Create
-        public IActionResult Create()
+        [AuthorizeRol("Administrador")]
+        public async Task<IActionResult> Create()
         {
-            ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id");
+            await CargarBodegasAsync();
             return View();
         }
 
         // POST: Mantenimientos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Create([Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega,ComentariosAdministracion")] Mantenimiento mantenimiento)
         {
-            if (ModelState.IsValid)
+            // Validaciones explícitas y claras
+            if (mantenimiento.IdBodega <= 0)
+                ModelState.AddModelError(nameof(Mantenimiento.IdBodega), "Debe seleccionar una bodega.");
+
+            if (mantenimiento.Costo < 0)
+                ModelState.AddModelError(nameof(Mantenimiento.Costo), "El costo no puede ser negativo.");
+
+            if (!string.IsNullOrWhiteSpace(mantenimiento.TipoMantenimiento) && mantenimiento.TipoMantenimiento.Length > 100)
+                ModelState.AddModelError(nameof(Mantenimiento.TipoMantenimiento), "Máximo 100 caracteres.");
+
+            // Si seleccionó una bodega (>0), verifico que exista
+            if (mantenimiento.IdBodega > 0 &&
+                !await _context.Bodegas.AnyAsync(b => b.Id == mantenimiento.IdBodega))
             {
-                _context.Add(mantenimiento);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError(nameof(Mantenimiento.IdBodega), "La bodega seleccionada no existe.");
             }
 
-            ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
-            return View(mantenimiento);
+            if (!ModelState.IsValid)
+            {
+                await CargarBodegasAsync(mantenimiento.IdBodega);
+                return View(mantenimiento);
+            }
+
+            _context.Add(mantenimiento);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Mantenimientos/Edit/5
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var mantenimiento = await _context.Mantenimientos.FindAsync(id);
-            if (mantenimiento == null)
-                return NotFound();
+            if (mantenimiento == null) return NotFound();
 
-            ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
+            await CargarBodegasAsync(mantenimiento.IdBodega);
             return View(mantenimiento);
         }
 
         // POST: Mantenimientos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,FechaMantenimiento,TipoMantenimiento,Costo,EmpresaResponsable,IdBodega,ComentariosAdministracion")] Mantenimiento mantenimiento)
         {
-            if (id != mantenimiento.Id)
-                return NotFound();
+            if (id != mantenimiento.Id) return NotFound();
 
-            if (ModelState.IsValid)
+            if (mantenimiento.IdBodega <= 0)
+                ModelState.AddModelError(nameof(Mantenimiento.IdBodega), "Debe seleccionar una bodega.");
+
+            if (mantenimiento.Costo < 0)
+                ModelState.AddModelError(nameof(Mantenimiento.Costo), "El costo no puede ser negativo.");
+
+            if (mantenimiento.IdBodega > 0 &&
+                !await _context.Bodegas.AnyAsync(b => b.Id == mantenimiento.IdBodega))
             {
-                try
-                {
-                    _context.Update(mantenimiento);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MantenimientoExists(mantenimiento.Id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError(nameof(Mantenimiento.IdBodega), "La bodega seleccionada no existe.");
             }
 
-            ViewData["IdBodega"] = new SelectList(_context.Bodegas, "Id", "Id", mantenimiento.IdBodega);
-            return View(mantenimiento);
+            if (!ModelState.IsValid)
+            {
+                await CargarBodegasAsync(mantenimiento.IdBodega);
+                return View(mantenimiento);
+            }
+
+            try
+            {
+                _context.Update(mantenimiento);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!MantenimientoExists(mantenimiento.Id)) return NotFound();
+                else throw;
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Mantenimientos/Delete/5
         [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var mantenimiento = await _context.Mantenimientos
-                .Include(m => m.Bodega)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (mantenimiento == null)
-                return NotFound();
+                                              .AsNoTracking()
+                                              .Include(m => m.Bodega)
+                                              .FirstOrDefaultAsync(m => m.Id == id);
+            if (mantenimiento == null) return NotFound();
 
             return View(mantenimiento);
         }
@@ -136,16 +164,27 @@ namespace SistemaBodega.Controllers
             if (mantenimiento != null)
             {
                 _context.Mantenimientos.Remove(mantenimiento);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MantenimientoExists(int id)
+        // ===================== Helpers =====================
+        private async Task CargarBodegasAsync(int? seleccionada = null)
         {
-            return _context.Mantenimientos.Any(e => e.Id == id);
+            var bodegas = await _context.Bodegas
+                .AsNoTracking()
+                .OrderBy(b => b.Nombre)
+                .Select(b => new { b.Id, Nombre = b.Nombre + " - " + b.Ubicacion })
+                .ToListAsync();
+
+            // ViewBag para simplificar en la vista (asp-items="ViewBag.IdBodega")
+            ViewBag.IdBodega = new SelectList(bodegas, "Id", "Nombre", seleccionada);
+            // Si prefieres ViewData, también quedaría disponible:
+            // ViewData["IdBodega"] = ViewBag.IdBodega;
         }
+
+        private bool MantenimientoExists(int id) =>
+            _context.Mantenimientos.Any(e => e.Id == id);
     }
 }
-

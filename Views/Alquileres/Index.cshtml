@@ -15,37 +15,99 @@
     </p>
 }
 
-<table class="table table-bordered">
+<table class="table table-bordered table-striped align-middle">
     <thead class="table-light">
         <tr>
+            <th>Cliente</th>
+            <th>Bodega</th>
             <th>@Html.DisplayNameFor(model => model.FechaInicio)</th>
             <th>@Html.DisplayNameFor(model => model.FechaFin)</th>
+
+            <!-- Datos tomados/establecidos desde Bodega -->
+            <th>Área (m²)</th>
+            <th>Precio por m²</th>
+
+            <!-- Calculado -->
+            <th>Precio de alquiler</th>
+
+            <th>Aumento anual (%)</th>
             <th>@Html.DisplayNameFor(model => model.RenovacionAutomatica)</th>
             <th>@Html.DisplayNameFor(model => model.Activo)</th>
-            <th>@Html.DisplayNameFor(model => model.Cliente)</th>
-            <th>@Html.DisplayNameFor(model => model.Bodega)</th>
-            <th>Acciones</th>
+            <th>Contrato</th>
+            <th style="width:260px">Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@(item.Cliente?.Nombre ?? "—")</td>
+                    <td>@(item.Bodega?.Nombre ?? "—")</td>
+                    <td>@item.FechaInicio.ToString("yyyy-MM-dd")</td>
+                    <td>@item.FechaFin.ToString("yyyy-MM-dd")</td>
+
+                    <!-- Área y Precio/m² -->
+                    <td>@(item.AreaM2.HasValue? item.AreaM2.Value.ToString("N2") : "—")</td>
+                    <td>@(item.PrecioPorM2.HasValue? item.PrecioPorM2.Value.ToString("N2") : "—")</td>
+
+                    <!-- Precio calculado -->
+                    <td>@(item.PrecioAlquiler.HasValue? item.PrecioAlquiler.Value.ToString("N2") : "—")</td>
+
+                    <td>@(item.AumentoAnualPorcentaje.HasValue? item.AumentoAnualPorcentaje.Value.ToString("0.##") : "—")</td>
+
+                    <td>
+                        @if (item.RenovacionAutomatica)
+                        {
+                            <span class="badge bg-success">Sí</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">No</span>
+                        }
+                    </td>
+
+                    <td>
+                        @if (item.Activo)
+                        {
+                            <span class="badge bg-primary">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Inactivo</span>
+                        }
+                    </td>
+
+                    <!-- Contrato -->
+                    <td>
+                        @if (!string.IsNullOrWhiteSpace(item.ContratoFilePath))
+                        {
+                            <a href="@item.ContratoFilePath" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">Ver contrato</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+
+                    <td>
+                        @if (rol == "Administrador")
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning text-white">Editar</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger ms-1">Eliminar</a>
+                        }
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white ms-1">Detalles</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.FechaInicio)</td>
-                <td>@Html.DisplayFor(modelItem => item.FechaFin)</td>
-                <td>@Html.DisplayFor(modelItem => item.RenovacionAutomatica)</td>
-                <td>@Html.DisplayFor(modelItem => item.Activo)</td>
-                <td>@Html.DisplayFor(modelItem => item.Cliente.Nombre)</td>
-                <td>@Html.DisplayFor(modelItem => item.Bodega.Nombre)</td>
-                <td>
-                    @if (rol == "Administrador")
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn-editar">Editar</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn-eliminar ms-1">Eliminar</a>
-                    }
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn-detalles ms-1">Detalles</a>
-                </td>
+                <td colspan="13" class="text-center text-muted">No hay alquileres registrados.</td>
             </tr>
         }
     </tbody>
 </table>
+

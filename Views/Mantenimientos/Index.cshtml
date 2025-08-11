@@ -15,36 +15,58 @@
     </p>
 }
 
-<table class="table table-bordered">
+<table class="table table-bordered table-striped align-middle">
     <thead class="table-light">
         <tr>
             <th>@Html.DisplayNameFor(model => model.FechaMantenimiento)</th>
             <th>@Html.DisplayNameFor(model => model.TipoMantenimiento)</th>
             <th>@Html.DisplayNameFor(model => model.Costo)</th>
             <th>@Html.DisplayNameFor(model => model.EmpresaResponsable)</th>
-            <th>@Html.DisplayNameFor(model => model.Bodega.Id)</th>
-            <th>@Html.DisplayNameFor(model => model.ComentariosAdministracion)</th> <!-- Nueva columna -->
-            <th>Acciones</th>
+            <th>Bodega</th>
+            <th>@Html.DisplayNameFor(model => model.ComentariosAdministracion)</th>
+            <th style="width:220px">Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.FechaMantenimiento.ToString("yyyy-MM-dd")</td>
+                    <td>@item.TipoMantenimiento</td>
+                    <td>@item.Costo.ToString("N2")</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.EmpresaResponsable) ? "—" : item.EmpresaResponsable)</td>
+                    <td>@(item.Bodega?.Nombre ?? "—")</td>
+                    <td>
+                        @{
+                            var c = item.ComentariosAdministracion;
+                            if (string.IsNullOrWhiteSpace(c))
+                            {
+                                @:—
+                            }
+                            else
+                            {
+                                var corto = c.Length > 120 ? c.Substring(0, 120) + "…" : c;
+                                @corto
+                            }
+                        }
+                    </td>
+                    <td>
+                        @if (rol == "Administrador")
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning text-white btn-editar">Editar</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger ms-1 btn-eliminar">Eliminar</a>
+                        }
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white ms-1 btn-detalles">Detalles</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.FechaMantenimiento)</td>
-                <td>@Html.DisplayFor(modelItem => item.TipoMantenimiento)</td>
-                <td>@Html.DisplayFor(modelItem => item.Costo)</td>
-                <td>@Html.DisplayFor(modelItem => item.EmpresaResponsable)</td>
-                <td>@Html.DisplayFor(modelItem => item.Bodega.Id)</td>
-                <td>@Html.DisplayFor(modelItem => item.ComentariosAdministracion)</td> <!-- Valor de la columna -->
-                <td>
-                    @if (rol == "Administrador")
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn-editar">Editar</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn-eliminar ms-1">Eliminar</a>
-                    }
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn-detalles ms-1">Detalles</a>
-                </td>
+                <td colspan="7" class="text-center text-muted">No hay mantenimientos registrados.</td>
             </tr>
         }
     </tbody>

@@ -6,46 +6,85 @@
 
 <h1>Delete</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>¿Seguro que deseas eliminar esta bodega?</h3>
 <div>
     <h4>Bodega</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Nombre)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Nombre)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Ubicacion)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Ubicacion)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Complejo)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Complejo)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Estado)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
+        <dd class="col-sm-9">
+            @{
+                var estado = Model.Estado?.Trim();
+                if (string.Equals(estado, "Disponible", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="badge bg-success">Disponible</span>
+                }
+                else if (string.Equals(estado, "Ocupada", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="badge bg-danger">Ocupada</span>
+                }
+                else if (string.Equals(estado, "Reservada", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="badge bg-warning text-dark">Reservada</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">@((string.IsNullOrWhiteSpace(estado) ? "—" : estado))</span>
+                }
+            }
         </dd>
-        <dt class = "col-sm-2">
+
+        <!-- Base del cálculo -->
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.AreaM2)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.AreaM2)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.PrecioAlquilerPorM2)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.PrecioAlquilerPorM2)
+        </dd>
+
+        <!-- Calculada -->
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Precio)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Precio)
         </dd>
     </dl>
-    
+
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Volver a listado</a>
     </form>
 </div>
+

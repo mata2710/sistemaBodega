@@ -4,51 +4,73 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Detalles</h1>
 
 <div>
     <h4>Alquiler</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaInicio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaInicio)
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FechaInicio)</dt>
+        <dd class="col-sm-9">@Model.FechaInicio.ToString("yyyy-MM-dd")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FechaFin)</dt>
+        <dd class="col-sm-9">@Model.FechaFin.ToString("yyyy-MM-dd")</dd>
+
+        <!-- Datos tomados/establecidos desde Bodega -->
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.AreaM2)</dt>
+        <dd class="col-sm-9">@(Model.AreaM2.HasValue? Model.AreaM2.Value.ToString("N2") : "—")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PrecioPorM2)</dt>
+        <dd class="col-sm-9">@(Model.PrecioPorM2.HasValue? Model.PrecioPorM2.Value.ToString("N2") : "—")</dd>
+
+        <!-- Calculado -->
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PrecioAlquiler)</dt>
+        <dd class="col-sm-9">@(Model.PrecioAlquiler.HasValue? Model.PrecioAlquiler.Value.ToString("N2") : "—")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.AumentoAnualPorcentaje)</dt>
+        <dd class="col-sm-9">@(Model.AumentoAnualPorcentaje.HasValue? Model.AumentoAnualPorcentaje.Value.ToString("0.##") + " %" : "—")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.RenovacionAutomatica)</dt>
+        <dd class="col-sm-9">@(Model.RenovacionAutomatica ? "Sí" : "No")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Activo)</dt>
+        <dd class="col-sm-9">@(Model.Activo ? "Activo" : "Inactivo")</dd>
+
+        <dt class="col-sm-3">Cliente</dt>
+        <dd class="col-sm-9">@((Model.Cliente?.Nombre) ?? "—")</dd>
+
+        <dt class="col-sm-3">Bodega</dt>
+        <dd class="col-sm-9">@((Model.Bodega?.Nombre) ?? "—")</dd>
+
+        <!-- Observaciones -->
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Observaciones)</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrWhiteSpace(Model?.Observaciones))
+            {
+                <pre class="mb-0" style="white-space:pre-wrap">@Model.Observaciones</pre>
+            }
+            else
+            {
+                @:—
+            }
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaFin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaFin)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RenovacionAutomatica)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RenovacionAutomatica)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Activo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Activo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cliente)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cliente.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Bodega)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Bodega.Id)
+
+        <!-- Contrato -->
+        <dt class="col-sm-3">Contrato</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrWhiteSpace(Model?.ContratoFilePath))
+            {
+                <a href="@Model.ContratoFilePath" target="_blank" rel="noopener">Ver contrato</a>
+            }
+            else
+            {
+                <span class="text-muted">—</span>
+            }
         </dd>
     </dl>
 </div>
+
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning text-white">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
 </div>

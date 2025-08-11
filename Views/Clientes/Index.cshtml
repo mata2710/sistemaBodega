@@ -8,6 +8,23 @@
 
 <h1 class="mt-4">Clientes</h1>
 
+<!-- Filtro -->
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="nombre" value="@(ViewBag.FiltroNombre ?? "")" class="form-control" placeholder="Buscar por nombre" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="cedula" value="@(ViewBag.FiltroCedula ?? "")" class="form-control" placeholder="Buscar por cédula" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="representante" value="@(ViewBag.FiltroRepresentante ?? "")" class="form-control" placeholder="Buscar por representante" />
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+    </div>
+</form>
+
 @if (rol == "Administrador")
 {
     <p>
@@ -21,27 +38,36 @@
             <th>@Html.DisplayNameFor(model => model.Nombre)</th>
             <th>@Html.DisplayNameFor(model => model.Identificacion)</th>
             <th>@Html.DisplayNameFor(model => model.Telefono)</th>
+            <th>Teléfono secundario</th>
             <th>@Html.DisplayNameFor(model => model.Email)</th>
+            <th>Representante legal</th>
+            <th>Actividad</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @if (Model != null)
         {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
-                <td>@Html.DisplayFor(modelItem => item.Identificacion)</td>
-                <td>@Html.DisplayFor(modelItem => item.Telefono)</td>
-                <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                <td>
-                    @if (rol == "Administrador")
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-editar btn-sm">Editar</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-eliminar btn-sm ms-1">Eliminar</a>
-                    }
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-detalles btn-sm ms-1">Detalles</a>
-                </td>
-            </tr>
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>@item.Identificacion</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.Telefono) ? "—" : item.Telefono)</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.TelefonoSecundario) ? "—" : item.TelefonoSecundario)</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.Email) ? "—" : item.Email)</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.RepresentanteLegal) ? "—" : item.RepresentanteLegal)</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.Actividad) ? "—" : item.Actividad)</td>
+                    <td>
+                        @if (rol == "Administrador")
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-editar btn-sm">Editar</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-eliminar btn-sm ms-1">Eliminar</a>
+                        }
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-detalles btn-sm ms-1">Detalles</a>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>

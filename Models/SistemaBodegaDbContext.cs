@@ -15,7 +15,7 @@ public partial class SistemaBodegaDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Alquilere> Alquileres { get; set; }
+    public virtual DbSet<Alquiler> Alquileres { get; set; }
 
     public virtual DbSet<Bodega> Bodegas { get; set; }
 
@@ -35,7 +35,7 @@ public partial class SistemaBodegaDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Alquilere>(entity =>
+        modelBuilder.Entity<Alquiler>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Alquiler__3214EC077E7AFFD8");
 

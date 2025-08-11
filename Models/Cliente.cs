@@ -1,19 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SistemaBodega.Models;
-
-public partial class Cliente
+namespace SistemaBodega.Models
 {
-    public int Id { get; set; }
+    [Table("Clientes")]
+    public partial class Cliente
+    {
+        public int Id { get; set; }
 
-    public string Nombre { get; set; } = null!;
+        [Required, MaxLength(100)]
+        public string Nombre { get; set; } = null!;
 
-    public string Identificacion { get; set; } = null!;
+        [Required, MaxLength(50)]
+        public string Identificacion { get; set; } = null!;
 
-    public string? Telefono { get; set; }
+        [MaxLength(20)]
+        public string? Telefono { get; set; }
 
-    public string? Email { get; set; }
+        [MaxLength(20)]
+        public string? TelefonoSecundario { get; set; }   // nuevo (opcional)
 
-    public virtual ICollection<Alquilere> Alquileres { get; set; } = new List<Alquilere>();
+        [MaxLength(100), EmailAddress]
+        public string? Email { get; set; }
+
+        [MaxLength(150)]
+        public string? RepresentanteLegal { get; set; }   // nuevo (opcional)
+
+        [MaxLength(100)]
+        public string? Actividad { get; set; }            // nuevo (opcional)
+
+        public virtual ICollection<Alquiler> Alquileres { get; set; } = new List<Alquiler>();
+    }
 }
+

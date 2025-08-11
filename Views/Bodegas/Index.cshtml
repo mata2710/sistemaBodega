@@ -4,9 +4,64 @@
 @{
     ViewData["Title"] = "Bodegas";
     var rol = Context.Session.GetString("Rol");
+    var filtroEstado = (string)ViewBag.FiltroEstado;
 }
 
 <h1 class="mt-4">Bodegas</h1>
+
+<!-- Filtros -->
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="nombre" value="@(ViewBag.FiltroNombre ?? "")" class="form-control" placeholder="Buscar por nombre" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="ubicacion" value="@(ViewBag.FiltroUbicacion ?? "")" class="form-control" placeholder="Buscar por ubicación" />
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="complejo" value="@(ViewBag.FiltroComplejo ?? "")" class="form-control" placeholder="Buscar por complejo" />
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+        <select name="estado" class="form-select">
+            @if (string.IsNullOrEmpty(filtroEstado))
+            {
+                <option value="" selected>Estado (todos)</option>
+            }
+            else
+            {
+                <option value="">Estado (todos)</option>
+            }
+
+            @if (string.Equals(filtroEstado, "Disponible", StringComparison.OrdinalIgnoreCase))
+            {
+                <option value="Disponible" selected>Disponible</option>
+            }
+            else
+            {
+                <option value="Disponible">Disponible</option>
+            }
+
+            @if (string.Equals(filtroEstado, "Ocupada", StringComparison.OrdinalIgnoreCase))
+            {
+                <option value="Ocupada" selected>Ocupada</option>
+            }
+            else
+            {
+                <option value="Ocupada">Ocupada</option>
+            }
+
+            @if (string.Equals(filtroEstado, "Reservada", StringComparison.OrdinalIgnoreCase))
+            {
+                <option value="Reservada" selected>Reservada</option>
+            }
+            else
+            {
+                <option value="Reservada">Reservada</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+    </div>
+</form>
 
 @if (rol == "Administrador")
 {
@@ -15,37 +70,76 @@
     </p>
 }
 
-<table class="table table-bordered">
+<table class="table table-bordered table-striped align-middle">
     <thead class="table-light">
         <tr>
             <th>@Html.DisplayNameFor(model => model.Nombre)</th>
             <th>@Html.DisplayNameFor(model => model.Ubicacion)</th>
             <th>@Html.DisplayNameFor(model => model.Complejo)</th>
             <th>@Html.DisplayNameFor(model => model.Estado)</th>
-            <th>@Html.DisplayNameFor(model => model.Precio)</th>
-            <th>Acciones</th>
+
+            <!-- Base del cálculo -->
+            <th>@Html.DisplayNameFor(model => model.AreaM2)</th>
+            <th>@Html.DisplayNameFor(model => model.PrecioAlquilerPorM2)</th>
+
+            <!-- Calculada -->
+            <th title="Precio = AreaM2 × PrecioAlquilerPorM2">@Html.DisplayNameFor(model => model.Precio)</th>
+            <th style="width:220px">Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>@item.Ubicacion</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.Complejo) ? "—" : item.Complejo)</td>
+                    <td>
+                        @{
+                            var estado = item.Estado?.Trim();
+                            if (string.Equals(estado, "Disponible", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="badge bg-success">Disponible</span>
+                            }
+                            else if (string.Equals(estado, "Ocupada", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="badge bg-danger">Ocupada</span>
+                            }
+                            else if (string.Equals(estado, "Reservada", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="badge bg-warning text-dark">Reservada</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@((string.IsNullOrWhiteSpace(estado) ? "—" : estado))</span>
+                            }
+                        }
+                    </td>
+
+                    <td>@(item.AreaM2.HasValue? item.AreaM2.Value.ToString("N2") : "—")</td>
+                    <td>@(item.PrecioAlquilerPorM2.HasValue? item.PrecioAlquilerPorM2.Value.ToString("N2") : "—")</td>
+                    <td>@(item.Precio.HasValue? item.Precio.Value.ToString("N2") : "—")</td>
+
+                    <td>
+                        @if (rol == "Administrador")
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-editar">Editar</a>
+                        }
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-detalles ms-1">Detalles</a>
+                        @if (rol == "Administrador")
+                        {
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-eliminar ms-1">Eliminar</a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
-                <td>@Html.DisplayFor(modelItem => item.Ubicacion)</td>
-                <td>@Html.DisplayFor(modelItem => item.Complejo)</td>
-                <td>@Html.DisplayFor(modelItem => item.Estado)</td>
-                <td>@Html.DisplayFor(modelItem => item.Precio)</td>
-                <td>
-                    @if (rol == "Administrador")
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn-editar">Editar</a>
-                    }
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn-detalles ms-1">Detalles</a>
-                    @if (rol == "Administrador")
-                    {
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn-eliminar ms-1">Eliminar</a>
-                    }
-                </td>
+                <td colspan="8" class="text-center text-muted">No hay bodegas que coincidan con el filtro.</td>
             </tr>
         }
     </tbody>

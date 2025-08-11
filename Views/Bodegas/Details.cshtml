@@ -10,39 +10,78 @@
     <h4>Bodega</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Nombre)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Nombre)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Ubicacion)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Ubicacion)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Complejo)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Complejo)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Estado)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
+        <dd class="col-sm-9">
+            @{
+                var estado = Model.Estado?.Trim();
+                if (string.Equals(estado, "Disponible", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="badge bg-success">Disponible</span>
+                }
+                else if (string.Equals(estado, "Ocupada", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="badge bg-danger">Ocupada</span>
+                }
+                else if (string.Equals(estado, "Reservada", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="badge bg-warning text-dark">Reservada</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">@((string.IsNullOrWhiteSpace(estado) ? "—" : estado))</span>
+                }
+            }
         </dd>
-        <dt class = "col-sm-2">
+
+        <!-- Nuevos: base del cálculo -->
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.AreaM2)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.AreaM2)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.PrecioAlquilerPorM2)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.PrecioAlquilerPorM2)
+        </dd>
+
+        <!-- Calculada -->
+        <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Precio)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Precio)
         </dd>
     </dl>
 </div>
+
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Volver a listado</a>
 </div>
