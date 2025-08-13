@@ -1,73 +1,139 @@
 ﻿@model IEnumerable<SistemaBodega.Models.Mantenimiento>
 @using Microsoft.AspNetCore.Http
-
+@using System.Globalization
 @{
     ViewData["Title"] = "Mantenimientos";
     var rol = Context.Session.GetString("Rol");
+    var cr = new CultureInfo("es-CR");
+
+    var tipos = Model?
+        .Where(x => !string.IsNullOrWhiteSpace(x.TipoMantenimiento))
+        .Select(x => x.TipoMantenimiento!.Trim())
+        .Distinct()
+        .OrderBy(x => x)
+        .ToList() ?? new List<string>();
+
+    string q = Context.Request.Query["q"];
+    string tipo = Context.Request.Query["tipo"];
 }
 
-<h1 class="mt-4">Mantenimientos</h1>
+<!-- barra de acento (si ya la tienes en _Layout, puedes quitar esta línea) -->
+<div class="accent-bar"></div>
 
-@if (rol == "Administrador")
-{
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Crear nuevo mantenimiento</a>
-    </p>
-}
+<div class="container py-4">
+    <!-- Encabezado -->
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
+        <div>
+            <h1 class="page-title mb-1">Mantenimientos</h1>
+            <p class="text-muted mb-0">Listado de actividades realizadas en bodegas.</p>
+        </div>
 
-<table class="table table-bordered table-striped align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.FechaMantenimiento)</th>
-            <th>@Html.DisplayNameFor(model => model.TipoMantenimiento)</th>
-            <th>@Html.DisplayNameFor(model => model.Costo)</th>
-            <th>@Html.DisplayNameFor(model => model.EmpresaResponsable)</th>
-            <th>Bodega</th>
-            <th>@Html.DisplayNameFor(model => model.ComentariosAdministracion)</th>
-            <th style="width:220px">Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
+        @if (rol == "Administrador")
         {
-            foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.FechaMantenimiento.ToString("yyyy-MM-dd")</td>
-                    <td>@item.TipoMantenimiento</td>
-                    <td>@item.Costo.ToString("N2")</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.EmpresaResponsable) ? "—" : item.EmpresaResponsable)</td>
-                    <td>@(item.Bodega?.Nombre ?? "—")</td>
-                    <td>
-                        @{
-                            var c = item.ComentariosAdministracion;
-                            if (string.IsNullOrWhiteSpace(c))
-                            {
-                                @:—
-                            }
-                            else
-                            {
-                                var corto = c.Length > 120 ? c.Substring(0, 120) + "…" : c;
-                                @corto
-                            }
-                        }
-                    </td>
-                    <td>
-                        @if (rol == "Administrador")
+            <a asp-action="Create" class="btn btn-accent btn-lg fw-semibold shadow-sm">
+                Crear nuevo mantenimiento
+            </a>
+        }
+    </div>
+
+    <!-- Filtros / Búsqueda -->
+    <form method="get" class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-3 p-md-4">
+            <div class="row g-2 g-md-3 align-items-end">
+                <div class="col-12 col-md-6 col-lg-5">
+                    <label class="form-label fw-semibold" for="q">Buscar</label>
+                    <input id="q" name="q" value="@q" class="form-control form-control-lg" placeholder="Empresa, bodega o comentario…" />
+                    <div class="form-text">Filtra por texto en Empresa, Bodega o Comentarios.</div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label fw-semibold" for="tipo">Tipo</label>
+                    <select id="tipo" name="tipo" class="form-select form-select-lg">
+                        <option value="">Todos</option>
+                        @foreach (var t in tipos)
                         {
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning text-white btn-editar">Editar</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger ms-1 btn-eliminar">Eliminar</a>
+                            <option value="@t" selected="@(t == tipo)">@t</option>
                         }
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white ms-1 btn-detalles">Detalles</a>
-                    </td>
-                </tr>
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="7" class="text-center text-muted">No hay mantenimientos registrados.</td>
-            </tr>
-        }
-    </tbody>
-</table>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2 col-lg-2 d-grid">
+                    <button type="submit" class="btn btn-outline-dark btn-lg">Aplicar</button>
+                </div>
+                <div class="col-12 col-md-12 col-lg-2 d-grid">
+                    <a asp-action="Index" class="btn btn-link text-decoration-none mt-2 mt-lg-0">Limpiar filtros</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="table-responsive">
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th class="text-end">Costo</th>
+                        <th>Empresa responsable</th>
+                        <th>Bodega</th>
+                        <th>Comentarios de la administración</th>
+                        <th class="text-center" style="width:240px">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        var datos = Model.AsQueryable();
+                        if (!string.IsNullOrWhiteSpace(q))
+                        {
+                            var ql = q.Trim().ToLower();
+                            datos = datos.Where(x =>
+                            (x.EmpresaResponsable ?? "").ToLower().Contains(ql) ||
+                            (x.Bodega != null && (x.Bodega.Nombre ?? "").ToLower().Contains(ql)) ||
+                            (x.ComentariosAdministracion ?? "").ToLower().Contains(ql));
+                        }
+                        if (!string.IsNullOrWhiteSpace(tipo))
+                        {
+                            datos = datos.Where(x => (x.TipoMantenimiento ?? "") == tipo);
+                        }
+
+                        foreach (var item in datos)
+                        {
+                            var comentario = string.IsNullOrWhiteSpace(item.ComentariosAdministracion)
+                            ? "—"
+                            : (item.ComentariosAdministracion!.Length > 120
+                            ? item.ComentariosAdministracion.Substring(0, 120) + "…"
+                            : item.ComentariosAdministracion);
+
+                            <tr>
+                                <td><span class="text-nowrap">@item.FechaMantenimiento.ToString("yyyy-MM-dd")</span></td>
+                                <td><span class="badge badge-soft-accent">@item.TipoMantenimiento</span></td>
+                                <td class="text-end">@item.Costo.ToString("C", cr)</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.EmpresaResponsable) ? "—" : item.EmpresaResponsable)</td>
+                                <td>@(item.Bodega?.Nombre ?? "—")</td>
+                                <td title="@item.ComentariosAdministracion">@comentario</td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group" aria-label="Acciones">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Detalles</a>
+                                        @if (rol == "Administrador")
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Editar</a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">No hay mantenimientos registrados.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

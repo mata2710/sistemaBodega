@@ -1,73 +1,159 @@
 ﻿@model IEnumerable<SistemaBodega.Models.Cliente>
 @using Microsoft.AspNetCore.Http
-
 @{
     ViewData["Title"] = "Clientes";
     var rol = Context.Session.GetString("Rol");
+
+    string qNombre = ViewBag.FiltroNombre as string ?? "";
+    string qCedula = ViewBag.FiltroCedula as string ?? "";
+    string qRep = ViewBag.FiltroRepresentante as string ?? "";
+
+    int total = Model?.Count() ?? 0;
 }
+<div class="accent-bar"></div>
 
-<h1 class="mt-4">Clientes</h1>
-
-<!-- Filtro -->
-<form method="get" class="row g-2 mb-3">
-    <div class="col-md-3">
-        <input type="text" name="nombre" value="@(ViewBag.FiltroNombre ?? "")" class="form-control" placeholder="Buscar por nombre" />
-    </div>
-    <div class="col-md-3">
-        <input type="text" name="cedula" value="@(ViewBag.FiltroCedula ?? "")" class="form-control" placeholder="Buscar por cédula" />
-    </div>
-    <div class="col-md-3">
-        <input type="text" name="representante" value="@(ViewBag.FiltroRepresentante ?? "")" class="form-control" placeholder="Buscar por representante" />
-    </div>
-    <div class="col-md-3 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Buscar</button>
-        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
-    </div>
-</form>
-
-@if (rol == "Administrador")
-{
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Crear nuevo cliente</a>
-    </p>
-}
-
-<table class="table table-yellow">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Nombre)</th>
-            <th>@Html.DisplayNameFor(model => model.Identificacion)</th>
-            <th>@Html.DisplayNameFor(model => model.Telefono)</th>
-            <th>Teléfono secundario</th>
-            <th>@Html.DisplayNameFor(model => model.Email)</th>
-            <th>Representante legal</th>
-            <th>Actividad</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null)
-        {
-            foreach (var item in Model)
+<div class="container py-4">
+    <!-- Encabezado -->
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
+        <div>
+            <h1 class="page-title mb-1">Clientes</h1>
+            <p class="text-muted mb-0">Administrá tus clientes jurídicos y su información de contacto.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <span class="badge-count align-self-center">Total: @total</span>
+            @if (rol == "Administrador")
             {
-                <tr>
-                    <td>@item.Nombre</td>
-                    <td>@item.Identificacion</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.Telefono) ? "—" : item.Telefono)</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.TelefonoSecundario) ? "—" : item.TelefonoSecundario)</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.Email) ? "—" : item.Email)</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.RepresentanteLegal) ? "—" : item.RepresentanteLegal)</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.Actividad) ? "—" : item.Actividad)</td>
-                    <td>
-                        @if (rol == "Administrador")
-                        {
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-editar btn-sm">Editar</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-eliminar btn-sm ms-1">Eliminar</a>
-                        }
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-detalles btn-sm ms-1">Detalles</a>
-                    </td>
-                </tr>
+                <a asp-action="Create" class="btn btn-accent btn-lg fw-semibold shadow-sm">Crear nuevo cliente</a>
             }
-        }
-    </tbody>
-</table>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <form method="get" class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-3 p-md-4">
+            <div class="row g-2 g-md-3 align-items-end">
+                <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold" for="nombre">Nombre</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        <input id="nombre" name="nombre" value="@qNombre" class="form-control" placeholder="Buscar por nombre comercial" />
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold" for="cedula">Cédula jurídica</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                        <input id="cedula" name="cedula" value="@qCedula" class="form-control" placeholder="Ej.: 3-101-123456" />
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label fw-semibold" for="representante">Representante</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                        <input id="representante" name="representante" value="@qRep" class="form-control" placeholder="Buscar por representante legal" />
+                    </div>
+                </div>
+
+                <div class="col-12 d-flex flex-wrap gap-2 mt-3">
+                    <button type="submit" class="btn btn-outline-dark btn-lg">Buscar</button>
+                    <a asp-action="Index" class="btn btn-link text-decoration-none">Limpiar filtros</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="table-responsive">
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th class="text-nowrap">Cédula jurídica</th>
+                        <th class="text-nowrap">Teléfono(s)</th>
+                        <th>Email</th>
+                        <th class="d-none d-lg-table-cell">Representante legal</th>
+                        <th class="d-none d-xl-table-cell">Actividad</th>
+                        <th class="text-center" style="width:240px">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            var tel = string.IsNullOrWhiteSpace(item.Telefono) ? "—" : item.Telefono;
+                            var tel2 = string.IsNullOrWhiteSpace(item.TelefonoSecundario) ? "" : $" / {item.TelefonoSecundario}";
+                            var mail = string.IsNullOrWhiteSpace(item.Email) ? "—" : item.Email;
+                            var rep = string.IsNullOrWhiteSpace(item.RepresentanteLegal) ? "—" : item.RepresentanteLegal;
+                            var act = string.IsNullOrWhiteSpace(item.Actividad) ? "—" : item.Actividad;
+
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@item.Nombre</div>
+                                    <div class="small text-muted d-lg-none mt-1">
+                                        <span class="chip-soft">@rep</span>
+                                    </div>
+                                </td>
+                                <td class="text-nowrap">@item.Identificacion</td>
+                                <td class="text-nowrap">
+                                    @tel@tel2
+                                </td>
+                                <td>
+                                    @if (mail == "—")
+                                    {
+                                        @:—
+                                    }
+                                    else
+                                    {
+                                        <a href="mailto:@mail" class="link-email" title="@mail">@mail</a>
+                                    }
+                                </td>
+                                <td class="d-none d-lg-table-cell">@rep</td>
+                                <td class="d-none d-xl-table-cell">
+                                    @if (act == "—")
+                                    {
+                                        @:—
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-soft-accent">@act</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group" aria-label="Acciones">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Detalles</a>
+                                        @if (rol == "Administrador")
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Editar</a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="empty-state">
+                                    <div class="brand-circle mb-2">SB</div>
+                                    <h6 class="mb-1">No se encontraron clientes</h6>
+                                    <p class="text-muted mb-3">Ajustá los filtros o creá un nuevo registro.</p>
+                                    @if (rol == "Administrador")
+                                    {
+                                        <a asp-action="Create" class="btn btn-accent">Crear cliente</a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

@@ -2,49 +2,85 @@
     ViewData["Title"] = "Iniciar sesión";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-body">
-                <h2 class="mb-4 text-center">Iniciar sesión</h2>
+<div class="login-wrap bg-white">
+    <!-- Banda superior con color de acento -->
+    <div class="accent-bar"></div>
+
+    <div class="container d-flex align-items-center justify-content-center min-vh-100">
+        <div class="login-card card shadow-lg border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
+
+                <div class="text-center mb-4">
+                    <div class="brand-circle mx-auto mb-3">SB</div>
+                    <h1 class="h3 fw-bold mb-1">Industrias Unidas S.A</h1>
+                    <p class="text-muted mb-0">Accede a tu cuenta</p>
+                </div>
 
                 @if (TempData["Mensaje"] != null)
                 {
-                    <div class="alert alert-success text-center">@TempData["Mensaje"]</div>
+                    <div class="alert alert-success text-center rounded-3">@TempData["Mensaje"]</div>
                 }
 
-                <form asp-action="Login" method="post">
+                <form asp-action="Login" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+
                     <div class="mb-3">
-                        <label for="correo" class="form-label">Correo electrónico</label>
-                        <input type="email" name="correo" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label for="contrasena" class="form-label">Contraseña</label>
-                        <input type="password" name="contrasena" class="form-control" required />
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Ingresar</button>
+                        <label for="correo" class="form-label fw-semibold">Correo electrónico</label>
+                        <input id="correo" type="email" name="correo" class="form-control form-control-lg" placeholder="tu@correo.com" required />
+                        <div class="form-text">Usa el correo registrado en el sistema.</div>
                     </div>
 
-                    <!-- 🔽 Enlace de recuperación debajo del botón -->
+                    <div class="mb-2 position-relative">
+                        <label for="contrasena" class="form-label fw-semibold">Contraseña</label>
+                        <input id="contrasena" type="password" name="contrasena" class="form-control form-control-lg pe-5" placeholder="••••••••" required />
+                        <button type="button" class="btn btn-sm btn-link toggle-pass" aria-label="Mostrar u ocultar contraseña">Mostrar</button>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-accent btn-lg fw-semibold">
+                            Ingresar
+                        </button>
+                    </div>
+
                     <div class="text-center mt-3">
-                        <a asp-controller="Cuenta" asp-action="Recuperar">¿Olvidaste tu contraseña? Recupérala aquí</a>
+                        <a class="link-accent" asp-controller="Cuenta" asp-action="Recuperar">
+                            ¿Olvidaste tu contraseña? Recupérala aquí
+                        </a>
                     </div>
                 </form>
 
                 @if (ViewBag.Error != null)
                 {
-                    <div class="alert alert-danger mt-3 text-center">@ViewBag.Error</div>
+                    <div class="alert alert-danger mt-3 text-center rounded-3">@ViewBag.Error</div>
                 }
 
-                <p class="mt-4 text-center">
+                <hr class="my-4" />
+
+                <p class="text-center mb-0">
                     ¿No tienes cuenta?
-                    <a asp-controller="Cuenta" asp-action="Register">Regístrate aquí</a>
+                    <a class="link-accent fw-semibold" asp-controller="Cuenta" asp-action="Register">Regístrate aquí</a>
                 </p>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const btn = document.querySelector('.toggle-pass');
+            const input = document.getElementById('contrasena');
+            if (!btn || !input) return;
+            btn.addEventListener('click', function () {
+                const show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                this.textContent = show ? 'Ocultar' : 'Mostrar';
+                input.focus();
+            });
+        })();
+    </script>
+}
+
 
 
 
