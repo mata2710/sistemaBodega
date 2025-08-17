@@ -1,76 +1,229 @@
 ﻿@model SistemaBodega.Models.Alquiler
+@using Microsoft.AspNetCore.Http
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Alquiler — Detalles";
+    var rol = Context.Session.GetString("Rol");
+    string BRAND = "#00809D";
+    string BRAND_HOVER = "#00748A";
+    string EDIT_BG = "#FFD700"; // amarillo editar (Index)
+    string EDIT_FG = "#111";    // contraste oscuro
 }
 
-<h1>Detalles</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<div>
-    <h4>Alquiler</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FechaInicio)</dt>
-        <dd class="col-sm-9">@Model.FechaInicio.ToString("yyyy-MM-dd")</dd>
+<style>
+    /* ===== Estructura ===== */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid @BRAND;
+    }
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FechaFin)</dt>
-        <dd class="col-sm-9">@Model.FechaFin.ToString("yyyy-MM-dd")</dd>
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
 
-        <!-- Datos tomados/establecidos desde Bodega -->
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.AreaM2)</dt>
-        <dd class="col-sm-9">@(Model.AreaM2.HasValue? Model.AreaM2.Value.ToString("N2") : "—")</dd>
+    /* ===== Definición en rejilla ===== */
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem;
+    }
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PrecioPorM2)</dt>
-        <dd class="col-sm-9">@(Model.PrecioPorM2.HasValue? Model.PrecioPorM2.Value.ToString("N2") : "—")</dd>
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
 
-        <!-- Calculado -->
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PrecioAlquiler)</dt>
-        <dd class="col-sm-9">@(Model.PrecioAlquiler.HasValue? Model.PrecioAlquiler.Value.ToString("N2") : "—")</dd>
+        .dl-grid dd {
+            margin: 0;
+        }
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.AumentoAnualPorcentaje)</dt>
-        <dd class="col-sm-9">@(Model.AumentoAnualPorcentaje.HasValue? Model.AumentoAnualPorcentaje.Value.ToString("0.##") + " %" : "—")</dd>
+    @@media (max-width: 768px) {
+        .dl-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.RenovacionAutomatica)</dt>
-        <dd class="col-sm-9">@(Model.RenovacionAutomatica ? "Sí" : "No")</dd>
+    /* ===== Acciones ===== */
+    .btn.btn-edit {
+        background: @EDIT_BG !important;
+        color: @EDIT_FG !important;
+        border: 0 !important;
+    }
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Activo)</dt>
-        <dd class="col-sm-9">@(Model.Activo ? "Activo" : "Inactivo")</dd>
+        .btn.btn-edit:hover, .btn.btn-edit:focus, .btn.btn-edit:active {
+            filter: brightness(.95) !important;
+            color: @EDIT_FG !important;
+        }
 
-        <dt class="col-sm-3">Cliente</dt>
-        <dd class="col-sm-9">@((Model.Cliente?.Nombre) ?? "—")</dd>
+        .btn.btn-edit i {
+            color: @EDIT_FG !important;
+        }
 
-        <dt class="col-sm-3">Bodega</dt>
-        <dd class="col-sm-9">@((Model.Bodega?.Nombre) ?? "—")</dd>
+    .btn-brand {
+        background: @BRAND;
+        color: #fff;
+        border: 0;
+    }
 
-        <!-- Observaciones -->
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Observaciones)</dt>
-        <dd class="col-sm-9">
-            @if (!string.IsNullOrWhiteSpace(Model?.Observaciones))
-            {
-                <pre class="mb-0" style="white-space:pre-wrap">@Model.Observaciones</pre>
-            }
-            else
-            {
-                @:—
-            }
-        </dd>
+        .btn-brand:hover {
+            background: @BRAND_HOVER;
+            color: #fff;
+        }
 
-        <!-- Contrato -->
-        <dt class="col-sm-3">Contrato</dt>
-        <dd class="col-sm-9">
-            @if (!string.IsNullOrWhiteSpace(Model?.ContratoFilePath))
-            {
-                <a href="@Model.ContratoFilePath" target="_blank" rel="noopener">Ver contrato</a>
-            }
-            else
-            {
-                <span class="text-muted">—</span>
-            }
-        </dd>
-    </dl>
+    /* ===== Espacio icono/etiqueta ===== */
+    .kv {
+        opacity: .9;
+        margin-right: .4rem;
+    }
+
+    /* ===== Badges suaves, pill, coherentes con paleta ===== */
+    /* Sí / Activo -> Verde del botón Guardar (#437057) en texto/borde, fondo verde muy claro */
+    .badge-ok {
+        background: #EAF3EE !important; /* verde muy claro */
+        color: #437057 !important; /* texto verde Guardar */
+        border: 1px solid #437057 !important;
+        padding: .25rem .5rem;
+        border-radius: 999px;
+        font-weight: 600;
+    }
+    /* No / Inactivo -> Rojo de eliminar (#DC3C22) en texto/borde, fondo rojo muy claro */
+    .badge-danger {
+        background: #FDECEA !important; /* rojo muy claro */
+        color: #DC3C22 !important; /* rojo eliminar */
+        border: 1px solid #DC3C22 !important;
+        padding: .25rem .5rem;
+        border-radius: 999px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3 page-tools">
+    <h2 class="mb-0">Alquiler — Detalles</h2>
+    <div class="d-flex gap-2">
+        @if (rol == "Administrador")
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-sm btn-edit">
+                <i class="bi bi-pencil-square me-1"></i> Editar
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left-short me-1"></i> Volver al listado
+        </a>
+    </div>
 </div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning text-white">Editar</a>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
+<div class="row g-3">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Resumen</div>
+                <dl class="dl-grid">
+                    <dt><i class="kv bi bi-person"></i>Cliente</dt>
+                    <dd>@(Model.Cliente?.Nombre ?? "—")</dd>
+
+                    <dt><i class="kv bi bi-house-door"></i>Bodega</dt>
+                    <dd>@(Model.Bodega?.Nombre ?? "—")</dd>
+
+                    <dt><i class="kv bi bi-calendar-event"></i>Inicio</dt>
+                    <dd>@Model.FechaInicio.ToString("yyyy-MM-dd")</dd>
+
+                    <dt><i class="kv bi bi-calendar2-check"></i>Fin</dt>
+                    <dd>@(Model.FechaFin == default(DateTime) ? "—" : Model.FechaFin.ToString("yyyy-MM-dd"))</dd>
+
+                    <dt><i class="kv bi bi-repeat"></i>Renovación auto</dt>
+                    <dd>
+                        @if (Model.RenovacionAutomatica)
+                        {
+                            <span class="badge-ok">Sí</span>
+                        }
+                        else
+                        {
+
+                            <span class="badge-danger">No</span>
+                        }
+                    </dd>
+
+                    <dt><i class="kv bi bi-circle-fill"></i>Estado</dt>
+                    <dd>
+                        @if (Model.Activo)
+                        {
+                            <span class="badge-ok">Activo</span>
+                        }
+                        else
+                        {
+
+                            <span class="badge-danger">Inactivo</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-3">
+            <div class="card-body">
+                <div class="section-title">Observaciones</div>
+                @if (!string.IsNullOrWhiteSpace(Model?.Observaciones))
+                {
+                    <pre class="mb-0" style="white-space:pre-wrap">@Model.Observaciones</pre>
+                }
+                else
+                {
+                    <span class="text-muted">—</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna lateral -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Costos</div>
+                <dl class="dl-grid">
+                    <dt><i class="kv bi bi-aspect-ratio"></i>Área (m²)</dt>
+                    <dd>@string.Format("{0:N2}", Model.AreaM2 ?? 0m)</dd>
+
+                    <dt><i class="kv bi bi-currency-dollar"></i>Precio por m²</dt>
+                    <dd>$ @string.Format("{0:N2}", Model.PrecioPorM2 ?? 0m)</dd>
+
+                    <dt><i class="kv bi bi-cash-stack"></i>Precio alquiler</dt>
+                    <dd>$ @string.Format("{0:N2}", Model.PrecioAlquiler ?? 0m)</dd>
+
+                    <dt><i class="kv bi bi-graph-up"></i>Aumento anual</dt>
+                    <dd>@((Model.AumentoAnualPorcentaje ?? 0m).ToString("0.##") + " %")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-3">
+            <div class="card-body">
+                <div class="section-title">Contrato</div>
+                @if (!string.IsNullOrWhiteSpace(Model?.ContratoFilePath))
+                {
+                    <div class="d-grid gap-2">
+                        <a href="@Model.ContratoFilePath" target="_blank" rel="noopener" class="btn btn-sm btn-brand">
+                            <i class="bi bi-file-earmark-text me-1"></i> Ver contrato
+                        </a>
+                        <a href="@Model.ContratoFilePath" download class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i> Descargar
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <span class="text-muted">—</span>
+                }
+            </div>
+        </div>
+    </div>
 </div>
+

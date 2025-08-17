@@ -1,37 +1,294 @@
-﻿@model IEnumerable<SistemaBodega.Models.CarruselImagen>
+﻿@model SistemaBodega.Models.PagedResult<SistemaBodega.Models.CarruselImagen>
 
 @{
-    ViewData["Title"] = "Imágenes del Carrusel";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Imágenes del carrusel";
+
+    // Buscar por título
+    var q = (string)(ViewBag.q ?? Context?.Request?.Query["q"].ToString() ?? string.Empty);
+
+    int totalPages = Math.Max(1, (int)Math.Ceiling((decimal)(Model?.TotalItems ?? 0) / (Model?.PageSize ?? 10)));
+    int startRow = (Model?.TotalItems ?? 0) == 0 ? 0 : ((Model!.Page - 1) * Model.PageSize) + 1;
+    int endRow = Math.Min(Model!.Page * Model.PageSize, Model.TotalItems);
 }
 
-<div class="container py-4 text-white">
-    <h2 class="mb-4">Administrar Imágenes del Carrusel</h2>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-    <a asp-action="Create" class="btn btn-success mb-3">Agregar Imagen</a>
+<style>
+    /* Botones de acción */
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 0;
+        margin-left: .25rem;
+        text-decoration: none
+    }
 
-    <table class="table table-dark table-striped">
+        .btn-icon i {
+            font-size: 1.05rem;
+            color: #fff
+        }
+
+        .btn-icon.edit {
+            background: #FFD700
+        }
+
+            .btn-icon.edit i {
+                color: #111
+            }
+
+        .btn-icon.delete {
+            background: #DC3C22
+        }
+
+        .btn-icon:hover {
+            filter: brightness(.95)
+        }
+
+    /* Tabla */
+    .table-pro {
+        width: 100%
+    }
+
+        .table-pro th, .table-pro td {
+            padding: .65rem .8rem;
+            vertical-align: middle
+        }
+
+    .td-center {
+        text-align: center
+    }
+
+    .td-truncate {
+        max-width: 360px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis
+    }
+
+    .thumb {
+        width: 160px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: .5rem;
+        border: 1px solid rgba(0,0,0,.06)
+    }
+
+    /* Barra superior + filtros */
+    .page-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem
+    }
+
+    .search-group {
+        position: relative
+    }
+
+        .search-group .btn-search {
+            position: absolute;
+            right: .5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer
+        }
+
+            .search-group .btn-search i {
+                color: #00809D;
+                font-size: 1.1rem
+            }
+
+            .search-group .btn-search:hover i {
+                color: #00748A
+            }
+
+        .search-group .form-control.pe-5 {
+            padding-right: 2.5rem !important
+        }
+
+    /* Botón primario coherente */
+    .btn-primary {
+        background: #00809D;
+        border: 0
+    }
+
+        .btn-primary:hover {
+            background: #00748A
+        }
+
+    /* Paginación */
+    .pager-bar {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        flex-wrap: wrap
+    }
+
+    .pager-left {
+        margin-right: auto
+    }
+
+    .pager-center {
+        margin-left: auto;
+        margin-right: auto
+    }
+
+    .pager-right {
+        margin-left: auto
+    }
+
+    .empty-row {
+        text-align: center;
+        color: #6c757d;
+        padding: 1.25rem 0
+    }
+</style>
+
+<div class="page-tools mt-3 mb-3">
+    <div>
+        <h1 class="m-0">Imágenes del carrusel</h1>
+        <div class="text-muted">Total: @Model.TotalItems</div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Agregar imagen
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<form method="get" class="card shadow-sm mb-3" style="border:1px solid rgba(0,0,0,.06); border-radius:.75rem;">
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">Título</label>
+                <div class="search-group">
+                    <input type="search"
+                           name="q"
+                           value="@q"
+                           class="form-control pe-5"
+                           placeholder="Buscar por título..." />
+                    <button type="submit" class="btn-search" aria-label="Buscar">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset a página 1 conservando pageSize -->
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    </div>
+</form>
+
+<div class="table-wrap">
+    <table class="table-pro">
         <thead>
             <tr>
-                <th>Imagen</th>
-                <th>Título</th>
-                <th>Acciones</th>
+                <th style="width:24%">Imagen</th>
+                <th style="width:56%">Título</th>
+                <th class="td-center" style="width:20%">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @if (Model?.Items != null && Model.Items.Any())
             {
-                <tr>
-                    <td>
-                        <img src="~/@item.RutaImagen" alt="Imagen carrusel" width="150" class="img-thumbnail" />
-                    </td>
-                    <td>@item.Titulo</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Editar</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Eliminar</a>
-                    </td>
-                </tr>
+                foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <img src="~/@item.RutaImagen" alt="Imagen carrusel" class="thumb" />
+                        </td>
+                        <td class="td-truncate" title="@item.Titulo">@item.Titulo</td>
+                        <td class="td-center">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon edit" title="Editar" aria-label="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <!-- Eliminar redirige a la vista Delete (sin Detalles) -->
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn-icon delete" title="Eliminar" aria-label="Eliminar">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="3" class="empty-row">No se encontraron imágenes.</td></tr>
             }
         </tbody>
     </table>
 </div>
+
+@{
+    // Helper para conservar filtros en la paginación
+    Func<int, string> pageUrl = (p) =>
+        Url.Action("Index", "CarruselImagen", new
+        {
+            page = p,
+            pageSize = Model.PageSize,
+            q = q
+        })!;
+}
+
+<!-- Barra inferior con paginación -->
+<nav aria-label="Paginación" class="pager-bar mt-2">
+    <div class="small text-muted pager-left">
+        Mostrando @startRow - @endRow de @Model.TotalItems
+    </div>
+
+    <!-- Selector pageSize -->
+    <form method="get" class="d-flex align-items-center gap-2 pager-center">
+        <label class="small text-muted mb-0" for="pageSizeSelect">Pág.</label>
+        <select id="pageSizeSelect" name="pageSize" class="form-select form-select-sm" onchange="this.form.submit()">
+            @{
+                var sizes = new[] { 5, 10, 25, 50, 100 };
+            }
+            @foreach (var s in sizes)
+            {
+                if (Model.PageSize == s)
+                {
+                    <option value="@s" selected="selected">@s</option>
+                }
+                else
+                {
+                    <option value="@s">@s</option>
+                }
+            }
+        </select>
+
+        <!-- Preservar búsqueda y reset a página 1 -->
+        <input type="hidden" name="q" value="@q" />
+        <input type="hidden" name="page" value="1" />
+    </form>
+
+    <!-- Paginación numerada -->
+    <ul class="pagination mb-0 pager-right">
+        <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+            <a class="page-link" href="@(pageUrl(Model.Page - 1))">Anterior</a>
+        </li>
+
+        @for (int p = 1; p <= totalPages; p++)
+        {
+            <li class="page-item @(p == Model.Page ? "active" : "")">
+                <a class="page-link" href="@(pageUrl(p))">@p</a>
+            </li>
+        }
+
+        <li class="page-item @(Model.Page >= totalPages ? "disabled" : "")">
+            <a class="page-link" href="@(pageUrl(Model.Page + 1))">Siguiente</a>
+        </li>
+    </ul>
+</nav>

@@ -1,146 +1,582 @@
-﻿@model IEnumerable<SistemaBodega.Models.Bodega>
+﻿@model SistemaBodega.Models.PagedResult<SistemaBodega.Models.Bodega>
 @using Microsoft.AspNetCore.Http
 
 @{
     ViewData["Title"] = "Bodegas";
     var rol = Context.Session.GetString("Rol");
-    var filtroEstado = (string)ViewBag.FiltroEstado;
+
+    string filtroNombre = ViewBag.FiltroNombre as string ?? string.Empty;
+    string filtroComplejo = ViewBag.FiltroComplejo as string ?? string.Empty;
+    string filtroEstado = ViewBag.FiltroEstado as string ?? string.Empty;
+    string sortKey = ViewBag.Sort as string ?? "nombre";
+    string sortDir = ViewBag.Dir as string ?? "asc";
+
+    int totalPages = Math.Max(1, (int)Math.Ceiling((decimal)Model.TotalItems / Model.PageSize));
+    int startRow = Model.TotalItems == 0 ? 0 : ((Model.Page - 1) * Model.PageSize) + 1;
+    int endRow = Math.Min(Model.Page * Model.PageSize, Model.TotalItems);
+
+    string nextNombre = (sortKey == "nombre" && sortDir == "asc") ? "desc" : "asc";
+    string nextComplejo = (sortKey == "complejo" && sortDir == "asc") ? "desc" : "asc";
+    string nextEstado = (sortKey == "estado" && sortDir == "asc") ? "desc" : "asc";
+    string nextArea = (sortKey == "area" && sortDir == "asc") ? "desc" : "asc";
+    string nextPm2 = (sortKey == "pm2" && sortDir == "asc") ? "desc" : "asc";
+    string nextPrecio = (sortKey == "precio" && sortDir == "asc") ? "desc" : "asc";
+
+    bool selTodos = string.IsNullOrEmpty(filtroEstado);
+    bool selDisp = string.Equals(filtroEstado, "Disponible", System.StringComparison.OrdinalIgnoreCase);
+    bool selOc = string.Equals(filtroEstado, "Ocupada", System.StringComparison.OrdinalIgnoreCase);
+    bool selRes = string.Equals(filtroEstado, "Reservada", System.StringComparison.OrdinalIgnoreCase);
 }
 
-<h1 class="mt-4">Bodegas</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+<style>
+    /* Acciones con íconos */
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 0;
+        margin-left: .25rem;
+        text-decoration: none
+    }
+
+        .btn-icon i {
+            font-size: 1.05rem;
+            color: #fff
+        }
+
+        .btn-icon.details {
+            background: #00809D
+        }
+
+        .btn-icon.edit {
+            background: #FFD700
+        }
+
+            .btn-icon.edit i {
+                color: #111
+            }
+
+        .btn-icon.delete {
+            background: #DC3C22
+        }
+
+        .btn-icon:hover {
+            filter: brightness(.95)
+        }
+
+    /* Tabla */
+    .table-pro {
+        width: 100%
+    }
+
+        .table-pro th, .table-pro td {
+            padding: .65rem .8rem;
+            vertical-align: middle
+        }
+
+    .td-center {
+        text-align: center
+    }
+
+    .td-truncate {
+        max-width: 360px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis
+    }
+
+    .text-nowrap {
+        white-space: nowrap
+    }
+
+    /* Filtros */
+    .page-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem
+    }
+
+        .page-tools .btn {
+            margin-top: 0 !important
+        }
+
+    .card-filters {
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: .75rem
+    }
+
+    /* Buscadores con lupa */
+    .search-group {
+        position: relative
+    }
+
+        .search-group .btn-search {
+            position: absolute;
+            right: .5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer
+        }
+
+            .search-group .btn-search i {
+                color: #00809D;
+                font-size: 1.1rem
+            }
+
+            .search-group .btn-search:hover i {
+                color: #00748A
+            }
+
+        .search-group .form-control.pe-5 {
+            padding-right: 2.5rem !important
+        }
+
+    /* Pills rápidas de estado */
+    .filters-quick {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap
+    }
+
+    .filter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .35rem .7rem;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+        color: #334155;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: .9rem
+    }
+
+        .filter-pill:hover {
+            background: #eef2f7;
+            color: #0f172a
+        }
+
+        .filter-pill.active {
+            background: #00809D;
+            color: #fff;
+            border-color: #00748A
+        }
+
+    /* Badges estado */
+    .badge-state {
+        display: inline-block;
+        padding: .25rem .6rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        border: 1px solid transparent
+    }
+
+    .state-available {
+        background: #E7F6EC;
+        color: #1F7A39;
+        border-color: #BDE4C7
+    }
+
+    .state-occupied {
+        background: #fdecea;
+        color: #b42318;
+        border-color: #f5c2c7
+    }
+
+    .state-reserved {
+        background: #fff4cc;
+        color: #664d03;
+        border-color: #ffec99
+    }
+
+    /* Paginación / barra inferior */
+    .pager-bar {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        flex-wrap: wrap
+    }
+
+    .pager-left {
+        margin-right: auto
+    }
+
+    .pager-center {
+        margin-left: auto;
+        margin-right: auto
+    }
+
+    .pager-right {
+        margin-left: auto
+    }
+
+    /* Links marca (para celdas, no encabezados) */
+    .link-accent {
+        color: #00809D;
+        text-decoration: none
+    }
+
+        .link-accent:hover {
+            color: #00748A;
+            text-decoration: underline
+        }
+
+    /* Encabezados: que se vean como texto normal (no azules) */
+    .table-pro thead a.th-sort {
+        color: #212529 !important; /* color de texto estándar */
+        text-decoration: none !important;
+        font-weight: 600;
+    }
+
+        .table-pro thead a.th-sort:hover {
+            color: #111 !important;
+            text-decoration: none !important;
+        }
+
+    .table-pro thead .th-sort i {
+        font-size: .9rem;
+        opacity: .9;
+        color: #6c757d; /* icono más tenue */
+        margin-left: .25rem;
+    }
+</style>
+
+<div class="page-tools mt-3 mb-3">
+    <div>
+        <h1 class="m-0">Bodegas</h1>
+        <div class="text-muted">Total: @Model.TotalItems</div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        @if (rol == "Administrador")
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Crear nueva bodega
+            </a>
+        }
+    </div>
+</div>
 
 <!-- Filtros -->
-<form method="get" class="row g-2 mb-3">
-    <div class="col-md-3">
-        <input type="text" name="nombre" value="@(ViewBag.FiltroNombre ?? "")" class="form-control" placeholder="Buscar por nombre" />
-    </div>
-    <div class="col-md-3">
-        <input type="text" name="ubicacion" value="@(ViewBag.FiltroUbicacion ?? "")" class="form-control" placeholder="Buscar por ubicación" />
-    </div>
-    <div class="col-md-3">
-        <input type="text" name="complejo" value="@(ViewBag.FiltroComplejo ?? "")" class="form-control" placeholder="Buscar por complejo" />
-    </div>
-    <div class="col-md-3 d-flex gap-2">
-        <select name="estado" class="form-select">
-            @if (string.IsNullOrEmpty(filtroEstado))
-            {
-                <option value="" selected>Estado (todos)</option>
-            }
-            else
-            {
-                <option value="">Estado (todos)</option>
-            }
+<form method="get" class="card card-filters shadow-sm mb-3">
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <div class="search-group">
+                    <input type="search" name="nombre" value="@filtroNombre" class="form-control pe-5" placeholder="Buscar por nombre" />
+                    <button type="submit" class="btn-search" aria-label="Buscar"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Complejo</label>
+                <div class="search-group">
+                    <input type="search" name="complejo" value="@filtroComplejo" class="form-control pe-5" placeholder="Buscar por complejo" />
+                    <button type="submit" class="btn-search" aria-label="Buscar complejo"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
 
-            @if (string.Equals(filtroEstado, "Disponible", StringComparison.OrdinalIgnoreCase))
-            {
-                <option value="Disponible" selected>Disponible</option>
-            }
-            else
-            {
-                <option value="Disponible">Disponible</option>
-            }
+        <!-- Pills rápidas (Estado) -->
+        <div class="filters-quick mt-3">
+            <a class="filter-pill @(string.IsNullOrEmpty(filtroEstado) ? "active" : "")"
+               asp-action="Index"
+               asp-route-page="1"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-nombre="@filtroNombre"
+               asp-route-complejo="@filtroComplejo"
+               asp-route-estado=""
+               asp-route-sort="@sortKey"
+               asp-route-dir="@sortDir">Todas</a>
 
-            @if (string.Equals(filtroEstado, "Ocupada", StringComparison.OrdinalIgnoreCase))
-            {
-                <option value="Ocupada" selected>Ocupada</option>
-            }
-            else
-            {
-                <option value="Ocupada">Ocupada</option>
-            }
+            <a class="filter-pill @(selDisp ? "active" : "")"
+               asp-action="Index"
+               asp-route-page="1"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-nombre="@filtroNombre"
+               asp-route-complejo="@filtroComplejo"
+               asp-route-estado="Disponible"
+               asp-route-sort="@sortKey"
+               asp-route-dir="@sortDir">Disponible</a>
 
-            @if (string.Equals(filtroEstado, "Reservada", StringComparison.OrdinalIgnoreCase))
-            {
-                <option value="Reservada" selected>Reservada</option>
-            }
-            else
-            {
-                <option value="Reservada">Reservada</option>
-            }
-        </select>
-        <button type="submit" class="btn btn-primary">Buscar</button>
-        <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+            <a class="filter-pill @(selOc ? "active" : "")"
+               asp-action="Index"
+               asp-route-page="1"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-nombre="@filtroNombre"
+               asp-route-complejo="@filtroComplejo"
+               asp-route-estado="Ocupada"
+               asp-route-sort="@sortKey"
+               asp-route-dir="@sortDir">Ocupada</a>
+
+            <a class="filter-pill @(selRes ? "active" : "")"
+               asp-action="Index"
+               asp-route-page="1"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-nombre="@filtroNombre"
+               asp-route-complejo="@filtroComplejo"
+               asp-route-estado="Reservada"
+               asp-route-sort="@sortKey"
+               asp-route-dir="@sortDir">Reservada</a>
+        </div>
+
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+        <input type="hidden" name="sort" value="@sortKey" />
+        <input type="hidden" name="dir" value="@sortDir" />
     </div>
 </form>
 
-@if (rol == "Administrador")
-{
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Crear nueva bodega</a>
-    </p>
-}
-
-<table class="table table-bordered table-striped align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Nombre)</th>
-            <th>@Html.DisplayNameFor(model => model.Ubicacion)</th>
-            <th>@Html.DisplayNameFor(model => model.Complejo)</th>
-            <th>@Html.DisplayNameFor(model => model.Estado)</th>
-
-            <!-- Base del cálculo -->
-            <th>@Html.DisplayNameFor(model => model.AreaM2)</th>
-            <th>@Html.DisplayNameFor(model => model.PrecioAlquilerPorM2)</th>
-
-            <!-- Calculada -->
-            <th title="Precio = AreaM2 × PrecioAlquilerPorM2">@Html.DisplayNameFor(model => model.Precio)</th>
-            <th style="width:220px">Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.Nombre</td>
-                    <td>@item.Ubicacion</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.Complejo) ? "—" : item.Complejo)</td>
-                    <td>
-                        @{
-                            var estado = item.Estado?.Trim();
-                            if (string.Equals(estado, "Disponible", StringComparison.OrdinalIgnoreCase))
-                            {
-                                <span class="badge bg-success">Disponible</span>
-                            }
-                            else if (string.Equals(estado, "Ocupada", StringComparison.OrdinalIgnoreCase))
-                            {
-                                <span class="badge bg-danger">Ocupada</span>
-                            }
-                            else if (string.Equals(estado, "Reservada", StringComparison.OrdinalIgnoreCase))
-                            {
-                                <span class="badge bg-warning text-dark">Reservada</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">@((string.IsNullOrWhiteSpace(estado) ? "—" : estado))</span>
-                            }
-                        }
-                    </td>
-
-                    <td>@(item.AreaM2.HasValue? item.AreaM2.Value.ToString("N2") : "—")</td>
-                    <td>@(item.PrecioAlquilerPorM2.HasValue? item.PrecioAlquilerPorM2.Value.ToString("N2") : "—")</td>
-                    <td>@(item.Precio.HasValue? item.Precio.Value.ToString("N2") : "—")</td>
-
-                    <td>
-                        @if (rol == "Administrador")
-                        {
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-editar">Editar</a>
-                        }
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-detalles ms-1">Detalles</a>
-                        @if (rol == "Administrador")
-                        {
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-eliminar ms-1">Eliminar</a>
-                        }
-                    </td>
-                </tr>
-            }
-        }
-        else
-        {
+<div class="table-wrap">
+    <table class="table-pro">
+        <thead>
             <tr>
-                <td colspan="8" class="text-center text-muted">No hay bodegas que coincidan con el filtro.</td>
+                <th>
+                    <a class="th-sort"
+                       asp-action="Index"
+                       asp-route-sort="nombre"
+                       asp-route-dir="@nextNombre"
+                       asp-route-page="1"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-nombre="@filtroNombre"
+                       asp-route-complejo="@filtroComplejo"
+                       asp-route-estado="@filtroEstado">
+                        Nombre
+                        @if (sortKey == "nombre")
+                        {
+                            <i class="bi @(sortDir == "asc" ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                        }
+                    </a>
+                </th>
+                <th>
+                    <a class="th-sort"
+                       asp-action="Index"
+                       asp-route-sort="complejo"
+                       asp-route-dir="@nextComplejo"
+                       asp-route-page="1"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-nombre="@filtroNombre"
+                       asp-route-complejo="@filtroComplejo"
+                       asp-route-estado="@filtroEstado">
+                        Complejo
+                        @if (sortKey == "complejo")
+                        {
+                            <i class="bi @(sortDir == "asc" ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                        }
+                    </a>
+                </th>
+                <th>
+                    <a class="th-sort"
+                       asp-action="Index"
+                       asp-route-sort="estado"
+                       asp-route-dir="@nextEstado"
+                       asp-route-page="1"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-nombre="@filtroNombre"
+                       asp-route-complejo="@filtroComplejo"
+                       asp-route-estado="@filtroEstado">
+                        Estado
+                        @if (sortKey == "estado")
+                        {
+                            <i class="bi @(sortDir == "asc" ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                        }
+                    </a>
+                </th>
+                <th class="text-nowrap">
+                    <a class="th-sort"
+                       asp-action="Index"
+                       asp-route-sort="area"
+                       asp-route-dir="@nextArea"
+                       asp-route-page="1"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-nombre="@filtroNombre"
+                       asp-route-complejo="@filtroComplejo"
+                       asp-route-estado="@filtroEstado">
+                        Área (m²)
+                        @if (sortKey == "area")
+                        {
+                            <i class="bi @(sortDir == "asc" ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                        }
+                    </a>
+                </th>
+                <th class="text-nowrap">
+                    <a class="th-sort"
+                       asp-action="Index"
+                       asp-route-sort="pm2"
+                       asp-route-dir="@nextPm2"
+                       asp-route-page="1"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-nombre="@filtroNombre"
+                       asp-route-complejo="@filtroComplejo"
+                       asp-route-estado="@filtroEstado">
+                        Precio/m²
+                        @if (sortKey == "pm2")
+                        {
+                            <i class="bi @(sortDir == "asc" ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                        }
+                    </a>
+                </th>
+                <th class="text-nowrap">
+                    <a class="th-sort"
+                       asp-action="Index"
+                       asp-route-sort="precio"
+                       asp-route-dir="@nextPrecio"
+                       asp-route-page="1"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-nombre="@filtroNombre"
+                       asp-route-complejo="@filtroComplejo"
+                       asp-route-estado="@filtroEstado">
+                        Precio
+                        @if (sortKey == "precio")
+                        {
+                            <i class="bi @(sortDir == "asc" ? "bi-arrow-up" : "bi-arrow-down")"></i>
+                        }
+                    </a>
+                </th>
+                <th class="td-center">Acciones</th>
             </tr>
+        </thead>
+        <tbody>
+            @if (Model?.Items != null && Model.Items.Any())
+            {
+                foreach (var item in Model.Items)
+                {
+                    var complejo = string.IsNullOrWhiteSpace(item.Complejo) ? "—" : item.Complejo;
+                    var estado = item.Estado?.Trim();
+
+                    string estadoHtml;
+                    if (string.Equals(estado, "Disponible", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        estadoHtml = "<span class=\"badge-state state-available\">Disponible</span>";
+                    }
+                    else if (string.Equals(estado, "Ocupada", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        estadoHtml = "<span class=\"badge-state state-occupied\">Ocupada</span>";
+                    }
+                    else if (string.Equals(estado, "Reservada", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        estadoHtml = "<span class=\"badge-state state-reserved\">Reservada</span>";
+                    }
+                    else
+                    {
+                        estadoHtml = $"<span class=\"badge-state\" style=\"background:#eef1f4;color:#4b5563;border-color:#e5e7eb;\">{(string.IsNullOrWhiteSpace(estado) ? "—" : estado)}</span>";
+                    }
+
+                    <tr>
+                        <td class="td-truncate" title="@item.Nombre">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="link-accent">@item.Nombre</a>
+                        </td>
+                        <td class="td-truncate" title="@complejo">@complejo</td>
+                        <td>@Html.Raw(estadoHtml)</td>
+
+                        <td class="text-nowrap">@(item.AreaM2.HasValue? item.AreaM2.Value.ToString("N2") : "—")</td>
+                        <td class="text-nowrap">@(item.PrecioAlquilerPorM2.HasValue ? "$ " + item.PrecioAlquilerPorM2.Value.ToString("N2") : "—")</td>
+                        <td class="text-nowrap">@(item.Precio.HasValue ? "$ " + item.Precio.Value.ToString("N2") : "—")</td>
+
+                        <td class="td-center">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn-icon details" title="Detalles" aria-label="Detalles"><i class="bi bi-eye"></i></a>
+                            @if (rol == "Administrador")
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon edit" title="Editar" aria-label="Editar"><i class="bi bi-pencil-square"></i></a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn-icon delete" title="Eliminar" aria-label="Eliminar"><i class="bi bi-trash3"></i></a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="7" class="text-center text-muted py-4">No hay bodegas que coincidan con el filtro.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<nav aria-label="Paginación" class="pager-bar mt-2">
+    <div class="small text-muted pager-left">
+        Mostrando @startRow – @endRow de @Model.TotalItems
+    </div>
+
+    <form method="get" class="d-flex align-items-center gap-2 pager-center">
+        <label class="small text-muted mb-0" for="pageSizeSelect">Pág.</label>
+        <select id="pageSizeSelect" name="pageSize" class="form-select form-select-sm" onchange="this.form.submit()">
+            @{
+                var sizes = new[] { 5, 10, 25, 50, 100 };
+            }
+            @foreach (var s in sizes)
+            {
+                if (Model.PageSize == s)
+                {
+                    <option value="@s" selected="selected">@s</option>
+                }
+                else
+                {
+                    <option value="@s">@s</option>
+                }
+            }
+        </select>
+
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="nombre" value="@filtroNombre" />
+        <input type="hidden" name="complejo" value="@filtroComplejo" />
+        <input type="hidden" name="estado" value="@filtroEstado" />
+        <input type="hidden" name="sort" value="@sortKey" />
+        <input type="hidden" name="dir" value="@sortDir" />
+    </form>
+
+    <ul class="pagination mb-0 pager-right">
+        <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-page="@(Model.Page - 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-nombre="@filtroNombre"
+               asp-route-complejo="@filtroComplejo"
+               asp-route-estado="@filtroEstado"
+               asp-route-sort="@sortKey"
+               asp-route-dir="@sortDir">Anterior</a>
+        </li>
+
+        @for (int p = 1; p <= totalPages; p++)
+        {
+            <li class="page-item @(p == Model.Page ? "active" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-page="@p"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-nombre="@filtroNombre"
+                   asp-route-complejo="@filtroComplejo"
+                   asp-route-estado="@filtroEstado"
+                   asp-route-sort="@sortKey"
+                   asp-route-dir="@sortDir">@p</a>
+            </li>
         }
-    </tbody>
-</table>
+
+        <li class="page-item @(Model.Page >= totalPages ? "disabled" : "")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-page="@(Model.Page + 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-nombre="@filtroNombre"
+               asp-route-complejo="@filtroComplejo"
+               asp-route-estado="@filtroEstado"
+               asp-route-sort="@sortKey"
+               asp-route-dir="@sortDir">Siguiente</a>
+        </li>
+    </ul>
+</nav>

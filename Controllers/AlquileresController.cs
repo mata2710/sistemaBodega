@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Hosting; // <- para IWebHostEnvironment
+using Microsoft.AspNetCore.Hosting; // IWebHostEnvironment
 using SistemaBodega.Data;
 using SistemaBodega.Models;
 
@@ -23,19 +23,114 @@ namespace SistemaBodega.Controllers
             _env = env;
         }
 
-        // GET: Alquileres
-        public async Task<IActionResult> Index()
+        // =========================================================
+        // GET: Alquileres (Index con paginación + búsqueda + filtros + orden)
+        // =========================================================
+        public async Task<IActionResult> Index(
+            int page = 1,
+            int pageSize = 10,
+            string? q = null,
+            bool? activos = null,
+            bool? renovacion = null,
+            string? sort = null,
+            string dir = "desc")
         {
+            // Normaliza page y pageSize
+            if (page < 1) page = 1;
+            var allowed = new[] { 5, 10, 25, 50, 100 };
+            if (!allowed.Contains(pageSize)) pageSize = 10;
+
             var query = _context.Alquileres
                 .AsNoTracking()
                 .Include(a => a.Bodega)
                 .Include(a => a.Cliente)
-                .OrderBy(a => a.FechaInicio);
+                .AsQueryable();
 
-            return View(await query.ToListAsync());
+            // Búsqueda libre
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.Trim();
+                query = query.Where(a =>
+                    (a.Cliente != null && (
+                        a.Cliente.Nombre.Contains(q) ||
+                        (a.Cliente.Identificacion != null && a.Cliente.Identificacion.Contains(q))
+                    )) ||
+                    (a.Bodega != null && (
+                        a.Bodega.Nombre.Contains(q) ||
+                        (a.Bodega.Ubicacion != null && a.Bodega.Ubicacion.Contains(q))
+                    ))
+                );
+            }
+
+            // Filtros rápidos
+            if (activos.HasValue)
+                query = query.Where(a => a.Activo == activos.Value);
+
+            if (renovacion.HasValue)
+                query = query.Where(a => a.RenovacionAutomatica == renovacion.Value);
+
+            // Ordenación
+            bool asc = string.Equals(dir, "asc", StringComparison.OrdinalIgnoreCase);
+            switch (sort)
+            {
+                case "cliente":
+                    query = asc ? query.OrderBy(a => a.Cliente.Nombre)
+                                : query.OrderByDescending(a => a.Cliente.Nombre);
+                    break;
+                case "bodega":
+                    query = asc ? query.OrderBy(a => a.Bodega.Nombre)
+                                : query.OrderByDescending(a => a.Bodega.Nombre);
+                    break;
+                case "inicio":
+                    query = asc ? query.OrderBy(a => a.FechaInicio)
+                                : query.OrderByDescending(a => a.FechaInicio);
+                    break;
+                case "fin":
+                    query = asc ? query.OrderBy(a => a.FechaFin)
+                                : query.OrderByDescending(a => a.FechaFin);
+                    break;
+                case "renov":
+                    query = asc ? query.OrderBy(a => a.RenovacionAutomatica)
+                                : query.OrderByDescending(a => a.RenovacionAutomatica);
+                    break;
+                case "estado":
+                    query = asc ? query.OrderBy(a => a.Activo)
+                                : query.OrderByDescending(a => a.Activo);
+                    break;
+                default:
+                    // Por defecto: más recientes primero por inicio
+                    query = query.OrderByDescending(a => a.FechaInicio);
+                    break;
+            }
+
+            var total = await query.CountAsync();
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var vm = new PagedResult<Alquiler>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = total
+            };
+
+            // Mantener estado en la vista
+            ViewBag.q = q;
+            ViewBag.ActivosFilter = activos;
+            ViewBag.RenovFilter = renovacion;
+            ViewBag.Sort = sort;
+            ViewBag.Dir = asc ? "asc" : "desc";
+
+            return View(vm);
         }
 
+        // =========================================================
         // GET: Alquileres/Details/5
+        // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -50,7 +145,9 @@ namespace SistemaBodega.Controllers
             return View(alquiler);
         }
 
+        // =========================================================
         // GET: Alquileres/Create
+        // =========================================================
         public async Task<IActionResult> Create()
         {
             if (HttpContext.Session.GetString("Rol") != "Administrador")
@@ -60,7 +157,9 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
-        // Endpoint para autocompletar datos desde Bodega (AreaM2, PrecioPorM2 y precio calculado)
+        // =========================================================
+        // API: Datos de Bodega para autocompletar
+        // =========================================================
         [HttpGet]
         public async Task<IActionResult> GetBodegaData(int id)
         {
@@ -79,7 +178,9 @@ namespace SistemaBodega.Controllers
             return Json(b);
         }
 
+        // =========================================================
         // POST: Alquileres/Create
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ClienteId,BodegaId,FechaInicio,FechaFin,AreaM2,PrecioPorM2,PrecioAlquiler,AumentoAnualPorcentaje,Observaciones,RenovacionAutomatica,Activo,ContratoArchivo")] Alquiler model)
@@ -118,7 +219,7 @@ namespace SistemaBodega.Controllers
                 return View(model);
             }
 
-            // Archivo de contrato (PDF/imagen) -> guardar ruta
+            // Archivo de contrato -> guardar ruta
             await GuardarContratoSiCorresponde(model);
 
             _context.Alquileres.Add(model);
@@ -127,7 +228,9 @@ namespace SistemaBodega.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // =========================================================
         // GET: Alquileres/Edit/5
+        // =========================================================
         public async Task<IActionResult> Edit(int? id)
         {
             if (HttpContext.Session.GetString("Rol") != "Administrador")
@@ -142,7 +245,9 @@ namespace SistemaBodega.Controllers
             return View(alquiler);
         }
 
+        // =========================================================
         // POST: Alquileres/Edit/5
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,ClienteId,BodegaId,FechaInicio,FechaFin,AreaM2,PrecioPorM2,PrecioAlquiler,AumentoAnualPorcentaje,Observaciones,RenovacionAutomatica,Activo,ContratoArchivo")] Alquiler model)
@@ -205,7 +310,9 @@ namespace SistemaBodega.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // =========================================================
         // GET: Alquileres/Delete/5
+        // =========================================================
         public async Task<IActionResult> Delete(int? id)
         {
             if (HttpContext.Session.GetString("Rol") != "Administrador")
@@ -224,7 +331,9 @@ namespace SistemaBodega.Controllers
             return View(alquiler);
         }
 
+        // =========================================================
         // POST: Alquileres/Delete/5
+        // =========================================================
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -251,7 +360,7 @@ namespace SistemaBodega.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ===================== helpers =====================
+        // ===================== Helpers =====================
         private async Task CargarCombosAsync(int? clienteId = null, int? bodegaId = null)
         {
             var clientes = await _context.Clientes
@@ -316,3 +425,4 @@ namespace SistemaBodega.Controllers
         }
     }
 }
+

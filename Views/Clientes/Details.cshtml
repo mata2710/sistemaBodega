@@ -1,36 +1,280 @@
 ﻿@model SistemaBodega.Models.Cliente
+@using Microsoft.AspNetCore.Http
 
 @{
-    ViewData["Title"] = "Detalles del cliente";
+    ViewData["Title"] = "Cliente — Detalles";
+    var rol = Context?.Session?.GetString("Rol");
+
+    // Valores saneados
+    string? nombre = string.IsNullOrWhiteSpace(Model?.Nombre) ? null : Model!.Nombre;
+    string? cedula = string.IsNullOrWhiteSpace(Model?.Identificacion) ? null : Model!.Identificacion;
+    string? tel1 = string.IsNullOrWhiteSpace(Model?.Telefono) ? null : Model!.Telefono;
+    string? tel2 = string.IsNullOrWhiteSpace(Model?.TelefonoSecundario) ? null : Model!.TelefonoSecundario;
+    string? email = string.IsNullOrWhiteSpace(Model?.Email) ? null : Model!.Email;
+    string? rep = string.IsNullOrWhiteSpace(Model?.RepresentanteLegal) ? null : Model!.RepresentanteLegal;
+    string? act = string.IsNullOrWhiteSpace(Model?.Actividad) ? null : Model!.Actividad;
 }
 
-<h1 class="mt-3">Detalles del cliente</h1>
-<hr />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<dl class="row">
-    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Nombre)</dt>
-    <dd class="col-sm-9">@Html.DisplayFor(model => model.Nombre)</dd>
+<style>
+    /* ===== Estructura ===== */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D;
+    }
 
-    <dt class="col-sm-3">Cédula jurídica</dt>
-    <dd class="col-sm-9">@Html.DisplayFor(model => model.Identificacion)</dd>
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
 
-    <dt class="col-sm-3">Teléfono</dt>
-    <dd class="col-sm-9">@Html.DisplayFor(model => model.Telefono)</dd>
+    /* ===== Definición en rejilla ===== */
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem;
+    }
 
-    <dt class="col-sm-3">Teléfono secundario</dt>
-    <dd class="col-sm-9">@Html.DisplayFor(model => model.TelefonoSecundario)</dd>
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
 
-    <dt class="col-sm-3">Correo electrónico</dt>
-    <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+        .dl-grid dd {
+            margin: 0;
+        }
 
-    <dt class="col-sm-3">Representante legal</dt>
-    <dd class="col-sm-9">@Html.DisplayFor(model => model.RepresentanteLegal)</dd>
+    @@media (max-width:768px) {
+        .dl-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 
-    <dt class="col-sm-3">Actividad de la empresa</dt>
-    <dd class="col-sm-9">@Html.DisplayFor(model => model.Actividad)</dd>
-</dl>
+    /* ===== Acciones (Editar amarillo) ===== */
+    .btn-edit {
+        background-color: #FFD700 !important;
+        color: #111 !important;
+        border: 0 !important;
+    }
 
-<div class="mt-4">
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning text-white">Editar</a>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
+        .btn-edit:hover {
+            filter: brightness(.95);
+            color: #111 !important;
+            background-color: #E6C200 !important;
+        }
+
+        .btn-edit:focus, .btn-edit:active {
+            color: #111 !important;
+            background-color: #E6C200 !important;
+            box-shadow: 0 0 0 .2rem rgba(255,215,0,.25);
+        }
+
+    /* ===== Botones de Contacto ===== */
+    .btn-call {
+        background: #97B067 !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-call:hover {
+            background: #869D5C !important; /* un poco más oscuro */
+            color: #fff !important;
+        }
+
+        .btn-call:focus {
+            box-shadow: 0 0 0 .2rem rgba(151,176,103,.35) !important;
+        }
+
+    .btn-email {
+        background: #EAC8A6 !important; /* color solicitado */
+        color: #3d2b12 !important; /* texto oscuro legible */
+        border: 1px solid #EAC8A6 !important;
+    }
+
+        .btn-email:hover {
+            background: #DDB88F !important; /* tono levemente más oscuro */
+            color: #3d2b12 !important;
+            border-color: #DDB88F !important;
+        }
+
+        .btn-email:focus {
+            box-shadow: 0 0 0 .2rem rgba(234,200,166,.45) !important;
+        }
+
+    /* ===== Espacio entre ícono y texto ===== */
+    .kv {
+        opacity: .9;
+        margin-right: .4rem;
+    }
+
+    /* ===== Link ===== */
+    .link-accent {
+        color: #00809D;
+        text-decoration: none;
+    }
+
+        .link-accent:hover {
+            color: #00748A;
+            text-decoration: underline;
+        }
+
+    /* ===== Badge "Pendiente" ===== */
+    .badge-pending {
+        background: #EAC8A6;
+        color: #3d2b12;
+        border: 1px solid #EAC8A6;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3 page-tools">
+    <h2 class="mb-0">Cliente — Detalles</h2>
+    <div class="d-flex gap-2">
+        @if (rol == "Administrador")
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-sm btn-edit">
+                <i class="bi bi-pencil-square me-1"></i> Editar
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left-short me-1"></i> Volver al listado
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Resumen</div>
+                <dl class="dl-grid">
+                    <dt><i class="kv bi bi-building"></i>Nombre</dt>
+                    <dd>
+                        @if (nombre == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @nombre
+                        }
+                    </dd>
+
+                    <dt><i class="kv bi bi-hash"></i>Cédula jurídica</dt>
+                    <dd>
+                        @if (cedula == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @cedula
+                        }
+                    </dd>
+
+                    <dt><i class="kv bi bi-person-badge"></i>Representante legal</dt>
+                    <dd>
+                        @if (rep == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @rep
+                        }
+                    </dd>
+
+                    <dt><i class="kv bi bi-briefcase"></i>Actividad</dt>
+                    <dd>
+                        @if (act == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @act
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna lateral -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Contacto</div>
+                <dl class="dl-grid">
+                    <dt><i class="kv bi bi-telephone"></i>Teléfono</dt>
+                    <dd>
+                        @if (tel1 == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            <a href="tel:@tel1" class="link-accent">@tel1</a>
+                        }
+                    </dd>
+
+                    <dt><i class="kv bi bi-telephone-plus"></i>Teléfono secundario</dt>
+                    <dd>
+                        @if (tel2 == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            <a href="tel:@tel2" class="link-accent">@tel2</a>
+                        }
+                    </dd>
+
+                    <dt><i class="kv bi bi-envelope"></i>Correo electrónico</dt>
+                    <dd>
+                        @if (email == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            <a href="mailto:@email" class="link-accent">@email</a>
+                        }
+                    </dd>
+                </dl>
+
+                <div class="d-grid gap-2 mt-2">
+                    @if (email != null)
+                    {
+                        <a href="mailto:@email" class="btn btn-sm btn-email">
+                            <i class="bi bi-envelope me-1"></i> Enviar correo
+                        </a>
+                    }
+                    @if (tel1 != null)
+                    {
+                        <a href="tel:@tel1" class="btn btn-sm btn-call">
+                            <i class="bi bi-telephone-outbound me-1"></i> Llamar
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

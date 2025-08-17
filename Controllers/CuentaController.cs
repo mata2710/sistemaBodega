@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;              // <-- agregado (para guardar archivos)
 using SistemaBodega.Data;
 using SistemaBodega.Models;
 using SistemaBodega.Helpers; // ✅ Para usar EmailProvidersSettings
 using Microsoft.Extensions.Options; // ✅ Para inyectar configuración SMTP
 using System.Net.Mail;
 using System.Net;
+using System.IO;                              // <-- agregado (FileStream/Path)
 
 namespace SistemaBodega.Controllers
 {
@@ -14,11 +16,16 @@ namespace SistemaBodega.Controllers
     {
         private readonly SistemaBodegaContext _context;
         private readonly EmailProvidersSettings _emailSettings; // ✅ Configuración SMTP inyectada
+        private readonly IWebHostEnvironment _env;             // <-- agregado
 
-        public CuentaController(SistemaBodegaContext context, IOptions<EmailProvidersSettings> emailSettings)
+        public CuentaController(
+            SistemaBodegaContext context,
+            IOptions<EmailProvidersSettings> emailSettings,
+            IWebHostEnvironment env)                           // <-- agregado
         {
             _context = context;
             _emailSettings = emailSettings.Value; // ✅ Leer configuración desde appsettings.json
+            _env = env;                            // <-- agregado
         }
 
         private bool UsuarioAutenticado()
@@ -100,7 +107,7 @@ namespace SistemaBodega.Controllers
         }
 
         [HttpPost]
-        public IActionResult ActualizarPerfil(int id, string nombreCompleto, string correo)
+        public IActionResult ActualizarPerfil(int id, string nombreCompleto, string correo, IFormFile? Foto)  // <-- agregado IFormFile Foto
         {
             var usuario = _context.Usuarios.FirstOrDefault(u => u.Id == id);
             if (usuario == null)
@@ -114,6 +121,41 @@ namespace SistemaBodega.Controllers
 
             usuario.NombreCompleto = nombreCompleto;
             usuario.Correo = correo;
+
+            // === Manejo de imagen (nuevo) ===
+            if (Foto != null && Foto.Length > 0)
+            {
+                if (!Foto.ContentType.StartsWith("image/", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["Error"] = "El archivo seleccionado debe ser una imagen.";
+                    return RedirectToAction("PerfilUsuario");
+                }
+
+                var carpeta = Path.Combine(_env.WebRootPath, "img", "usuarios");
+                if (!Directory.Exists(carpeta))
+                    Directory.CreateDirectory(carpeta);
+
+                // eliminar foto anterior si existe
+                if (!string.IsNullOrWhiteSpace(usuario.FotoFilePath))
+                {
+                    var rutaVieja = Path.Combine(_env.WebRootPath, usuario.FotoFilePath);
+                    if (System.IO.File.Exists(rutaVieja))
+                        System.IO.File.Delete(rutaVieja);
+                }
+
+                // guardar nueva
+                var nombreArchivo = $"{System.Guid.NewGuid():N}{Path.GetExtension(Foto.FileName)}";
+                var rutaFisica = Path.Combine(carpeta, nombreArchivo);
+
+                using (var fs = new FileStream(rutaFisica, FileMode.Create))
+                {
+                    Foto.CopyTo(fs);
+                }
+
+                // ruta relativa para BD
+                usuario.FotoFilePath = Path.Combine("img", "usuarios", nombreArchivo).Replace("\\", "/");
+            }
+
             _context.SaveChanges();
 
             TempData["Mensaje"] = "Perfil actualizado correctamente.";
@@ -218,4 +260,3 @@ namespace SistemaBodega.Controllers
         public IActionResult AccesoDenegado() => View();
     }
 }
-

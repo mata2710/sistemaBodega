@@ -3,25 +3,136 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- Bootstrap Icons (por si no están en el layout ya) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<div class="container py-4 text-white">
-    <h2 class="mb-4">Configuración del Sistema</h2>
+<style>
+    /* ===== Estructura común ===== */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D;
+    }
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <a asp-controller="CarruselImagen" asp-action="Index" class="btn btn-outline-primary w-100 py-3">
-                <i class="bi bi-images fs-4 me-2"></i> Administrar Carrusel
-            </a>
-        </div>
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
 
-        <div class="col-md-4">
-            <a asp-controller="Usuarios" asp-action="Index" class="btn btn-outline-secondary w-100 py-3">
-                <i class="bi bi-people fs-4 me-2"></i> Administrar Usuarios
-            </a>
-        </div>
+    .page-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+    }
 
-        <!-- Agregá más configuraciones aquí si querés -->
-    </div>
+        .page-tools .btn {
+            margin-top: 0 !important;
+        }
+
+    /* ===== Botones coherentes ===== */
+    .btn-accent {
+        background: #00809D !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-accent:hover {
+            background: #00748A !important;
+        }
+
+    /* Amarillo (no se pone azul en hover/focus/active) */
+    .btn-edit {
+        background: #FFD700 !important;
+        color: #111 !important;
+        border: 0 !important;
+    }
+
+        .btn-edit:hover,
+        .btn-edit:focus,
+        .btn-edit:active,
+        .btn-edit:focus-visible {
+            background: #FFD700 !important; /* mantener amarillo */
+            color: #111 !important;
+            border-color: #FFD700 !important;
+            filter: brightness(.95);
+            box-shadow: 0 0 0 .2rem rgba(255,215,0,.25) !important; /* realce suave en amarillo */
+        }
+
+    /* ===== Tarjetas de configuración ===== */
+    .tile-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #F0F7F9;
+        color: #00809D;
+        border: 1px solid #E4EDF0;
+        font-size: 1.25rem;
+    }
+
+    .tile-title {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .tile-desc {
+        margin: 0;
+        color: #6c757d;
+        font-size: .925rem;
+    }
+</style>
+
+<div class="page-tools mt-3 mb-3">
+    <h2 class="mb-0">Configuración del sistema</h2>
 </div>
+
+<div class="row g-3">
+    <!-- Tarjeta: Carrusel -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="tile-icon"><i class="bi bi-images"></i></div>
+                    <div>
+                        <h5 class="tile-title">Imágenes del carrusel</h5>
+                        <p class="tile-desc">Subí, editá o eliminá imágenes mostradas en el inicio.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="CarruselImagen" asp-action="Index" class="btn btn-edit">
+                        <i class="bi bi-sliders me-1"></i> Administrar carrusel
+                    </a>
+                    <a asp-controller="CarruselImagen" asp-action="Create" class="btn btn-outline-secondary">
+                        <i class="bi bi-plus-lg me-1"></i> Agregar imagen
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: Usuarios -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="tile-icon"><i class="bi bi-people"></i></div>
+                    <div>
+                        <h5 class="tile-title">Usuarios</h5>
+                        <p class="tile-desc">Gestioná permisos y datos de acceso del personal.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="Admin" asp-action="Usuarios" class="btn btn-edit">
+                        <i class="bi bi-person-gear me-1"></i> Administrar usuarios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Podés agregar más tarjetas de configuración aquí -->
+</div>
+

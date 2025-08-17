@@ -17,5 +17,7 @@ public partial class Usuario
 
     public string? TokenRecuperacion { get; set; }
 
+    public string? FotoFilePath { get; set; }
+
     public virtual ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
 }

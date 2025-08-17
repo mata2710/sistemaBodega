@@ -19,32 +19,117 @@ namespace SistemaBodega.Controllers
             _context = context;
         }
 
-        // GET: Mantenimientos
-        public async Task<IActionResult> Index()
+        // =========================================================
+        // GET: Mantenimientos (filtros + paginación)
+        // /Mantenimientos?bodegaId=&tipo=&empresa=&desde=&hasta=&q=&page=1&pageSize=25
+        // =========================================================
+        public async Task<IActionResult> Index(
+            int? bodegaId,
+            string? tipo,
+            string? empresa,
+            DateTime? desde,
+            DateTime? hasta,
+            string? q,
+            int page = 1,
+            int pageSize = 25)
         {
-            var lista = await _context.Mantenimientos
-                                      .AsNoTracking()
-                                      .Include(m => m.Bodega)
-                                      .OrderByDescending(m => m.FechaMantenimiento)
-                                      .ToListAsync();
-            return View(lista);
+            if (page < 1) page = 1;
+            if (pageSize < 5) pageSize = 25;
+
+            var query = _context.Mantenimientos
+                .AsNoTracking()
+                .Include(m => m.Bodega)
+                .AsQueryable();
+
+            if (bodegaId.HasValue && bodegaId.Value > 0)
+                query = query.Where(m => m.IdBodega == bodegaId.Value);
+
+            if (!string.IsNullOrWhiteSpace(tipo))
+            {
+                var t = tipo.Trim();
+                query = query.Where(m => m.TipoMantenimiento != null && EF.Functions.Like(m.TipoMantenimiento, $"%{t}%"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(empresa))
+            {
+                var e = empresa.Trim();
+                query = query.Where(m => m.EmpresaResponsable != null && EF.Functions.Like(m.EmpresaResponsable, $"%{e}%"));
+            }
+
+            if (desde.HasValue)
+                query = query.Where(m => m.FechaMantenimiento >= desde.Value.Date);
+
+            if (hasta.HasValue)
+                query = query.Where(m => m.FechaMantenimiento <= hasta.Value.Date.AddDays(1).AddTicks(-1));
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var s = q.Trim();
+                query = query.Where(m =>
+                    (m.ComentariosAdministracion != null && EF.Functions.Like(m.ComentariosAdministracion, $"%{s}%")) ||
+                    (m.TipoMantenimiento != null && EF.Functions.Like(m.TipoMantenimiento, $"%{s}%")) ||
+                    (m.EmpresaResponsable != null && EF.Functions.Like(m.EmpresaResponsable, $"%{s}%")) ||
+                    (m.Bodega != null && (
+                        EF.Functions.Like(m.Bodega.Nombre, $"%{s}%") ||
+                        (m.Bodega.Ubicacion != null && EF.Functions.Like(m.Bodega.Ubicacion, $"%{s}%"))
+                    ))
+                );
+            }
+
+            // Para filtros de selects en la vista
+            ViewBag.BodegasFiltro = await _context.Bodegas
+                .AsNoTracking()
+                .OrderBy(b => b.Nombre)
+                .Select(b => new { b.Id, Nombre = b.Nombre + " - " + b.Ubicacion })
+                .ToListAsync();
+
+            // Mantener valores en la UI
+            ViewBag.FiltroBodegaId = bodegaId;
+            ViewBag.FiltroTipo = tipo;
+            ViewBag.FiltroEmpresa = empresa;
+            ViewBag.FiltroDesde = desde?.ToString("yyyy-MM-dd");
+            ViewBag.FiltroHasta = hasta?.ToString("yyyy-MM-dd");
+            ViewBag.FiltroQ = q;
+
+            var total = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(m => m.FechaMantenimiento)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var vm = new PagedResult<Mantenimiento>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = total
+            };
+
+            return View(vm);
         }
 
+        // =========================================================
         // GET: Mantenimientos/Details/5
+        // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
             var mantenimiento = await _context.Mantenimientos
-                                              .AsNoTracking()
-                                              .Include(m => m.Bodega)
-                                              .FirstOrDefaultAsync(m => m.Id == id);
+                .AsNoTracking()
+                .Include(m => m.Bodega)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (mantenimiento == null) return NotFound();
 
             return View(mantenimiento);
         }
 
+        // =========================================================
         // GET: Mantenimientos/Create
+        // =========================================================
         [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Create()
         {
@@ -52,7 +137,9 @@ namespace SistemaBodega.Controllers
             return View();
         }
 
+        // =========================================================
         // POST: Mantenimientos/Create
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizeRol("Administrador")]
@@ -68,7 +155,6 @@ namespace SistemaBodega.Controllers
             if (!string.IsNullOrWhiteSpace(mantenimiento.TipoMantenimiento) && mantenimiento.TipoMantenimiento.Length > 100)
                 ModelState.AddModelError(nameof(Mantenimiento.TipoMantenimiento), "Máximo 100 caracteres.");
 
-            // Si seleccionó una bodega (>0), verifico que exista
             if (mantenimiento.IdBodega > 0 &&
                 !await _context.Bodegas.AnyAsync(b => b.Id == mantenimiento.IdBodega))
             {
@@ -86,7 +172,9 @@ namespace SistemaBodega.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // =========================================================
         // GET: Mantenimientos/Edit/5
+        // =========================================================
         [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -99,7 +187,9 @@ namespace SistemaBodega.Controllers
             return View(mantenimiento);
         }
 
+        // =========================================================
         // POST: Mantenimientos/Edit/5
+        // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizeRol("Administrador")]
@@ -139,22 +229,27 @@ namespace SistemaBodega.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // =========================================================
         // GET: Mantenimientos/Delete/5
+        // =========================================================
         [AuthorizeRol("Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
             var mantenimiento = await _context.Mantenimientos
-                                              .AsNoTracking()
-                                              .Include(m => m.Bodega)
-                                              .FirstOrDefaultAsync(m => m.Id == id);
+                .AsNoTracking()
+                .Include(m => m.Bodega)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (mantenimiento == null) return NotFound();
 
             return View(mantenimiento);
         }
 
+        // =========================================================
         // POST: Mantenimientos/Delete/5
+        // =========================================================
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [AuthorizeRol("Administrador")]
@@ -178,10 +273,7 @@ namespace SistemaBodega.Controllers
                 .Select(b => new { b.Id, Nombre = b.Nombre + " - " + b.Ubicacion })
                 .ToListAsync();
 
-            // ViewBag para simplificar en la vista (asp-items="ViewBag.IdBodega")
             ViewBag.IdBodega = new SelectList(bodegas, "Id", "Nombre", seleccionada);
-            // Si prefieres ViewData, también quedaría disponible:
-            // ViewData["IdBodega"] = ViewBag.IdBodega;
         }
 
         private bool MantenimientoExists(int id) =>

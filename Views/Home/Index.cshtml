@@ -1,12 +1,102 @@
 ﻿@model List<SistemaBodega.Models.CarruselImagen>
+@using SistemaBodega.Models.ViewModels
+@using System.Linq
 
 @{
     ViewData["Title"] = "Inicio";
+
+    var usuarioNombre = ViewBag.UsuarioNombre as string ?? "Usuario";
+    var usuarioFoto = ViewBag.UsuarioFoto as string ?? Url.Content("~/img/perfil.jpg");
+
+    var mantenimientos = (ViewBag.MantenimientosProximos as List<MantenimientoItemVM>) ?? new List<MantenimientoItemVM>();
+    var contratos = (ViewBag.ContratosPorVencer as List<ContratoPorVencerVM>) ?? new List<ContratoPorVencerVM>();
+
+    // === Helpers para colorear por cercanía usando la fecha (string o DateTime) ===
+    DateTime today = DateTime.Today;
+
+    Func<object, int?> daysUntil = (obj) =>
+    {
+        if (obj == null) return null;
+
+        DateTime dt;
+
+        if (obj is DateTime d)
+        {
+            dt = d.Date;
+        }
+        else
+        {
+            var s = obj.ToString()?.Trim();
+            if (string.IsNullOrWhiteSpace(s)) return null;
+
+            // Intentar formatos comunes primero
+            string[] formats = { "yyyy-MM-dd", "dd/MM/yyyy", "dd-MM-yyyy", "MM/dd/yyyy", "M/d/yyyy", "d/M/yyyy", "d-M-yyyy" };
+            if (!DateTime.TryParseExact(s, formats, System.Globalization.CultureInfo.InvariantCulture,
+                                        System.Globalization.DateTimeStyles.None, out dt))
+            {
+                // Intento flexible con es-CR e invariant como fallback
+                if (!DateTime.TryParse(s, System.Globalization.CultureInfo.GetCultureInfo("es-CR"),
+                                       System.Globalization.DateTimeStyles.None, out dt))
+                {
+                    if (!DateTime.TryParse(s, System.Globalization.CultureInfo.InvariantCulture,
+                                           System.Globalization.DateTimeStyles.None, out dt))
+                    {
+                        return null; // no se pudo parsear
+                    }
+                }
+            }
+            dt = dt.Date;
+        }
+
+        return (int)(dt - today).TotalDays;
+    };
+
+    Func<object, string> badgeClassFor = (obj) =>
+    {
+        var d = daysUntil(obj);
+        if (!d.HasValue) return "";
+        if (d.Value <= 5) return "badge-critical"; // rojo
+        if (d.Value <= 15) return "badge-warning";  // amarillo
+        return "";                                   // normal
+    };
 }
 
-<!-- Bootstrap & Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<style>
+    /* --- Carrusel más delgado --- */
+    .home-carousel .carousel-inner,
+    .home-carousel .carousel-item,
+    .home-carousel .carousel-item img {
+        height: 260px; /* ajusta si lo querés aún más delgado */
+    }
+
+        .home-carousel .carousel-item img {
+            object-fit: cover;
+        }
+
+    /* Badges base */
+    .item-badge {
+        background: #EAF3EE;
+        color: #437057;
+        border: 1px solid #437057;
+        padding: .25rem .5rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        white-space: nowrap;
+    }
+    /* Rojo (<= 5 días) */
+    .badge-critical {
+        background: #FDECEA;
+        color: #B02A1C;
+        border: 1px solid #F3D0CA;
+    }
+    /* Amarillo (6 a 15 días) */
+    .badge-warning {
+        background: #FFF8E1;
+        color: #8B6C00;
+        border: 1px solid #FFE08A;
+    }
+</style>
 
 <div class="container-fluid">
     <div class="row">
@@ -23,8 +113,9 @@
 
         <!-- Main Content -->
         <div class="col-md-10 content">
-            <!-- Carrusel dinámico -->
-            <div id="carouselExampleIndicators" class="carousel slide mb-4" data-bs-ride="carousel">
+
+            <!-- Carrusel dinámico (más delgado) -->
+            <div id="carouselExampleIndicators" class="carousel slide mb-4 carousel-fade shadow-sm rounded-4 overflow-hidden home-carousel" data-bs-ride="carousel">
                 @if (Model != null && Model.Count > 0)
                 {
                     <div class="carousel-indicators">
@@ -50,8 +141,8 @@
 
                                 @if (!string.IsNullOrEmpty(Model[i].Titulo))
                                 {
-                                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
-                                        <h5>@Model[i].Titulo</h5>
+                                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded px-3 py-2">
+                                        <h5 class="mb-0">@Model[i].Titulo</h5>
                                     </div>
                                 }
                             </div>
@@ -74,58 +165,123 @@
             </div>
 
             <!-- Accesos rápidos -->
-            <div class="row g-4">
+            <div class="row g-4 mb-3">
                 <div class="col-md-4">
                     <a asp-controller="Clientes" asp-action="Index">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-list"></i>
-                            <div>Listar Clientes</div>
+                            <div class="fw-semibold">Listar Clientes</div>
                         </div>
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a asp-controller="Clientes" asp-action="Create">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-plus-square"></i>
-                            <div>Crear Cliente</div>
+                            <div class="fw-semibold">Crear Cliente</div>
                         </div>
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a asp-controller="Bodegas" asp-action="Index">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-box-seam"></i>
-                            <div>Ver Bodegas</div>
+                            <div class="fw-semibold">Ver Bodegas</div>
                         </div>
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a asp-controller="Alquileres" asp-action="Index">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-journal-text"></i>
-                            <div>Alquileres</div>
+                            <div class="fw-semibold">Alquileres</div>
                         </div>
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a asp-controller="Mantenimientos" asp-action="Index">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-wrench-adjustable"></i>
-                            <div>Mantenimientos</div>
+                            <div class="fw-semibold">Mantenimientos</div>
                         </div>
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a href="/Home/PerfilUsuario">
                         <div class="tile tile-yellow">
-                            <i class="bi bi-person-circle"></i>
-                            <div>Perfil de Usuario</div>
+                            <div class="fw-semibold">Perfil de Usuario</div>
                         </div>
                     </a>
                 </div>
             </div>
-        </div>
+
+            <!-- FILA: Mantenimientos y Contratos -->
+            <div class="row g-3">
+                <!-- Mantenimientos próximos -->
+                <div class="col-12 col-lg-6">
+                    <div class="card list-card shadow-sm">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="mb-0">Mantenimientos próximos</h5>
+                                <small class="text-muted">Tareas pendientes para esta semana</small>
+                            </div>
+                            <a asp-controller="Mantenimientos" asp-action="Index" class="btn btn-sm btn-outline-dark">Ver todos</a>
+                        </div>
+
+                        <ul class="list-group list-group-flush">
+                            @if (mantenimientos.Any())
+                            {
+                                foreach (var m in mantenimientos)
+                                {
+                                    <li class="list-group-item d-flex align-items-center justify-content-between">
+                                        <span class="fw-semibold">@m.Titulo</span>
+                                        <!-- Usamos m.FechaCorta (string) para calcular color -->
+                                        <span class="item-badge @badgeClassFor(m.FechaCorta)">
+                                            @m.Dia @m.FechaCorta
+                                        </span>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item text-muted">No hay mantenimientos próximos.</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contratos por vencer -->
+                <div class="col-12 col-lg-6">
+                    <div class="card list-card shadow-sm">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="mb-0">Contratos por vencer</h5>
+                                <small class="text-muted">Próximos 15 días</small>
+                            </div>
+                            <a asp-controller="Alquileres" asp-action="Index" class="btn btn-sm btn-outline-dark">Ver todos</a>
+                        </div>
+
+                        <ul class="list-group list-group-flush">
+                            @if (contratos.Any())
+                            {
+                                foreach (var c in contratos)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="fw-semibold">@c.Cliente — Bodega @c.Bodega</span><br />
+                                            <small class="text-muted">Vence: @c.VenceEl</small>
+                                        </div>
+                                        <!-- Usamos c.VenceEl (string) para calcular color -->
+                                        <span class="item-badge @badgeClassFor(c.VenceEl)">
+                                            @c.VenceEl
+                                        </span>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item text-muted">No hay contratos próximos a vencer.</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- /Main -->
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

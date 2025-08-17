@@ -2,65 +2,318 @@
 
 @{
     ViewData["Title"] = "Crear cliente";
+
+    // Valores iniciales para el preview (en Create estarán vacíos)
+    string? nombre = string.IsNullOrWhiteSpace(Model?.Nombre) ? null : Model!.Nombre;
+    string? cedula = string.IsNullOrWhiteSpace(Model?.Identificacion) ? null : Model!.Identificacion;
+    string? tel1 = string.IsNullOrWhiteSpace(Model?.Telefono) ? null : Model!.Telefono;
+    string? tel2 = string.IsNullOrWhiteSpace(Model?.TelefonoSecundario) ? null : Model!.TelefonoSecundario;
+    string? email = string.IsNullOrWhiteSpace(Model?.Email) ? null : Model!.Email;
+    string? rep = string.IsNullOrWhiteSpace(Model?.RepresentanteLegal) ? null : Model!.RepresentanteLegal;
+    string? act = string.IsNullOrWhiteSpace(Model?.Actividad) ? null : Model!.Actividad;
 }
 
-<h1 class="mt-3">Crear cliente</h1>
-<hr />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+<style>
+    /* ===== Estructura y layout ===== */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D;
+    }
 
-            <div class="mb-3">
-                <label asp-for="Nombre" class="form-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
+
+    .page-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+    }
+
+        .page-tools .btn {
+            margin-top: 0 !important;
+        }
+
+    /* ===== Botones ===== */
+    .btn-save {
+        background: #437057 !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-save:hover {
+            filter: brightness(.95);
+            color: #fff !important;
+            background: #3a614c !important;
+        }
+
+        .btn-save:focus {
+            box-shadow: 0 0 0 .2rem rgba(67,112,87,.25) !important;
+        }
+
+    .btn-cancel {
+        background: #DC3C22 !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-cancel:hover {
+            background: #C3341E !important;
+            color: #fff !important;
+        }
+
+        .btn-cancel:focus {
+            box-shadow: 0 0 0 .2rem rgba(220,60,34,.25) !important;
+        }
+
+    /* ===== Input groups con iconos ===== */
+    .input-group-text i {
+        opacity: .85;
+    }
+
+    /* ===== Grid para preview ===== */
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem;
+    }
+
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .dl-grid dd {
+            margin: 0;
+        }
+    /* Responsive (si activas fuera de comentario, recuerda @@media en Razor) */
+    /* @@media (max-width:768px){ .dl-grid{ grid-template-columns:1fr; } } */
+
+    /* ===== Badge "Pendiente" ===== */
+    .badge-pending {
+        background: #EAC8A6;
+        color: #3d2b12;
+        border: 1px solid #EAC8A6;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+    }
+</style>
+
+<div class="page-tools mt-3 mb-3">
+    <h2 class="mb-0">Crear cliente</h2>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left-short"></i> Volver al listado
+    </a>
+</div>
+
+<div class="row g-3">
+    <!-- Columna izquierda: formulario -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form asp-action="Create" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger rounded-3 mb-3"
+                         role="alert"
+                         style="display:@(ViewData.ModelState.IsValid ? "none" : "block")">
+                        Revisa los campos marcados en rojo.
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label">Nombre comercial / Razón social</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-building"></i></span>
+                            <input asp-for="Nombre" class="form-control form-control-lg" id="inNombre" placeholder="Ej.: Industrias ABC S.A." autocomplete="organization" />
+                        </div>
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Identificacion" class="form-label">Cédula jurídica</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                <input asp-for="Identificacion" class="form-control form-control-lg" id="inCedula" placeholder="3-101-123456" inputmode="numeric" />
+                            </div>
+                            <div class="form-text">Formato sugerido: #-###-######</div>
+                            <span asp-validation-for="Identificacion" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Actividad" class="form-label">Actividad de la empresa</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                                <input asp-for="Actividad" class="form-control form-control-lg" id="inAct" placeholder="Ej.: Almacenaje y logística" />
+                            </div>
+                            <span asp-validation-for="Actividad" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label asp-for="RepresentanteLegal" class="form-label">Representante legal</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                <input asp-for="RepresentanteLegal" class="form-control form-control-lg" id="inRep" placeholder="Nombre completo" autocomplete="name" />
+                            </div>
+                            <span asp-validation-for="RepresentanteLegal" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Correo electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" class="form-control form-control-lg" id="inEmail" placeholder="contacto@empresa.com" autocomplete="email" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label asp-for="Telefono" class="form-label">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input asp-for="Telefono" class="form-control form-control-lg" id="inTel1" placeholder="8888-8888" inputmode="tel" />
+                            </div>
+                            <span asp-validation-for="Telefono" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="TelefonoSecundario" class="form-label">Teléfono secundario</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone-plus"></i></span>
+                                <input asp-for="TelefonoSecundario" class="form-control form-control-lg" id="inTel2" placeholder="Opcional" inputmode="tel" />
+                            </div>
+                            <span asp-validation-for="TelefonoSecundario" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button type="submit" class="btn btn-save btn-lg">
+                            <i class="bi bi-check2"></i> Guardar cliente
+                        </button>
+                        <a asp-action="Index" class="btn btn-cancel btn-lg">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
+        </div>
+    </div>
 
-            <div class="mb-3">
-                <label asp-for="Identificacion" class="form-label">Cédula jurídica</label>
-                <input asp-for="Identificacion" class="form-control" />
-                <span asp-validation-for="Identificacion" class="text-danger"></span>
-            </div>
+    <!-- Columna derecha: preview en vivo -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Resumen (preview)</div>
+                <dl class="dl-grid">
+                    <dt>Nombre</dt>
+                    <dd id="pvNombre">
+                        @if (nombre == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Telefono" class="form-label">Teléfono</label>
-                    <input asp-for="Telefono" class="form-control" />
-                    <span asp-validation-for="Telefono" class="text-danger"></span>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label asp-for="TelefonoSecundario" class="form-label">Teléfono secundario</label>
-                    <input asp-for="TelefonoSecundario" class="form-control" />
-                    <span asp-validation-for="TelefonoSecundario" class="text-danger"></span>
-                </div>
-            </div>
+                            @nombre
+                        }
+                    </dd>
 
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">Correo electrónico</label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
+                    <dt>Cédula jurídica</dt>
+                    <dd id="pvCedula">
+                        @if (cedula == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
 
-            <div class="mb-3">
-                <label asp-for="RepresentanteLegal" class="form-label">Representante legal</label>
-                <input asp-for="RepresentanteLegal" class="form-control" />
-                <span asp-validation-for="RepresentanteLegal" class="text-danger"></span>
-            </div>
+                            @cedula
+                        }
+                    </dd>
 
-            <div class="mb-3">
-                <label asp-for="Actividad" class="form-label">Actividad de la empresa</label>
-                <input asp-for="Actividad" class="form-control" />
-                <span asp-validation-for="Actividad" class="text-danger"></span>
-            </div>
+                    <dt>Teléfono</dt>
+                    <dd id="pvTel1">
+                        @if (tel1 == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
 
-            <div class="d-flex gap-2 mt-2">
-                <button type="submit" class="btn btn-primary">Crear</button>
-                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+                            @tel1
+                        }
+                    </dd>
+
+                    <dt>Teléfono secundario</dt>
+                    <dd id="pvTel2">
+                        @if (tel2 == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @tel2
+                        }
+                    </dd>
+
+                    <dt>Correo electrónico</dt>
+                    <dd id="pvEmail">
+                        @if (email == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @email
+                        }
+                    </dd>
+
+                    <dt>Representante legal</dt>
+                    <dd id="pvRep">
+                        @if (rep == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @rep
+                        }
+                    </dd>
+
+                    <dt>Actividad</dt>
+                    <dd id="pvAct">
+                        @if (act == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @act
+                        }
+                    </dd>
+                </dl>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -68,4 +321,49 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        (function () {
+            const pending = '<span class="badge-pending">Pendiente</span>';
+
+            function valOrPending(el) {
+                const v = (el && el.value ? el.value : '').trim();
+                return v.length ? v : null;
+            }
+            function setPreview(id, value) {
+                const slot = document.getElementById(id);
+                if (!slot) return;
+                slot.innerHTML = value ?? pending;
+            }
+
+            const inNombre = document.getElementById('inNombre');
+            const inCedula = document.getElementById('inCedula');
+            const inTel1   = document.getElementById('inTel1');
+            const inTel2   = document.getElementById('inTel2');
+            const inEmail  = document.getElementById('inEmail');
+            const inRep    = document.getElementById('inRep');
+            const inAct    = document.getElementById('inAct');
+
+            const bindings = [
+                [inNombre,'pvNombre'],
+                [inCedula,'pvCedula'],
+                [inTel1,'pvTel1'],
+                [inTel2,'pvTel2'],
+                [inEmail,'pvEmail'],
+                [inRep,'pvRep'],
+                [inAct,'pvAct']
+            ];
+
+            bindings.forEach(function ([input, target]) {
+                if (!input) return;
+                input.addEventListener('input', function () {
+                    setPreview(target, valOrPending(input));
+                });
+            });
+
+            // Sincronización inicial (por si hay autocompletado)
+            [inNombre,inCedula,inTel1,inTel2,inEmail,inRep,inAct].forEach(function (el) {
+                if (el) el.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+        })();
+    </script>
 }

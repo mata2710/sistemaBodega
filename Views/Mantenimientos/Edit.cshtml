@@ -3,77 +3,303 @@
 
 @{
     ViewData["Title"] = "Editar mantenimiento";
+
+    // Valores iniciales para el preview (saneados)
+    string? tipo = string.IsNullOrWhiteSpace(Model?.TipoMantenimiento) ? null : Model!.TipoMantenimiento;
+    string? responsable = string.IsNullOrWhiteSpace(Model?.EmpresaResponsable) ? null : Model!.EmpresaResponsable;
+    string? comentarios = string.IsNullOrWhiteSpace(Model?.ComentariosAdministracion) ? null : Model!.ComentariosAdministracion;
+
+    string? fecha = (Model is null || Model.FechaMantenimiento == default)
+        ? null
+        : Model.FechaMantenimiento.ToString("yyyy-MM-dd");
+
+    string? costoStr = (Model is null || Model.Costo <= 0)
+        ? null
+        : Model.Costo.ToString("0.00");
 }
 
-<h1>Editar mantenimiento</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<h4>Mantenimiento</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit" method="post">
-            @Html.AntiForgeryToken()
+<style>
+    /* ===== Estructura y layout ===== */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D;
+    }
 
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
 
-            <!-- Bodega -->
-            <div class="mb-3">
-                <label asp-for="IdBodega" class="form-label"></label>
-                <select asp-for="IdBodega"
-                        class="form-select"
-                        asp-items="ViewBag.IdBodega">
-                    <option value="">Seleccione...</option>
-                </select>
-                <span asp-validation-for="IdBodega" class="text-danger"></span>
+    .page-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+    }
+
+        .page-tools .btn {
+            margin-top: 0 !important;
+        }
+
+    /* ===== Botones (mismos colores que Clientes) ===== */
+    .btn-save {
+        background: #437057 !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-save:hover {
+            filter: brightness(.95);
+            color: #fff !important;
+            background: #3a614c !important;
+        }
+
+        .btn-save:focus {
+            box-shadow: 0 0 0 .2rem rgba(67,112,87,.25) !important;
+        }
+
+    .btn-cancel {
+        background: #DC3C22 !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-cancel:hover {
+            background: #C3341E !important;
+            color: #fff !important;
+        }
+
+        .btn-cancel:focus {
+            box-shadow: 0 0 0 .2rem rgba(220,60,34,.25) !important;
+        }
+
+    /* ===== Input groups con iconos (tamaño estándar) ===== */
+    .input-group-text i {
+        opacity: .85;
+    }
+
+    /* ===== Grid resumen ===== */
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem;
+    }
+
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .dl-grid dd {
+            margin: 0;
+        }
+
+    /* ===== Badge "Pendiente" ===== */
+    .badge-pending {
+        background: #EAC8A6;
+        color: #3d2b12;
+        border: 1px solid #EAC8A6;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+    }
+</style>
+
+<div class="page-tools mt-3 mb-3">
+    <h2 class="mb-0">Editar mantenimiento</h2>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left-short"></i> Volver al listado
+    </a>
+</div>
+
+<div class="row g-3">
+    <!-- Columna izquierda: formulario -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <div class="section-title">Datos del mantenimiento</div>
+
+                <form asp-action="Edit" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <!-- Bodega -->
+                    <div class="mb-3">
+                        <label asp-for="IdBodega" class="form-label fw-semibold">Bodega</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-building"></i></span>
+                            <select asp-for="IdBodega" class="form-select" asp-items="ViewBag.IdBodega" id="inBodega">
+                                <option value="">Seleccione...</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="IdBodega" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Fecha -->
+                    <div class="mb-3">
+                        <label asp-for="FechaMantenimiento" class="form-label fw-semibold">Fecha</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                            <input asp-for="FechaMantenimiento" class="form-control" type="date" id="inFecha" />
+                        </div>
+                        <span asp-validation-for="FechaMantenimiento" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Tipo -->
+                    <div class="mb-3">
+                        <label asp-for="TipoMantenimiento" class="form-label fw-semibold">Tipo</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-wrench-adjustable"></i></span>
+                            <input asp-for="TipoMantenimiento"
+                                   class="form-control"
+                                   id="inTipo"
+                                   list="tiposMantenimiento"
+                                   placeholder="Ej.: Preventivo" />
+                        </div>
+                        <datalist id="tiposMantenimiento">
+                            <option value="Preventivo"></option>
+                            <option value="Correctivo"></option>
+                            <option value="Inspección"></option>
+                            <option value="Limpieza"></option>
+                        </datalist>
+                        <span asp-validation-for="TipoMantenimiento" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Costo -->
+                    <div class="mb-3">
+                        <label asp-for="Costo" class="form-label fw-semibold">Costo</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                            <input asp-for="Costo" class="form-control" type="number" step="0.01" min="0" id="inCosto" />
+                        </div>
+                        <span asp-validation-for="Costo" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Responsable -->
+                    <div class="mb-3">
+                        <label asp-for="EmpresaResponsable" class="form-label fw-semibold">Responsable</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <input asp-for="EmpresaResponsable" class="form-control" id="inResp" placeholder="Empresa o persona responsable" />
+                        </div>
+                        <span asp-validation-for="EmpresaResponsable" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Comentarios -->
+                    <div class="mb-3">
+                        <label asp-for="ComentariosAdministracion" class="form-label fw-semibold">Comentarios</label>
+                        <textarea asp-for="ComentariosAdministracion" class="form-control" rows="3" id="inCom" placeholder="Notas de la administración..."></textarea>
+                        <span asp-validation-for="ComentariosAdministracion" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <button type="submit" class="btn btn-save">
+                            <i class="bi bi-check2"></i> Guardar
+                        </button>
+                        <a asp-action="Index" class="btn btn-cancel">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
+        </div>
+    </div>
 
-            <!-- Fecha -->
-            <div class="mb-3">
-                <label asp-for="FechaMantenimiento" class="form-label"></label>
-                <input asp-for="FechaMantenimiento" class="form-control" type="date" />
-                <span asp-validation-for="FechaMantenimiento" class="text-danger"></span>
-            </div>
+    <!-- Columna derecha: preview en vivo -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <div class="section-title">Resumen (preview)</div>
+                <dl class="dl-grid">
+                    <dt>Bodega</dt>
+                    <dd id="pvBodega">
+                        @if (!string.IsNullOrWhiteSpace(Model?.Bodega?.Nombre))
+                        {
+                            @Model.Bodega.Nombre
+                        }
+                        else
+                        {
 
-            <!-- Tipo -->
-            <div class="mb-3">
-                <label asp-for="TipoMantenimiento" class="form-label"></label>
-                <input asp-for="TipoMantenimiento" class="form-control" list="tiposMantenimiento" placeholder="Ej.: Preventivo" />
-                <datalist id="tiposMantenimiento">
-                    <option value="Preventivo"></option>
-                    <option value="Correctivo"></option>
-                    <option value="Inspección"></option>
-                    <option value="Limpieza"></option>
-                </datalist>
-                <span asp-validation-for="TipoMantenimiento" class="text-danger"></span>
-            </div>
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                    </dd>
 
-            <!-- Costo -->
-            <div class="mb-3">
-                <label asp-for="Costo" class="form-label"></label>
-                <input asp-for="Costo" class="form-control" type="number" step="0.01" min="0" />
-                <span asp-validation-for="Costo" class="text-danger"></span>
-            </div>
+                    <dt>Fecha</dt>
+                    <dd id="pvFecha">
+                        @if (fecha == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
 
-            <!-- Empresa -->
-            <div class="mb-3">
-                <label asp-for="EmpresaResponsable" class="form-label"></label>
-                <input asp-for="EmpresaResponsable" class="form-control" />
-                <span asp-validation-for="EmpresaResponsable" class="text-danger"></span>
-            </div>
+                            @fecha
+                        }
+                    </dd>
 
-            <!-- Comentarios -->
-            <div class="mb-3">
-                <label asp-for="ComentariosAdministracion" class="form-label"></label>
-                <textarea asp-for="ComentariosAdministracion" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="ComentariosAdministracion" class="text-danger"></span>
-            </div>
+                    <dt>Tipo</dt>
+                    <dd id="pvTipo">
+                        @if (tipo == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
 
-            <div class="mt-3">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
+                            @tipo
+                        }
+                    </dd>
+
+                    <dt>Costo</dt>
+                    <dd id="pvCosto">
+                        @if (string.IsNullOrWhiteSpace(costoStr))
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @($"$ {costoStr}")
+                        }
+                    </dd>
+
+                    <dt>Responsable</dt>
+                    <dd id="pvResp">
+                        @if (responsable == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @responsable
+                        }
+                    </dd>
+
+                    <dt>Comentarios</dt>
+                    <dd id="pvCom">
+                        @if (comentarios == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @comentarios
+                        }
+                    </dd>
+                </dl>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -81,5 +307,78 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-}
+    <script>
+        (function () {
+            const PENDING = '<span class="badge-pending">Pendiente</span>';
 
+            // Inputs
+            const $bodega = document.getElementById('inBodega');
+            const $fecha  = document.getElementById('inFecha');
+            const $tipo   = document.getElementById('inTipo');
+            const $costo  = document.getElementById('inCosto');
+            const $resp   = document.getElementById('inResp');
+            const $com    = document.getElementById('inCom');
+
+            // Helpers
+            const get = (id) => document.getElementById(id);
+            const setHTML = (el, html) => { if (el) el.innerHTML = html; };
+            const setText = (el, text) => { if (el) el.textContent = text; };
+            const valOrNull = (el) => (el && el.value && el.value.trim() !== '') ? el.value.trim() : null;
+
+            // Actualizadores
+            function updateBodega() {
+                const slot = get('pvBodega');
+                if (!slot) return;
+                let txt = '';
+                if ($bodega && $bodega.selectedOptions && $bodega.selectedOptions.length) {
+                    txt = ($bodega.selectedOptions[0].text || '').trim();
+                }
+                txt ? setText(slot, txt) : setHTML(slot, PENDING);
+            }
+            function updateFecha() {
+                const slot = get('pvFecha');
+                const v = valOrNull($fecha);
+                v ? setText(slot, v) : setHTML(slot, PENDING);
+            }
+            function updateTipo() {
+                const slot = get('pvTipo');
+                const v = valOrNull($tipo);
+                v ? setText(slot, v) : setHTML(slot, PENDING);
+            }
+            function updateCosto() {
+                const slot = get('pvCosto');
+                let v = valOrNull($costo);
+                if (v) {
+                    const n = Number((v + '').replace(',', '.'));
+                    (isFinite(n) && n > 0) ? setText(slot, '$ ' + n.toFixed(2)) : setHTML(slot, PENDING);
+                } else {
+                    setHTML(slot, PENDING);
+                }
+            }
+            function updateResp() {
+                const slot = get('pvResp');
+                const v = valOrNull($resp);
+                v ? setText(slot, v) : setHTML(slot, PENDING);
+            }
+            function updateCom() {
+                const slot = get('pvCom');
+                const v = valOrNull($com);
+                v ? setText(slot, v) : setHTML(slot, PENDING);
+            }
+
+            function init() {
+                updateBodega(); updateFecha(); updateTipo(); updateCosto(); updateResp(); updateCom();
+            }
+
+            // Eventos
+            if ($bodega) $bodega.addEventListener('change', updateBodega);
+            if ($fecha)  $fecha.addEventListener('input', updateFecha);
+            if ($tipo)   $tipo.addEventListener('input', updateTipo);
+            if ($costo)  $costo.addEventListener('input', updateCosto);
+            if ($resp)   $resp.addEventListener('input', updateResp);
+            if ($com)    $com.addEventListener('input', updateCom);
+
+            init();
+        })();
+    </script>
+}

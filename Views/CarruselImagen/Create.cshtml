@@ -1,46 +1,254 @@
 ﻿@model SistemaBodega.Models.CarruselImagen
 
 @{
-    ViewData["Title"] = "Agregar Imagen al Carrusel";
+    ViewData["Title"] = "Agregar imagen al carrusel";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string? titulo = string.IsNullOrWhiteSpace(Model?.Titulo) ? null : Model!.Titulo;
 }
 
-<div class="container py-4 text-white">
-    <h2 class="mb-4">Agregar Imagen</h2>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-    <form asp-action="Create" enctype="multipart/form-data">
-        <div class="form-group mb-3">
-            <label asp-for="Titulo" class="form-label"></label>
-            <input asp-for="Titulo" class="form-control" />
-            <span asp-validation-for="Titulo" class="text-danger"></span>
+<style>
+    /* ===== Estructura y layout (coherente) ===== */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D;
+    }
+
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
+
+    .page-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+    }
+
+        .page-tools .btn {
+            margin-top: 0 !important;
+        }
+
+    /* ===== Botones (verde/rojo) ===== */
+    .btn-save {
+        background: #437057 !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-save:hover {
+            filter: brightness(.95);
+            background: #3a614c !important;
+            color: #fff !important;
+        }
+
+        .btn-save:focus {
+            box-shadow: 0 0 0 .2rem rgba(67,112,87,.25) !important;
+        }
+
+    .btn-cancel {
+        background: #DC3C22 !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-cancel:hover {
+            background: #C3341E !important;
+            color: #fff !important;
+        }
+
+        .btn-cancel:focus {
+            box-shadow: 0 0 0 .2rem rgba(220,60,34,.25) !important;
+        }
+
+    /* ===== Input group con icono ===== */
+    .input-group-text i {
+        opacity: .85;
+    }
+
+    /* ===== Preview 16:9 con overlay de título ===== */
+    .preview-wrap {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16/9;
+        border-radius: .75rem;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+    }
+
+        .preview-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+    .preview-overlay {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: .75rem .9rem;
+        background: linear-gradient(transparent, rgba(0,0,0,.55));
+        color: #fff;
+    }
+
+    .preview-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1rem;
+        line-height: 1.2;
+        text-shadow: 0 1px 2px rgba(0,0,0,.4);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Badge “Pendiente” (consistente) */
+    .badge-pending {
+        background: #EAC8A6;
+        color: #3d2b12;
+        border: 1px solid #EAC8A6;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+    }
+</style>
+
+<div class="page-tools mt-3 mb-3">
+    <h2 class="mb-0">Agregar imagen</h2>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left-short"></i> Volver al listado
+    </a>
+</div>
+
+<div class="row g-3">
+    <!-- Columna izquierda: formulario -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form asp-action="Create" method="post" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger rounded-3 mb-3"
+                         role="alert"
+                         style="display:@(ViewData.ModelState.IsValid ? "none" : "block")">
+                        Revisa los campos marcados en rojo.
+                    </div>
+
+                    <!-- Título -->
+                    <div class="mb-3">
+                        <label asp-for="Titulo" class="form-label">Título</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-type"></i></span>
+                            <input asp-for="Titulo" class="form-control form-control-lg" id="inTitulo"
+                                   placeholder="Texto a mostrar sobre la imagen" />
+                        </div>
+                        <span asp-validation-for="Titulo" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Imagen -->
+                    <div class="mb-3">
+                        <label class="form-label">Seleccionar imagen</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-image"></i></span>
+                            <input type="file" name="imagen" id="inImagen"
+                                   class="form-control form-control-lg"
+                                   accept="image/*" required />
+                        </div>
+                        <div class="form-text">Formatos: JPG/PNG. Se mostrará en proporción 16:9.</div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <button type="submit" class="btn btn-save">
+                            <i class="bi bi-check2"></i> Guardar
+                        </button>
+                        <a asp-action="Index" class="btn btn-cancel">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
+    </div>
 
-        <div class="form-group mb-3">
-            <label class="form-label">Seleccionar imagen</label>
-            <input type="file" name="imagen" class="form-control" accept="image/*" onchange="mostrarPrevisualizacion(this)" required />
+    <!-- Columna derecha: vista previa -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Vista previa</div>
+                <div class="preview-wrap">
+                    <img id="pvImg" src="" alt="Previsualización"
+                         style="opacity:.3;" />
+                    <div class="preview-overlay">
+                        <p class="preview-title" id="pvTitulo">
+                            @if (titulo == null)
+                            {
+                                <span class="badge-pending">Pendiente</span>
+                            }
+                            else
+                            {
+                                @titulo
+                            }
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-2 text-muted small">
+                    Seleccioná una imagen para ver la previsualización.
+                </div>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <img id="preview" src="#" alt="Previsualización" class="img-fluid" style="max-height: 200px; display: none;" />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
-        function mostrarPrevisualizacion(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    var preview = document.getElementById('preview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(input.files[0]);
+        (function () {
+            const PENDING = '<span class="badge-pending">Pendiente</span>';
+
+            const inTitulo = document.getElementById('inTitulo');
+            const inImagen = document.getElementById('inImagen');
+            const pvTitulo = document.getElementById('pvTitulo');
+            const pvImg = document.getElementById('pvImg');
+
+            function setTitlePreview() {
+                const v = (inTitulo && inTitulo.value || '').trim();
+                pvTitulo.innerHTML = v.length ? v : PENDING;
             }
-        }
+
+            function setImagePreview(file) {
+                if (!pvImg) return;
+                if (!file) {
+                    pvImg.src = '';
+                    pvImg.style.opacity = '.3';
+                    return;
+                }
+                const url = URL.createObjectURL(file);
+                pvImg.src = url;
+                pvImg.style.opacity = '1';
+            }
+
+            if (inTitulo) {
+                inTitulo.addEventListener('input', setTitlePreview);
+                setTitlePreview();
+            }
+            if (inImagen) {
+                inImagen.addEventListener('change', function () {
+                    const f = this.files && this.files[0] ? this.files[0] : null;
+                    setImagePreview(f);
+                });
+            }
+        })();
     </script>
 }

@@ -1,72 +1,232 @@
 ﻿@model SistemaBodega.Models.Bodega
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Crear bodega";
 }
 
-<h1>Create</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<h4>Bodega</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<style>
+    /* ===== Cards / layout ===== */
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: .75rem
+    }
 
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D
+    }
+
+    /* ===== Botones ===== */
+    .btn-brand {
+        background: #00809D;
+        color: #fff;
+        border: 0
+    }
+
+        .btn-brand:hover {
+            background: #00748A;
+            color: #fff
+        }
+
+    .btn-cancel {
+        background: #DC3C22;
+        color: #fff;
+        border: 0
+    }
+
+        .btn-cancel:hover {
+            filter: brightness(.95);
+            color: #fff
+        }
+
+    /* ===== Rejilla para vista rápida ===== */
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem
+    }
+
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center
+        }
+
+        .dl-grid dd {
+            margin: 0
+        }
+
+    @@media (max-width: 768px) {
+        .dl-grid {
+            grid-template-columns: 1fr
+        }
+    }
+
+    /* ===== Badges estado (preview) ===== */
+    .badge-state {
+        display: inline-block;
+        padding: .25rem .6rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        border: 1px solid transparent;
+        white-space: nowrap
+    }
+
+    .state-available {
+        background: #E7F6EC;
+        color: #1F7A39;
+        border-color: #BDE4C7
+    }
+
+    .state-occupied {
+        background: #fdecea;
+        color: #b42318;
+        border-color: #f5c2c7
+    }
+
+    .state-reserved {
+        background: #fff4cc;
+        color: #664d03;
+        border-color: #ffec99
+    }
+
+    /* Utilidades */
+    .text-mono {
+        font-variant-numeric: tabular-nums
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mt-3 mb-3 page-tools">
+    <h2 class="mb-0">Crear bodega</h2>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left-short me-1"></i> Volver al listado
+    </a>
+</div>
+
+<div class="row g-3">
+    <!-- Columna izquierda: formulario -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4 p-md-5">
+                <form asp-action="Create" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-4" role="alert" style="display:@(ViewData.ModelState.IsValid ? "none" : "block")">
+                        Revisá los campos marcados en rojo.
+                    </div>
+
+                    <!-- Datos generales -->
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label fw-semibold">Nombre</label>
+                        <input asp-for="Nombre" class="form-control form-control-lg" placeholder="Ej.: Bodega A-12" />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Complejo" class="form-label fw-semibold">Complejo</label>
+                            <input asp-for="Complejo" class="form-control form-control-lg" placeholder="Parque Industrial XYZ" />
+                            <span asp-validation-for="Complejo" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Ubicacion" class="form-label fw-semibold">Ubicación</label>
+                            <input asp-for="Ubicacion" class="form-control form-control-lg" placeholder="Opcional" />
+                            <span asp-validation-for="Ubicacion" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label asp-for="Estado" class="form-label fw-semibold">Estado</label>
+                            <select asp-for="Estado" class="form-select form-select-lg">
+                                <option value="">Seleccione...</option>
+                                <option value="Disponible">Disponible</option>
+                                <option value="Ocupada">Ocupada</option>
+                                <option value="Reservada">Reservada</option>
+                            </select>
+                            <span asp-validation-for="Estado" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Económicos -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label asp-for="AreaM2" class="form-label fw-semibold">Área (m²)</label>
+                            <div class="input-group input-group-lg">
+                                <input asp-for="AreaM2" class="form-control" type="number" step="0.01" min="0" />
+                                <span class="input-group-text">m²</span>
+                            </div>
+                            <span asp-validation-for="AreaM2" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PrecioAlquilerPorM2" class="form-label fw-semibold">Precio por m²</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="PrecioAlquilerPorM2" class="form-control" type="number" step="0.01" min="0" />
+                            </div>
+                            <span asp-validation-for="PrecioAlquilerPorM2" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Precio estimado</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">$</span>
+                                <input id="precioPreview" class="form-control" type="text" value="0.00" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-brand btn-lg fw-semibold">
+                            <i class="bi bi-check2 me-1"></i> Guardar bodega
+                        </button>
+                        <a asp-action="Index" class="btn btn-cancel btn-lg">Cancelar</a>
+                    </div>
+                </form>
             </div>
+        </div>
+    </div>
 
-            <div class="form-group">
-                <label asp-for="Ubicacion" class="control-label"></label>
-                <input asp-for="Ubicacion" class="form-control" />
-                <span asp-validation-for="Ubicacion" class="text-danger"></span>
-            </div>
+    <!-- Columna derecha: vista rápida -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <div class="section-title">Vista rápida</div>
+                <dl class="dl-grid">
+                    <dt>Nombre</dt>
+                    <dd id="vrNombre">—</dd>
 
-            <div class="form-group">
-                <label asp-for="Complejo" class="control-label"></label>
-                <input asp-for="Complejo" class="form-control" />
-                <span asp-validation-for="Complejo" class="text-danger"></span>
-            </div>
+                    <dt>Complejo</dt>
+                    <dd id="vrComplejo">—</dd>
 
-            <!-- Estado como dropdown -->
-            <div class="form-group">
-                <label asp-for="Estado" class="control-label"></label>
-                <select asp-for="Estado" class="form-select">
-                    <option value="">Seleccione...</option>
-                    <option>Disponible</option>
-                    <option>Ocupada</option>
-                    <option>Reservada</option>
-                </select>
-                <span asp-validation-for="Estado" class="text-danger"></span>
-            </div>
+                    <dt>Ubicación</dt>
+                    <dd id="vrUbicacion">—</dd>
 
-            <!-- Campos base para el cálculo -->
-            <div class="form-group">
-                <label asp-for="AreaM2" class="control-label"></label>
-                <input asp-for="AreaM2" class="form-control" type="number" step="0.01" min="0" placeholder="Ej.: 120.50" />
-                <span asp-validation-for="AreaM2" class="text-danger"></span>
-            </div>
+                    <dt>Estado</dt>
+                    <dd id="vrEstado"><span class="badge-state" style="background:#eef1f4;color:#4b5563;border-color:#e5e7eb;">—</span></dd>
 
-            <div class="form-group">
-                <label asp-for="PrecioAlquilerPorM2" class="control-label"></label>
-                <input asp-for="PrecioAlquilerPorM2" class="form-control" type="number" step="0.01" min="0" placeholder="Ej.: 8.75" />
-                <span asp-validation-for="PrecioAlquilerPorM2" class="text-danger"></span>
-            </div>
+                    <dt>Área (m²)</dt>
+                    <dd class="text-mono" id="vrArea">0.00</dd>
 
-            <!-- Preview informativo -->
-            <div class="form-group">
-                <label class="control-label">Precio estimado</label>
-                <input id="precioPreview" class="form-control" type="text" value="0.00" readonly />
-            </div>
+                    <dt>Precio/m²</dt>
+                    <dd class="text-mono" id="vrPm2">$ 0.00</dd>
 
-            <div class="form-group mt-3">
-                <input type="submit" value="Crear" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+                    <dt>Precio estimado</dt>
+                    <dd class="text-mono" id="vrEstimado">0.00</dd>
+                </dl>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -74,29 +234,74 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
     <script>
         (function () {
-            const areaInput = document.getElementById('@Html.IdFor(m => m.AreaM2)');
-            const precioM2Input = document.getElementById('@Html.IdFor(m => m.PrecioAlquilerPorM2)');
-            const preview = document.getElementById('precioPreview');
+            // Inputs principales
+            const $area     = document.getElementById('@Html.IdFor(m => m.AreaM2)');
+            const $pm2      = document.getElementById('@Html.IdFor(m => m.PrecioAlquilerPorM2)');
+            const $estado   = document.getElementById('@Html.IdFor(m => m.Estado)');
+            const $nombre   = document.getElementById('@Html.IdFor(m => m.Nombre)');
+            const $complejo = document.getElementById('@Html.IdFor(m => m.Complejo)');
+            const $ubic     = document.getElementById('@Html.IdFor(m => m.Ubicacion)');
 
-            function toNumber(v) {
+            // previews
+            const $preview  = document.getElementById('precioPreview');
+            const $vrNombre   = document.getElementById('vrNombre');
+            const $vrComplejo = document.getElementById('vrComplejo');
+            const $vrUbicacion= document.getElementById('vrUbicacion');
+            const $vrEstado   = document.getElementById('vrEstado');
+            const $vrArea     = document.getElementById('vrArea');
+            const $vrPm2      = document.getElementById('vrPm2');
+            const $vrEst      = document.getElementById('vrEstimado');
+
+            function toNumber(v){
                 if (typeof v === 'string') v = v.replace(',', '.');
                 const n = parseFloat(v);
                 return isNaN(n) ? 0 : n;
             }
 
-            function updatePreview() {
-                const area = toNumber(areaInput.value);
-                const precioM2 = toNumber(precioM2Input.value);
-                const total = area * precioM2;
-                preview.value = total.toFixed(2);
+            function updatePreview(){
+                const total = toNumber($area.value) * toNumber($pm2.value);
+                $preview.value = total.toFixed(2);
+                // espejo en vista rápida
+                $vrArea.textContent = toNumber($area.value).toFixed(2);
+                $vrPm2.textContent  = "$ " + toNumber($pm2.value).toFixed(2);
+                $vrEst.textContent  = total.toFixed(2);
             }
 
-            areaInput.addEventListener('input', updatePreview);
-            precioM2Input.addEventListener('input', updatePreview);
+            function mirrorText(src, targetEl, placeholder = "—"){
+                targetEl.textContent = src.value && src.value.trim() !== "" ? src.value : placeholder;
+            }
+
+            function renderEstado(){
+                const val = ($estado.value || "").trim();
+                let html;
+                if (val === "Disponible"){
+                    html = '<span class="badge-state state-available">Disponible</span>';
+                } else if (val === "Ocupada"){
+                    html = '<span class="badge-state state-occupied">Ocupada</span>';
+                } else if (val === "Reservada"){
+                    html = '<span class="badge-state state-reserved">Reservada</span>';
+                } else {
+                    html = '<span class="badge-state" style="background:#eef1f4;color:#4b5563;border-color:#e5e7eb;">—</span>';
+                }
+                $vrEstado.innerHTML = html;
+            }
+
+            // eventos
+            $area.addEventListener('input', updatePreview);
+            $pm2.addEventListener('input', updatePreview);
+            $estado.addEventListener('change', renderEstado);
+            $nombre.addEventListener('input', () => mirrorText($nombre, $vrNombre));
+            $complejo.addEventListener('input', () => mirrorText($complejo, $vrComplejo));
+            $ubic.addEventListener('input', () => mirrorText($ubic, $vrUbicacion));
+
+            // init
             updatePreview();
+            renderEstado();
+            mirrorText($nombre, $vrNombre);
+            mirrorText($complejo, $vrComplejo);
+            mirrorText($ubic, $vrUbicacion);
         })();
     </script>
 }

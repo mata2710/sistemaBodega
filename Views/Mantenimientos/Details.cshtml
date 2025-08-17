@@ -1,45 +1,205 @@
 ﻿@model SistemaBodega.Models.Mantenimiento
+@using Microsoft.AspNetCore.Http
 
 @{
-    ViewData["Title"] = "Detalles";
+    ViewData["Title"] = "Mantenimiento — Detalles";
+    var rol = Context?.Session?.GetString("Rol");
+
+    string? fecha = (Model is null || Model.FechaMantenimiento == default)
+        ? null
+        : Model.FechaMantenimiento.ToString("yyyy-MM-dd");
+
+    string? tipo = string.IsNullOrWhiteSpace(Model?.TipoMantenimiento) ? null : Model!.TipoMantenimiento;
+    string? responsable = string.IsNullOrWhiteSpace(Model?.EmpresaResponsable) ? null : Model!.EmpresaResponsable;
+    string? bodegaNombre = string.IsNullOrWhiteSpace(Model?.Bodega?.Nombre) ? null : Model!.Bodega!.Nombre;
+    string? costoStr = (Model is null || Model.Costo <= 0) ? null : Model.Costo.ToString("0.00");
 }
 
-<h1>Detalles</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<div>
-    <h4>Mantenimiento</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FechaMantenimiento)</dt>
-        <dd class="col-sm-9">@Model.FechaMantenimiento.ToString("yyyy-MM-dd")</dd>
+<style>
+    /* Estructura */
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: .75rem;
+    }
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.TipoMantenimiento)</dt>
-        <dd class="col-sm-9">@Model.TipoMantenimiento</dd>
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D;
+    }
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Costo)</dt>
-        <dd class="col-sm-9">@Model.Costo.ToString("N2")</dd>
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem;
+    }
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.EmpresaResponsable)</dt>
-        <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.EmpresaResponsable) ? Model.EmpresaResponsable : "—")</dd>
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
 
-        <dt class="col-sm-3">Bodega</dt>
-        <dd class="col-sm-9">@((Model.Bodega?.Nombre) ?? "—")</dd>
+        .dl-grid dd {
+            margin: 0;
+        }
 
-        <dt class="col-sm-3">Comentarios</dt>
-        <dd class="col-sm-9">
-            @if (!string.IsNullOrWhiteSpace(Model?.ComentariosAdministracion))
-            {
-                <pre class="mb-0" style="white-space:pre-wrap">@Model.ComentariosAdministracion</pre>
-            }
-            else
-            {
-                @:—
-            }
-        </dd>
-    </dl>
+    /* ===== Acciones (Editar amarillo) ===== */
+    .btn-edit {
+        background-color: #FFD700 !important;
+        color: #111 !important;
+        border: 0 !important;
+    }
+
+        .btn-edit:hover {
+            filter: brightness(.95);
+            color: #111 !important;
+            background-color: #E6C200 !important;
+        }
+
+        .btn-edit:focus, .btn-edit:active {
+            color: #111 !important;
+            background-color: #E6C200 !important;
+            box-shadow: 0 0 0 .2rem rgba(255,215,0,.25);
+        }
+
+        .btn-edit:hover {
+            filter: brightness(.95);
+            color: #111;
+        }
+
+    /* Utilidades */
+    .badge-pending {
+        background: #EAC8A6;
+        color: #3d2b12;
+        border: 1px solid #EAC8A6;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+    }
+
+    .text-mono {
+        font-variant-numeric: tabular-nums;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+    <h2 class="mb-0">Mantenimiento — Detalles</h2>
+    <div class="d-flex gap-2">
+        @if (rol == "Administrador")
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-sm btn-edit">
+                <i class="bi bi-pencil-square me-1"></i> Editar
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left-short me-1"></i> Volver al listado
+        </a>
+    </div>
 </div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Editar</a>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
+<div class="row g-3">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Resumen</div>
+                <dl class="dl-grid">
+                    <dt><i class="bi bi-calendar3 me-2"></i>Fecha</dt>
+                    <dd>
+                        @if (fecha == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @fecha
+                        }
+                    </dd>
+
+                    <dt><i class="bi bi-wrench-adjustable me-2"></i>Tipo</dt>
+                    <dd>
+                        @if (tipo == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @tipo
+                        }
+                    </dd>
+
+                    <dt><i class="bi bi-person-badge me-2"></i>Responsable</dt>
+                    <dd>
+                        @if (responsable == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @responsable
+                        }
+                    </dd>
+
+                    <dt><i class="bi bi-house-door me-2"></i>Bodega</dt>
+                    <dd>
+                        @if (bodegaNombre == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @bodegaNombre
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna lateral -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Costo y comentarios</div>
+                <dl class="dl-grid">
+                    <dt><i class="bi bi-currency-dollar me-2"></i>Costo</dt>
+                    <dd class="text-mono">
+                        @if (string.IsNullOrWhiteSpace(costoStr))
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                        else
+                        {
+
+                            @($"$ {costoStr}")
+                        }
+                    </dd>
+
+                    <dt><i class="bi bi-chat-left-text me-2"></i>Comentarios</dt>
+                    <dd>
+                        @if (!string.IsNullOrWhiteSpace(Model?.ComentariosAdministracion))
+                        {
+                            <pre class="mb-0" style="white-space:pre-wrap">@Model.ComentariosAdministracion</pre>
+                        }
+                        else
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
 </div>

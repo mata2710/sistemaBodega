@@ -1,87 +1,208 @@
 ﻿@model SistemaBodega.Models.Bodega
+@using Microsoft.AspNetCore.Http
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Bodega — Detalles";
+    var rol = Context.Session.GetString("Rol");
 }
 
-<h1>Details</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<div>
-    <h4>Bodega</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
+<style>
+    /* ===== Estructura general ===== */
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Ubicacion)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Ubicacion)
-        </dd>
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D;
+    }
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Complejo)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Complejo)
-        </dd>
+    /* ===== Definición en rejilla ===== */
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem;
+    }
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class="col-sm-9">
-            @{
-                var estado = Model.Estado?.Trim();
-                if (string.Equals(estado, "Disponible", StringComparison.OrdinalIgnoreCase))
-                {
-                    <span class="badge bg-success">Disponible</span>
-                }
-                else if (string.Equals(estado, "Ocupada", StringComparison.OrdinalIgnoreCase))
-                {
-                    <span class="badge bg-danger">Ocupada</span>
-                }
-                else if (string.Equals(estado, "Reservada", StringComparison.OrdinalIgnoreCase))
-                {
-                    <span class="badge bg-warning text-dark">Reservada</span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">@((string.IsNullOrWhiteSpace(estado) ? "—" : estado))</span>
-                }
-            }
-        </dd>
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
 
-        <!-- Nuevos: base del cálculo -->
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.AreaM2)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.AreaM2)
-        </dd>
+        .dl-grid dd {
+            margin: 0;
+        }
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.PrecioAlquilerPorM2)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.PrecioAlquilerPorM2)
-        </dd>
+    /* IMPORTANTE: en Razor, @@media => media */
+    @@media (max-width: 768px) {
+        .dl-grid
 
-        <!-- Calculada -->
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Precio)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Precio)
-        </dd>
-    </dl>
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    /* ===== Acciones ===== */
+    .btn-edit {
+        background: #FFD700 !important; /* amarillo */
+        color: #111 !important;
+        border: 0 !important;
+    }
+
+        .btn-edit:hover, .btn-edit:focus, .btn-edit:active {
+            filter: brightness(.95);
+            color: #111 !important;
+        }
+
+    .btn-brand {
+        background: #00809D;
+        color: #fff;
+        border: 0;
+    }
+
+        .btn-brand:hover {
+            background: #00748A;
+            color: #fff;
+        }
+
+    /* ===== Espacio entre ícono y texto ===== */
+    .kv {
+        opacity: .9;
+        margin-right: .4rem;
+    }
+
+    /* ===== Badges/estado ===== */
+    .badge-state {
+        display: inline-block;
+        padding: .25rem .6rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .state-available {
+        background: #E7F6EC;
+        color: #1F7A39;
+        border-color: #BDE4C7;
+    }
+    /* Disponible */
+    .state-occupied {
+        background: #fdecea;
+        color: #b42318;
+        border-color: #f5c2c7;
+    }
+    /* Ocupada */
+    .state-reserved {
+        background: #fff4cc;
+        color: #664d03;
+        border-color: #ffec99;
+    }
+    /* Reservada */
+
+    /* ===== Links marca ===== */
+    .link-accent {
+        color: #00809D;
+        text-decoration: none;
+    }
+
+        .link-accent:hover {
+            color: #00748A;
+            text-decoration: underline;
+        }
+
+    /* Utilidades */
+    .text-mono {
+        font-variant-numeric: tabular-nums;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3 page-tools">
+    <h2 class="mb-0">Bodega — Detalles</h2>
+    <div class="d-flex gap-2">
+        @if (rol == "Administrador")
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-sm btn-edit">
+                <i class="bi bi-pencil-square me-1"></i> Editar
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left-short me-1"></i> Volver al listado
+        </a>
+    </div>
 </div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Editar</a>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Volver a listado</a>
+<div class="row g-3">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Resumen</div>
+                <dl class="dl-grid">
+                    <dt><i class="kv bi bi-house-door"></i>Nombre</dt>
+                    <dd>@(Model?.Nombre ?? "—")</dd>
+
+                    <dt><i class="kv bi bi-geo-alt"></i>Ubicación</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model?.Ubicacion) ? "—" : Model!.Ubicacion)</dd>
+
+                    <dt><i class="kv bi bi-grid-3x3-gap"></i>Complejo</dt>
+                    <dd>@(string.IsNullOrWhiteSpace(Model?.Complejo) ? "—" : Model!.Complejo)</dd>
+
+                    <dt><i class="kv bi bi-circle-fill"></i>Estado</dt>
+                    <dd>
+                        @{
+                            var estado = (Model?.Estado ?? string.Empty).Trim();
+                        }
+                        @if (string.Equals(estado, "Disponible", System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span class="badge-state state-available">Disponible</span>
+                        }
+                        else if (string.Equals(estado, "Ocupada", System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span class="badge-state state-occupied">Ocupada</span>
+                        }
+                        else if (string.Equals(estado, "Reservada", System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span class="badge-state state-reserved">Reservada</span>
+                        }
+                        else
+                        {
+                            <span class="badge-state" style="background:#eef1f4;color:#4b5563;border-color:#e5e7eb;">
+                                @(string.IsNullOrWhiteSpace(estado) ? "—" : estado)
+                            </span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna lateral -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Dimensiones y costos</div>
+                <dl class="dl-grid">
+                    <dt><i class="kv bi bi-aspect-ratio"></i>Área (m²)</dt>
+                    <dd class="text-mono">@(Model?.AreaM2.HasValue == true ? Model.AreaM2.Value.ToString("N2") : "—")</dd>
+
+                    <dt><i class="kv bi bi-currency-dollar"></i>Precio por m²</dt>
+                    <dd class="text-mono">@(Model?.PrecioAlquilerPorM2.HasValue == true ? "$ " + Model.PrecioAlquilerPorM2.Value.ToString("N2") : "—")</dd>
+
+                    <dt><i class="kv bi bi-cash-stack"></i>Precio total</dt>
+                    <dd class="text-mono">@(Model?.Precio.HasValue == true ? "$ " + Model.Precio.Value.ToString("N2") : "—")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
 </div>

@@ -1,73 +1,384 @@
-﻿@model IEnumerable<SistemaBodega.Models.Mantenimiento>
+﻿@model SistemaBodega.Models.PagedResult<SistemaBodega.Models.Mantenimiento>
 @using Microsoft.AspNetCore.Http
-
+@using System.Globalization
 @{
     ViewData["Title"] = "Mantenimientos";
-    var rol = Context.Session.GetString("Rol");
+    var rol = Context?.Session?.GetString("Rol");
+
+    var cr = new CultureInfo("es-CR");
+
+    // Filtros (preservados)
+    string q = (ViewBag.q as string) ?? (Context?.Request?.Query["q"].ToString() ?? "");
+    string tipo = (ViewBag.tipo as string) ?? (Context?.Request?.Query["tipo"].ToString() ?? "");
+
+    // Lista de tipos (si el controlador no la pasa por ViewBag.Tipos)
+    var tipos = (ViewBag.Tipos as List<string>) ??
+                (Model?.Items?
+                    .Where(x => !string.IsNullOrWhiteSpace(x.TipoMantenimiento))
+                    .Select(x => x.TipoMantenimiento!.Trim())
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList()
+                 ?? new List<string>());
+
+    int totalPages = Math.Max(1, (int)Math.Ceiling((decimal)(Model?.TotalItems ?? 0) / (Model?.PageSize ?? 10)));
+    int startRow = (Model?.TotalItems ?? 0) == 0 ? 0 : (((Model!.Page - 1) * Model!.PageSize) + 1);
+    int endRow = Math.Min(Model!.Page * Model!.PageSize, Model.TotalItems);
+
+    bool selTodos = string.IsNullOrEmpty(tipo);
 }
 
-<h1 class="mt-4">Mantenimientos</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-@if (rol == "Administrador")
-{
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Crear nuevo mantenimiento</a>
-    </p>
-}
+<style>
+    /* ===== Acciones con íconos ===== */
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 0;
+        margin-left: .25rem;
+        text-decoration: none
+    }
 
-<table class="table table-bordered table-striped align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.FechaMantenimiento)</th>
-            <th>@Html.DisplayNameFor(model => model.TipoMantenimiento)</th>
-            <th>@Html.DisplayNameFor(model => model.Costo)</th>
-            <th>@Html.DisplayNameFor(model => model.EmpresaResponsable)</th>
-            <th>Bodega</th>
-            <th>@Html.DisplayNameFor(model => model.ComentariosAdministracion)</th>
-            <th style="width:220px">Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.FechaMantenimiento.ToString("yyyy-MM-dd")</td>
-                    <td>@item.TipoMantenimiento</td>
-                    <td>@item.Costo.ToString("N2")</td>
-                    <td>@(string.IsNullOrWhiteSpace(item.EmpresaResponsable) ? "—" : item.EmpresaResponsable)</td>
-                    <td>@(item.Bodega?.Nombre ?? "—")</td>
-                    <td>
-                        @{
-                            var c = item.ComentariosAdministracion;
-                            if (string.IsNullOrWhiteSpace(c))
-                            {
-                                @:—
-                            }
-                            else
-                            {
-                                var corto = c.Length > 120 ? c.Substring(0, 120) + "…" : c;
-                                @corto
-                            }
-                        }
-                    </td>
-                    <td>
-                        @if (rol == "Administrador")
-                        {
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning text-white btn-editar">Editar</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger ms-1 btn-eliminar">Eliminar</a>
-                        }
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white ms-1 btn-detalles">Detalles</a>
-                    </td>
-                </tr>
+        .btn-icon i {
+            font-size: 1.05rem;
+            color: #fff
+        }
+
+        .btn-icon.details {
+            background: #00809D
+        }
+
+        .btn-icon.edit {
+            background: #FFD700
+        }
+
+            .btn-icon.edit i {
+                color: #111
             }
+
+        .btn-icon.delete {
+            background: #DC3C22
         }
-        else
+
+        .btn-icon:hover {
+            filter: brightness(.95)
+        }
+
+    /* ===== Tabla ===== */
+    .table-pro {
+        width: 100%
+    }
+
+        .table-pro th, .table-pro td {
+            padding: .65rem .8rem;
+            vertical-align: middle
+        }
+
+    .td-center {
+        text-align: center
+    }
+
+    .text-nowrap {
+        white-space: nowrap
+    }
+
+    /* ===== Buscador con lupa (sin fondo) ===== */
+    .search-group {
+        position: relative
+    }
+
+        .search-group .btn-search {
+            position: absolute;
+            right: .5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer
+        }
+
+            .search-group .btn-search i {
+                color: #00809D;
+                font-size: 1.1rem
+            }
+
+            .search-group .btn-search:hover i {
+                color: #00748A
+            }
+
+        .search-group .form-control.pe-5 {
+            padding-right: 2.5rem !important
+        }
+
+    /* ===== Pills rápidas (Tipo) ===== */
+    .filters-quick {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap
+    }
+
+    .filter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .35rem .7rem;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+        color: #334155;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: .9rem
+    }
+
+        .filter-pill:hover {
+            background: #eef2f7;
+            color: #0f172a
+        }
+
+        .filter-pill.active {
+            background: #00809D;
+            color: #fff;
+            border-color: #00748A
+        }
+
+    /* ===== Barra inferior / paginación ===== */
+    .pager-bar {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        flex-wrap: wrap
+    }
+
+    .pager-left {
+        margin-right: auto
+    }
+
+    .pager-center {
+        margin-left: auto;
+        margin-right: auto
+    }
+
+    .pager-right {
+        margin-left: auto
+    }
+
+    /* Link marca */
+    .link-accent {
+        color: #00809D;
+        text-decoration: none
+    }
+
+        .link-accent:hover {
+            color: #00748A;
+            text-decoration: underline
+        }
+
+    /* Badge "soft" para tipo */
+    .badge-soft-accent {
+        background: #E6F4F1;
+        color: #166f6b;
+        font-weight: 600;
+        border-radius: .5rem;
+        padding: .25rem .5rem
+    }
+</style>
+
+<div class="d-flex align-items-center justify-content-between mt-3 mb-3">
+    <div>
+        <h1 class="m-0">Mantenimientos</h1>
+        <div class="text-muted">Total: @Model.TotalItems</div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        @if (rol == "Administrador")
         {
-            <tr>
-                <td colspan="7" class="text-center text-muted">No hay mantenimientos registrados.</td>
-            </tr>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Crear nuevo mantenimiento
+            </a>
         }
-    </tbody>
-</table>
+    </div>
+</div>
+
+<!-- Filtros -->
+<form method="get" class="card shadow-sm border-0 rounded-4 mb-3">
+    <div class="card-body p-3 p-md-4">
+        <div class="row g-2 g-md-3 align-items-end">
+            <!-- Buscar -->
+            <div class="col-12 col-md-6 col-lg-5">
+                <label class="form-label fw-semibold" for="q">Buscar</label>
+                <div class="search-group">
+                    <input id="q" name="q" value="@q" class="form-control form-control-sm pe-5"
+                           placeholder="Empresa, bodega o comentario…" />
+                    <button type="submit" class="btn-search" aria-label="Buscar">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pills rápidas (Tipo) -->
+        <div class="filters-quick mt-3">
+            <a class="filter-pill @(selTodos ? "active" : "")"
+               asp-action="Index"
+               asp-route-page="1"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-q="@q"
+               asp-route-tipo="">
+                Todos
+            </a>
+
+            @foreach (var t in tipos)
+            {
+                var isActive = string.Equals(t, tipo, System.StringComparison.Ordinal);
+                <a class="filter-pill @(isActive ? "active" : "")"
+                   asp-action="Index"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-q="@q"
+                   asp-route-tipo="@t">
+                    @t
+                </a>
+            }
+        </div>
+
+        <!-- Preserva pageSize y resetea página al buscar -->
+        <input type="hidden" name="page" value="1" />
+        <input type="hidden" name="pageSize" value="@Model.PageSize" />
+    </div>
+</form>
+
+<!-- Tabla -->
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="table-responsive">
+        <table class="table table-modern table-pro align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th class="text-end">Costo</th>
+                    <th>Responsable</th>
+                    <th>Bodega</th>
+                    <th>Comentarios</th>
+                    <th class="td-center" style="width:240px">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.Items != null && Model.Items.Any())
+                {
+                    foreach (var item in Model.Items)
+                    {
+                        var comentario = string.IsNullOrWhiteSpace(item.ComentariosAdministracion)
+                        ? "—"
+                        : (item.ComentariosAdministracion!.Length > 120
+                        ? item.ComentariosAdministracion.Substring(0, 120) + "…"
+                        : item.ComentariosAdministracion);
+
+                        <tr>
+                            <td><span class="text-nowrap">@item.FechaMantenimiento.ToString("yyyy-MM-dd")</span></td>
+                            <td><span class="badge-soft-accent">@item.TipoMantenimiento</span></td>
+                            <td class="text-end">@item.Costo.ToString("C", cr)</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.EmpresaResponsable) ? "—" : item.EmpresaResponsable)</td>
+                            <td>@(item.Bodega?.Nombre ?? "—")</td>
+                            <td title="@item.ComentariosAdministracion">@comentario</td>
+                            <td class="td-center">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-icon details" title="Detalles" aria-label="Detalles">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                @if (rol == "Administrador")
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon edit" title="Editar" aria-label="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn-icon delete" title="Eliminar" aria-label="Eliminar">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">No hay mantenimientos registrados.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginación -->
+<nav aria-label="Paginación" class="pager-bar mt-2">
+    <div class="small text-muted pager-left">
+        Mostrando @startRow – @endRow de @Model.TotalItems
+    </div>
+
+    <form method="get" class="d-flex align-items-center gap-2 pager-center">
+        <label class="small text-muted mb-0" for="pageSizeSelect">Pág.</label>
+        <select id="pageSizeSelect" name="pageSize" class="form-select form-select-sm" onchange="this.form.submit()">
+            @{
+                var sizes = new[] { 5, 10, 25, 50, 100 };
+            }
+            @foreach (var s in sizes)
+            {
+                if (Model.PageSize == s)
+                {
+                    <option value="@s" selected="selected">@s</option>
+                }
+                else
+                {
+                    <option value="@s">@s</option>
+                }
+            }
+        </select>
+        <!-- Preservar filtros y resetear a página 1 -->
+        <input type="hidden" name="q" value="@q" />
+        <input type="hidden" name="tipo" value="@tipo" />
+        <input type="hidden" name="page" value="1" />
+    </form>
+
+    <ul class="pagination mb-0 pager-right">
+        <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-page="@(Model.Page - 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-q="@q"
+               asp-route-tipo="@tipo">Anterior</a>
+        </li>
+
+        @for (int p = 1; p <= totalPages; p++)
+        {
+            <li class="page-item @(p == Model.Page ? "active" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-page="@p"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-q="@q"
+                   asp-route-tipo="@tipo">@p</a>
+            </li>
+        }
+
+        <li class="page-item @(Model.Page >= totalPages ? "disabled" : "")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-page="@(Model.Page + 1)"
+               asp-route-pageSize="@Model.PageSize"
+               asp-route-q="@q"
+               asp-route-tipo="@tipo">Siguiente</a>
+        </li>
+    </ul>
+</nav>

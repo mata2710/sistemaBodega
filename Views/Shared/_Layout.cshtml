@@ -1,37 +1,67 @@
 ﻿@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
+@inject SistemaBodega.Data.SistemaBodegaContext DbCtx
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - SistemaBodega</title>
+    <title>@ViewData["Title"] - Industrias Unidos S.A</title>
+
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- (Opcional) Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Estilos del sitio -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SistemaBodega.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="text-dark">
     @{
         var rol = HttpContextAccessor.HttpContext?.Session.GetString("Rol");
         var usuario = HttpContextAccessor.HttpContext?.Session.GetString("Usuario");
+
+        // 🔎 Buscar la foto del usuario actual (si hay sesión)
+        string fotoUrl = Url.Content("~/img/perfil.jpg");
+        var uid = HttpContextAccessor.HttpContext?.Session.GetInt32("UsuarioId");
+        if (uid.HasValue)
+        {
+            // Lee solo la ruta de la foto (si existe)
+            var path = DbCtx.Usuarios
+            .Where(u => u.Id == uid.Value)
+            .Select(u => u.FotoFilePath)
+            .FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                fotoUrl = Url.Content("~/" + path.Replace("\\", "/"));
+            }
+        }
     }
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #ffcc00;">
-            <div class="container-fluid justify-content-between">
-                <!-- Marca del sistema -->
-                <a class="navbar-brand text-dark fw-bold" asp-area="" asp-controller="Home" asp-action="Index">SistemaBodega</a>
+        <!-- Navbar con color principal #00809D -->
+        <nav class="navbar navbar-expand-sm navbar-light" style="background-color: #00809D;">
+            <div class="container-fluid">
+                <!-- Marca (texto en blanco) -->
+                <a class="navbar-brand text-white fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    Empresarios Unidos S.A.
+                </a>
 
-                <!-- Info del usuario -->
+                <!-- Usuario (derecha) -->
                 @if (!string.IsNullOrEmpty(usuario))
                 {
-                    <div class="d-flex align-items-center">
-                        <span class="me-3 fw-semibold text-dark">
-                            @usuario (@rol)
-                        </span>
-                        <a asp-controller="Cuenta" asp-action="Logout" class="btn btn-danger btn-sm me-3">Salir</a>
-                        <img src="~/img/perfil.jpg" alt="Perfil" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid white;">
+                    <div class="ms-auto d-flex align-items-center">
+                        <img src="@fotoUrl"
+                             alt="Perfil"
+                             class="rounded-circle me-2"
+                             style="width: 32px; height: 32px; object-fit: cover; border: 2px solid rgba(0,0,0,.15);" />
+                        <span class="fw-semibold text-dark me-2">@usuario (@rol)</span>
+                        <a asp-controller="Cuenta" asp-action="Logout" class="btn btn-danger btn-sm">
+                            Salir
+                        </a>
                     </div>
                 }
             </div>

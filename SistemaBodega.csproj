@@ -19,6 +19,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\img\carrusel\" />
     <Folder Include="wwwroot\contratos\" />
+    <Folder Include="wwwroot\img\usuarios\" />
   </ItemGroup>
 
 </Project>

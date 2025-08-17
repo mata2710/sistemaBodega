@@ -1,111 +1,358 @@
 ﻿@model SistemaBodega.Models.Alquiler
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar alquiler";
+    string BRAND = "#00809D";
+    string BRAND_HOVER = "#00748A";
+    string SAVE_BG = "#437057";  // Guardar
+    string SAVE_HOVER = "#3a5e4a";
 }
 
-<h1>Editar alquiler</h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
-<h4>Alquiler</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+<style>
+    /* ===== Titulares / layout ===== */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid @BRAND;
+    }
 
-            <div class="mb-3">
-                <label asp-for="ClienteId" class="form-label"></label>
-                <select asp-for="ClienteId" class="form-select" asp-items="ViewBag.ClienteId"></select>
-                <span asp-validation-for="ClienteId" class="text-danger"></span>
-            </div>
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
 
-            <div class="mb-3">
-                <label asp-for="BodegaId" class="form-label"></label>
-                <select asp-for="BodegaId" class="form-select" asp-items="ViewBag.BodegaId" id="bodegaSelect"></select>
-                <span asp-validation-for="BodegaId" class="text-danger"></span>
-            </div>
+    /* ===== Grid auxiliar (solo usado en cards si hace falta) ===== */
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem;
+    }
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="FechaInicio" class="form-label"></label>
-                    <input asp-for="FechaInicio" class="form-control" type="date" />
-                    <span asp-validation-for="FechaInicio" class="text-danger"></span>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="FechaFin" class="form-label"></label>
-                    <input asp-for="FechaFin" class="form-control" type="date" />
-                    <span asp-validation-for="FechaFin" class="text-danger"></span>
-                </div>
-            </div>
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
 
-            <!-- Económicos -->
-            <div class="row g-3 mt-1">
-                <div class="col-md-4">
-                    <label asp-for="AreaM2" class="form-label"></label>
-                    <input asp-for="AreaM2" class="form-control" id="areaM2" type="number" step="0.01" min="0" />
-                    <span asp-validation-for="AreaM2" class="text-danger"></span>
-                </div>
-                <div class="col-md-4">
-                    <label asp-for="PrecioPorM2" class="form-label"></label>
-                    <input asp-for="PrecioPorM2" class="form-control" id="precioM2" type="number" step="0.01" min="0" />
-                    <span asp-validation-for="PrecioPorM2" class="text-danger"></span>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Precio estimado</label>
-                    <input id="precioPreview" class="form-control" type="text"
-                           value="@( ((Model?.AreaM2 ?? 0M) * (Model?.PrecioPorM2 ?? 0M)).ToString("0.00") )" readonly />
-                </div>
-            </div>
+        .dl-grid dd {
+            margin: 0;
+        }
 
-            <div class="row g-3 mt-1">
-                <div class="col-md-6">
-                    <label asp-for="AumentoAnualPorcentaje" class="form-label"></label>
-                    <input asp-for="AumentoAnualPorcentaje" class="form-control" type="number" step="0.01" min="0" />
-                    <span asp-validation-for="AumentoAnualPorcentaje" class="text-danger"></span>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Precio actual</label>
-                    <input class="form-control" value="@(Model?.PrecioAlquiler?.ToString("0.00") ?? "0.00")" readonly />
-                </div>
-            </div>
+    /* una sola línea para títulos concretos */
+    .dt-nowrap {
+        white-space: nowrap;
+    }
 
-            <div class="mb-3 mt-3">
-                <label asp-for="Observaciones" class="form-label"></label>
-                <textarea asp-for="Observaciones" class="form-control" rows="3" placeholder="Observaciones del contrato..."></textarea>
-                <span asp-validation-for="Observaciones" class="text-danger"></span>
-            </div>
+    @@media (max-width: 768px) {
+        .dl-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 
-            <!-- Contrato -->
-            <div class="mb-2">
-                <label class="form-label">Contrato (PDF/imagen)</label>
-                <input asp-for="ContratoArchivo" type="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg" />
-                <span asp-validation-for="ContratoArchivo" class="text-danger"></span>
-                @if (!string.IsNullOrWhiteSpace(Model?.ContratoFilePath))
-                {
-                    <div class="form-text mt-1">
-                        Contrato actual:
-                        <a href="@Model.ContratoFilePath" target="_blank" rel="noopener">Ver contrato</a>
-                        (al subir uno nuevo se reemplaza)
+    /* ===== Botones ===== */
+    .btn-save {
+        background: @SAVE_BG !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-save:hover {
+            background: @SAVE_HOVER !important;
+            color: #fff !important;
+        }
+
+    /* Cancelar en ROJO (botón inferior) */
+    .btn-cancel {
+        background: #DC3C22 !important;
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-cancel:hover {
+            filter: brightness(.95) !important;
+            color: #fff !important;
+        }
+
+    /* Volver al listado (superior, igual a Details) */
+    .btn-back {
+        border: 1px solid #d0d5dd;
+        color: #344054;
+    }
+
+        .btn-back:hover {
+            background: #f8f9fa;
+        }
+
+    /* ===== Switches con color ===== */
+    .form-switch .form-check-input.switch-colored {
+        width: 3rem;
+        height: 1.5rem;
+        background-color: #e9ecef;
+        border-color: #ced4da;
+    }
+
+        .form-switch .form-check-input.switch-colored:focus {
+            box-shadow: none;
+        }
+
+        .form-switch .form-check-input.switch-colored:checked {
+            background-color: #437057;
+            border-color: #437057; /* verde activo */
+        }
+
+        .form-switch .form-check-input.switch-colored:not(:checked) {
+            background-color: #FDECEA;
+            border-color: #DC3C22; /* rojo inactivo */
+        }
+
+    /* Pills “Sí/No” */
+    .badge-state {
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        border: 1px solid transparent;
+    }
+
+        .badge-state.ok {
+            background: #EAF3EE;
+            color: #437057;
+            border-color: #437057;
+        }
+
+        .badge-state.no {
+            background: #FDECEA;
+            color: #DC3C22;
+            border-color: #DC3C22;
+        }
+
+    /* Input-groups $ y % */
+    .input-group-text {
+        background: #f8f9fa;
+    }
+
+    /* Sidebar sticky */
+    .sticky-side {
+        position: sticky;
+        top: 1rem;
+    }
+</style>
+
+<div class="d-flex align-items-center justify-content-between mt-3 mb-3 page-tools">
+    <h2 class="m-0">Editar alquiler</h2>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="Index" class="btn btn-sm btn-back">
+            <i class="bi bi-arrow-left-short me-1"></i> Volver al listado
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Datos del contrato</div>
+
+                <form method="post" asp-action="Edit" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="ClienteId" class="form-label"></label>
+                            <select asp-for="ClienteId" class="form-select" asp-items="ViewBag.ClienteId" id="ClienteId"></select>
+                            <span asp-validation-for="ClienteId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="BodegaId" class="form-label"></label>
+                            <select asp-for="BodegaId" class="form-select" asp-items="ViewBag.BodegaId" id="bodegaSelect"></select>
+                            <span asp-validation-for="BodegaId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FechaInicio" class="form-label"></label>
+                            <input asp-for="FechaInicio" class="form-control" type="date" id="FechaInicio" />
+                            <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FechaFin" class="form-label"></label>
+                            <input asp-for="FechaFin" class="form-control" type="date" id="FechaFin" />
+                            <span asp-validation-for="FechaFin" class="text-danger"></span>
+                        </div>
                     </div>
-                }
-            </div>
 
-            <div class="form-check mb-3">
-                <input class="form-check-input" asp-for="RenovacionAutomatica" />
-                <label class="form-check-label" asp-for="RenovacionAutomatica"></label>
-            </div>
+                    <hr class="my-4" />
+                    <div class="section-title">Económicos</div>
 
-            <div class="form-check mb-3">
-                <input class="form-check-input" asp-for="Activo" />
-                <label class="form-check-label" asp-for="Activo"></label>
-            </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="AreaM2" class="form-label"></label>
+                            <input asp-for="AreaM2" class="form-control" id="areaM2" type="number" step="0.01" min="0" />
+                            <span asp-validation-for="AreaM2" class="text-danger"></span>
+                        </div>
 
-            <div class="mt-3">
-                <input type="submit" value="Guardar cambios" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary ms-2">Volver al listado</a>
+                        <div class="col-md-4">
+                            <label asp-for="PrecioPorM2" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="PrecioPorM2" class="form-control" id="precioM2" type="number" step="0.01" min="0" />
+                            </div>
+                            <span asp-validation-for="PrecioPorM2" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-nowrap">Precio estimado</label> <!-- 1 línea -->
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input id="precioPreview" class="form-control" type="text"
+                                       value="@( ((Model?.AreaM2 ?? 0M) * (Model?.PrecioPorM2 ?? 0M)).ToString("0.00") )" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label asp-for="AumentoAnualPorcentaje" class="form-label"></label>
+                            <div class="input-group">
+                                <input asp-for="AumentoAnualPorcentaje" id="AumentoAnualPorcentaje" class="form-control" type="number" step="0.01" min="0" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <span asp-validation-for="AumentoAnualPorcentaje" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Precio actual</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input id="precioActual" class="form-control" type="text"
+                                       value="@(Model?.PrecioAlquiler?.ToString("0.00") ?? "0.00")" readonly />
+                            </div>
+                            <!-- Valor que se enviará al servidor -->
+                            <input asp-for="PrecioAlquiler" type="hidden" id="PrecioAlquilerHidden" />
+                            <span asp-validation-for="PrecioAlquiler" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+                    <div class="section-title">Observaciones</div>
+                    <div class="mb-3">
+                        <textarea asp-for="Observaciones" class="form-control" rows="3" placeholder="Observaciones del contrato..."></textarea>
+                        <span asp-validation-for="Observaciones" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-4" />
+                    <div class="section-title">Contrato</div>
+                    <div class="mb-2">
+                        <label class="form-label">Archivo (PDF/imagen)</label>
+                        <input asp-for="ContratoArchivo" type="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg" />
+                        <span asp-validation-for="ContratoArchivo" class="text-danger"></span>
+                        @if (!string.IsNullOrWhiteSpace(Model?.ContratoFilePath))
+                        {
+                            <div class="form-text mt-1">
+                                Contrato actual:
+                                <a href="@Model.ContratoFilePath" target="_blank" rel="noopener">Ver contrato</a>
+                                (al subir uno nuevo se reemplaza)
+                            </div>
+                        }
+                    </div>
+
+                    <hr class="my-4" />
+                    <div class="section-title">Estado</div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch d-flex align-items-center gap-2">
+                                <input class="form-check-input switch-colored" asp-for="RenovacionAutomatica" role="switch" id="RenovacionAutomatica" />
+                                <label class="form-check-label" asp-for="RenovacionAutomatica"></label>
+                                <span id="renovState" class="badge-state @(Model.RenovacionAutomatica ? "ok" : "no")">
+                                    @(Model.RenovacionAutomatica ? "Sí" : "No")
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-check form-switch d-flex align-items-center gap-2">
+                                <input class="form-check-input switch-colored" asp-for="Activo" role="switch" id="Activo" />
+                                <label class="form-check-label" asp-for="Activo"></label>
+                                <span id="activoState" class="badge-state @(Model.Activo ? "ok" : "no")">
+                                    @(Model.Activo ? "Sí" : "No")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-save">
+                            <i class="bi bi-check2-circle me-1"></i> Guardar cambios
+                        </button>
+                        <a asp-action="Index" class="btn btn-cancel">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
+    </div>
+
+    <!-- Columna lateral (Resumen en vivo) -->
+    <div class="col-lg-4">
+        <div class="sticky-side">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="section-title">Resumen en vivo</div>
+                    <dl class="dl-grid">
+                        <dt><i class="bi bi-person me-2"></i>Cliente</dt>
+                        <dd id="sumCliente">—</dd>
+
+                        <dt><i class="bi bi-house-door me-2"></i>Bodega</dt>
+                        <dd id="sumBodega">—</dd>
+
+                        <dt><i class="bi bi-calendar-event me-2"></i>Inicio</dt>
+                        <dd id="sumInicio">@Model.FechaInicio.ToString("yyyy-MM-dd")</dd>
+
+                        <dt><i class="bi bi-calendar2-check me-2"></i>Fin</dt>
+                        <dd id="sumFin">@Model.FechaFin.ToString("yyyy-MM-dd")</dd>
+
+                        <dt><i class="bi bi-aspect-ratio me-2"></i>Área (m²)</dt>
+                        <dd id="sumArea">@((Model.AreaM2 ?? 0m).ToString("0.00"))</dd>
+
+                        <dt class="dt-nowrap"><i class="bi bi-currency-dollar me-2"></i>Precio por m²</dt>
+                        <dd id="sumPrecioM2">@((Model.PrecioPorM2 ?? 0m).ToString("0.00"))</dd>
+
+                        <dt class="dt-nowrap"><i class="bi bi-calculator me-2"></i>Precio estimado</dt> <!-- 1 línea -->
+                        <dd id="sumPrecioEstimado">@(((Model.AreaM2 ?? 0m) * (Model.PrecioPorM2 ?? 0m)).ToString("0.00"))</dd>
+
+                        <dt><i class="bi bi-graph-up me-2"></i>Aumento anual</dt>
+                        <dd id="sumAumento">@((Model.AumentoAnualPorcentaje ?? 0m).ToString("0.##")) %</dd>
+
+                        <dt><i class="bi bi-cash-stack me-2"></i>Precio actual</dt>
+                        <dd id="sumPrecioActual">@((Model.PrecioAlquiler ?? 0m).ToString("0.00"))</dd>
+
+                        <dt><i class="bi bi-repeat me-2"></i>Renovación</dt>
+                        <dd>
+                            <span id="sumRenov" class="badge-state @(Model.RenovacionAutomatica ? "ok" : "no")">
+                                @(Model.RenovacionAutomatica ? "Sí" : "No")
+                            </span>
+                        </dd>
+
+                        <dt><i class="bi bi-circle-fill me-2"></i>Estado</dt>
+                        <dd>
+                            <span id="sumActivo" class="badge-state @(Model.Activo ? "ok" : "no")">
+                                @(Model.Activo ? "Sí" : "No")
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -113,44 +360,149 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
     <script>
         (function(){
-            const $bodega = document.getElementById('bodegaSelect');
-            const $area   = document.getElementById('areaM2');
-            const $pm2    = document.getElementById('precioM2');
-            const $prev   = document.getElementById('precioPreview');
+          const $form   = document.querySelector('form');
+          const $clienteSel = document.getElementById('ClienteId');
+          const $bodega = document.getElementById('bodegaSelect');
+          const $area   = document.getElementById('areaM2');
+          const $pm2    = document.getElementById('precioM2');
+          const $prev   = document.getElementById('precioPreview');
+          const $aumento = document.getElementById('AumentoAnualPorcentaje');
+          const $precioActual = document.getElementById('precioActual');
+          const $precioAlquilerHidden = document.getElementById('PrecioAlquilerHidden');
 
-            function toNumber(v){
-                if (typeof v === 'string') v = v.replace(',', '.');
-                const n = parseFloat(v);
-                return isNaN(n) ? 0 : n;
+          // Fechas
+          const $inicio = document.getElementById('FechaInicio');
+          const $fin    = document.getElementById('FechaFin');
+
+          // Sidebar targets
+          const sumCliente = document.getElementById('sumCliente');
+          const sumBodega = document.getElementById('sumBodega');
+          const sumInicio = document.getElementById('sumInicio');
+          const sumFin = document.getElementById('sumFin');
+          const sumArea = document.getElementById('sumArea');
+          const sumPrecioM2 = document.getElementById('sumPrecioM2');
+          const sumPrecioEstimado = document.getElementById('sumPrecioEstimado');
+          const sumAumento = document.getElementById('sumAumento');
+          const sumPrecioActual = document.getElementById('sumPrecioActual');
+          const sumRenov = document.getElementById('sumRenov');
+          const sumActivo = document.getElementById('sumActivo');
+
+          // Switches
+          const renovInput = document.getElementById('RenovacionAutomatica');
+          const activoInput = document.getElementById('Activo');
+
+          // ===== Utilidades =====
+          const DEC_SEP = (1.1).toLocaleString().includes(',') ? ',' : '.';
+          function toNumber(v){
+            if (typeof v === 'string') v = v.replace(',', '.');
+            const n = parseFloat(v);
+            return isNaN(n) ? 0 : n;
+          }
+          function formatForPosting(n){
+            const s = n.toFixed(2);
+            return DEC_SEP === ',' ? s.replace('.', ',') : s;
+          }
+          function getSelectedText(sel){
+            if (!sel) return '—';
+            const opt = sel.selectedOptions && sel.selectedOptions[0]
+                        ? sel.selectedOptions[0]
+                        : sel.options && sel.options.length ? sel.options[sel.selectedIndex] : null;
+            const txt = (opt && (opt.textContent || opt.innerText || '')).trim();
+            return txt || '—';
+          }
+          function setText(el, text){ if (el) el.textContent = text; }
+          function paintBadge(input, badge){
+            if(!input || !badge) return;
+            if(input.checked){
+              badge.textContent = 'Sí';
+              badge.classList.remove('no'); badge.classList.add('ok');
+            }else{
+              badge.textContent = 'No';
+              badge.classList.remove('ok'); badge.classList.add('no');
             }
-            function updatePreview(){
-                const total = toNumber($area.value) * toNumber($pm2.value);
-                $prev.value = total.toFixed(2);
-            }
+          }
 
-            $area.addEventListener('input', updatePreview);
-            $pm2.addEventListener('input', updatePreview);
+          // ===== Cálculos económicos =====
+          function updateAll(){
+            const base = toNumber($area?.value || 0) * toNumber($pm2?.value || 0);
+            const pct  = toNumber($aumento?.value || 0); // %
 
-            // Si cambian la bodega, autocompletar con sus valores
-            if ($bodega) {
-                $bodega.addEventListener('change', function(){
-                    const id = this.value;
-                    if(!id){ return; }
-                    fetch('@Url.Action("GetBodegaData", "Alquileres")?id=' + id)
-                        .then(r => r.ok ? r.json() : null)
-                        .then(data => {
-                            if(!data) return;
-                            $area.value = parseFloat(data.areaM2).toFixed(2);
-                            $pm2.value  = parseFloat(data.precioPorM2).toFixed(2);
-                            updatePreview();
-                        })
-                        .catch(() => {});
-                });
-            }
+            if ($prev) $prev.value = base.toFixed(2);
 
-            updatePreview();
+            const nuevo = base * (1 + (pct / 100));
+            if ($precioActual) $precioActual.value = nuevo.toFixed(2);
+            if ($precioAlquilerHidden) $precioAlquilerHidden.value = formatForPosting(nuevo);
+
+            // Sidebar números
+            setText(sumArea, toNumber($area?.value || 0).toFixed(2));
+            setText(sumPrecioM2, toNumber($pm2?.value || 0).toFixed(2));
+            setText(sumPrecioEstimado, base.toFixed(2));
+            setText(sumAumento, pct.toFixed(2) + ' %');
+            setText(sumPrecioActual, nuevo.toFixed(2));
+          }
+
+          // ===== Resumen lateral: selects, fechas y switches =====
+          function updateSelectSummaries(){
+            setText(sumCliente, getSelectedText($clienteSel));
+            setText(sumBodega,  getSelectedText($bodega));
+          }
+          function updateDateSummaries(){
+            setText(sumInicio, $inicio?.value || '—');
+            setText(sumFin,    $fin?.value || '—');
+          }
+          function updateSwitchSummaries(){
+            paintBadge(renovInput, sumRenov);
+            paintBadge(activoInput, sumActivo);
+          }
+
+          // Eventos
+          [$area, $pm2, $aumento].forEach(el => { if (el) el.addEventListener('input', updateAll); });
+          if ($clienteSel) $clienteSel.addEventListener('change', updateSelectSummaries);
+          if ($bodega)     $bodega.addEventListener('change', updateSelectSummaries);
+          if ($inicio)     $inicio.addEventListener('input', updateDateSummaries);
+          if ($fin)        $fin.addEventListener('input', updateDateSummaries);
+
+          ['change','input'].forEach(evt=>{
+            if(renovInput) renovInput.addEventListener(evt, updateSwitchSummaries);
+            if(activoInput) activoInput.addEventListener(evt, updateSwitchSummaries);
+          });
+
+          // Autocompletar al cambiar bodega (área y precio m2)
+          if ($bodega) {
+            $bodega.addEventListener('change', function(){
+              const id = this.value;
+              if(!id){ return; }
+              fetch('@Url.Action("GetBodegaData", "Alquileres")?id=' + id)
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                  if(!data) return;
+                  if ($area) $area.value = parseFloat(data.areaM2).toFixed(2);
+                  if ($pm2)  $pm2.value  = parseFloat(data.precioPorM2).toFixed(2);
+                  updateAll();
+                })
+                .catch(() => {});
+            });
+          }
+
+          // Asegura que el último valor se envíe
+          const formEl = document.querySelector('form');
+          if (formEl) {
+            formEl.addEventListener('submit', function(){ updateAll(); });
+          }
+
+          // ===== Inicialización segura después de pintar el DOM =====
+          requestAnimationFrame(() => {
+            updateSelectSummaries();
+            updateDateSummaries();
+            updateSwitchSummaries();
+            updateAll();
+          });
         })();
     </script>
 }
+
+
+
