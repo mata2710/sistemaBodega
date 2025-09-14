@@ -25,26 +25,49 @@ namespace SistemaBodega.Controllers
 
         // =========================================================
         // GET: Alquileres (Index con paginación + búsqueda + filtros + orden)
+        //  - Por defecto: solo activos
+        //  - verInactivos = true: solo inactivos
         // =========================================================
         public async Task<IActionResult> Index(
-            int page = 1,
-            int pageSize = 10,
-            string? q = null,
-            bool? activos = null,
-            bool? renovacion = null,
-            string? sort = null,
-            string dir = "desc")
+     int page = 1,
+     int pageSize = 10,
+     string? q = null,
+     bool verInactivos = false,
+     bool? renovacion = null,
+     string? sort = null,
+     string dir = "desc")
         {
             // Normaliza page y pageSize
             if (page < 1) page = 1;
             var allowed = new[] { 5, 10, 25, 50, 100 };
             if (!allowed.Contains(pageSize)) pageSize = 10;
 
+            // === Compatibilidad con la vista que envía "activos"
+            // Si llega activos=false -> ver inactivos
+            // Si llega activos=true  -> ver activos
+            // Si no llega "activos", se respeta el valor de verInactivos (default: false -> activos)
+            var activosValues = Request.Query["activos"];
+            if (activosValues.Count > 0)
+            {
+                // Si alguno de los valores es "false", mostramos inactivos.
+                // (robusto cuando el form envía checkbox + hidden con el mismo nombre)
+                if (activosValues.Any(v => string.Equals(v, "false", StringComparison.OrdinalIgnoreCase)))
+                    verInactivos = true;
+                else
+                    verInactivos = false;
+            }
+
+            // Construcción de la consulta (ignorando el filtro global para poder alternar)
             var query = _context.Alquileres
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Include(a => a.Bodega)
                 .Include(a => a.Cliente)
                 .AsQueryable();
+
+            // Filtro principal por estado
+            query = verInactivos ? query.Where(a => !a.Activo)
+                                 : query.Where(a => a.Activo);
 
             // Búsqueda libre
             if (!string.IsNullOrWhiteSpace(q))
@@ -62,10 +85,7 @@ namespace SistemaBodega.Controllers
                 );
             }
 
-            // Filtros rápidos
-            if (activos.HasValue)
-                query = query.Where(a => a.Activo == activos.Value);
-
+            // Filtro de renovación
             if (renovacion.HasValue)
                 query = query.Where(a => a.RenovacionAutomatica == renovacion.Value);
 
@@ -98,17 +118,12 @@ namespace SistemaBodega.Controllers
                                 : query.OrderByDescending(a => a.Activo);
                     break;
                 default:
-                    // Por defecto: más recientes primero por inicio
                     query = query.OrderByDescending(a => a.FechaInicio);
                     break;
             }
 
             var total = await query.CountAsync();
-
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
             var vm = new PagedResult<Alquiler>
             {
@@ -118,9 +133,9 @@ namespace SistemaBodega.Controllers
                 TotalItems = total
             };
 
-            // Mantener estado en la vista
+            // Estado para la vista
             ViewBag.q = q;
-            ViewBag.ActivosFilter = activos;
+            ViewBag.VerInactivos = verInactivos; // <- úsalo en la vista si quieres
             ViewBag.RenovFilter = renovacion;
             ViewBag.Sort = sort;
             ViewBag.Dir = asc ? "asc" : "desc";
@@ -128,14 +143,21 @@ namespace SistemaBodega.Controllers
             return View(vm);
         }
 
+
+        // (Opcional) Atajo para ir directo a inactivos desde un link si lo deseas
+        [HttpGet]
+        public Task<IActionResult> Inactivos(string? q, int page = 1, int pageSize = 10)
+            => Index(page: page, pageSize: pageSize, q: q, verInactivos: true);
+
         // =========================================================
-        // GET: Alquileres/Details/5
+        // GET: Alquileres/Details/5 (permite ver inactivos también)
         // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
             var alquiler = await _context.Alquileres
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Include(a => a.Bodega)
                 .Include(a => a.Cliente)
@@ -204,7 +226,7 @@ namespace SistemaBodega.Controllers
             if (model.AumentoAnualPorcentaje.HasValue && (model.AumentoAnualPorcentaje.Value < 0 || model.AumentoAnualPorcentaje.Value > 100))
                 ModelState.AddModelError(nameof(model.AumentoAnualPorcentaje), "El aumento debe estar entre 0% y 100%.");
 
-            // Cálculo: PrecioAlquiler = AreaM2 * PrecioPorM2 (con aumento opcional)
+            // Cálculo: PrecioAlquiler
             var calculoBase = (model.AreaM2 ?? 0m) * (model.PrecioPorM2 ?? 0m);
             if (model.AumentoAnualPorcentaje.HasValue && model.AumentoAnualPorcentaje.Value > 0m)
             {
@@ -229,7 +251,7 @@ namespace SistemaBodega.Controllers
         }
 
         // =========================================================
-        // GET: Alquileres/Edit/5
+        // GET: Alquileres/Edit/5 (permite abrir inactivos)
         // =========================================================
         public async Task<IActionResult> Edit(int? id)
         {
@@ -238,7 +260,9 @@ namespace SistemaBodega.Controllers
 
             if (id == null) return NotFound();
 
-            var alquiler = await _context.Alquileres.FindAsync(id);
+            var alquiler = await _context.Alquileres
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(a => a.Id == id);
             if (alquiler == null) return NotFound();
 
             await CargarCombosAsync(alquiler.ClienteId, alquiler.BodegaId);
@@ -250,7 +274,7 @@ namespace SistemaBodega.Controllers
         // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ClienteId,BodegaId,FechaInicio,FechaFin,AreaM2,PrecioPorM2,PrecioAlquiler,AumentoAnualPorcentaje,Observaciones,RenovacionAutomatica,Activo,ContratoArchivo")] Alquiler model)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ClienteId,BodegaId,FechaInicio,FechaFin,AreaM2,PrecioPorM2,PrecioAlquiler,AumentoAnualPorcentaje,Observaciones,RenovacionAutomatica,Activo,ContratoArchivo,ContratoFilePath")] Alquiler model)
         {
             if (HttpContext.Session.GetString("Rol") != "Administrador")
                 return RedirectToAction("Index", "Home");
@@ -288,11 +312,14 @@ namespace SistemaBodega.Controllers
                 return View(model);
             }
 
-            // Cargar registro original para preservar/limpiar ruta si corresponde
-            var original = await _context.Alquileres.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+            // Cargar original para conservar ruta si no se sube nuevo archivo
+            var original = await _context.Alquileres
+                .AsNoTracking()
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(a => a.Id == id);
             if (original == null) return NotFound();
 
-            // Si se sube un archivo nuevo, guardar y (opcional) borrar el anterior
+            // Guardar archivo nuevo si corresponde (y borrar el anterior)
             await GuardarContratoSiCorresponde(model, original.ContratoFilePath);
 
             try
@@ -311,53 +338,28 @@ namespace SistemaBodega.Controllers
         }
 
         // =========================================================
-        // GET: Alquileres/Delete/5
+        // POST: Alquileres/Inactivar/5  (NO hay reactivar, NO hay eliminar)
         // =========================================================
-        public async Task<IActionResult> Delete(int? id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Inactivar(int id)
         {
             if (HttpContext.Session.GetString("Rol") != "Administrador")
                 return RedirectToAction("Index", "Home");
-
-            if (id == null) return NotFound();
 
             var alquiler = await _context.Alquileres
-                .AsNoTracking()
-                .Include(a => a.Bodega)
-                .Include(a => a.Cliente)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (alquiler == null) return NotFound();
-
-            return View(alquiler);
-        }
-
-        // =========================================================
-        // POST: Alquileres/Delete/5
-        // =========================================================
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (HttpContext.Session.GetString("Rol") != "Administrador")
-                return RedirectToAction("Index", "Home");
-
-            var alquiler = await _context.Alquileres.FindAsync(id);
-            if (alquiler != null)
+                .FirstOrDefaultAsync(a => a.Id == id && a.Activo);
+            if (alquiler == null)
             {
-                // Si quieres también borrar el archivo físico al eliminar:
-                if (!string.IsNullOrWhiteSpace(alquiler.ContratoFilePath))
-                {
-                    var full = Path.Combine(_env.WebRootPath, alquiler.ContratoFilePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-                    if (System.IO.File.Exists(full))
-                        System.IO.File.Delete(full);
-                }
-
-                _context.Alquileres.Remove(alquiler);
-                await _context.SaveChangesAsync();
+                TempData["Error"] = "No se encontró el alquiler o ya está inactivo.";
+                return RedirectToAction(nameof(Index));
             }
 
-            TempData["Success"] = "Alquiler eliminado correctamente.";
-            return RedirectToAction(nameof(Index));
+            alquiler.Activo = false;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Alquiler desactivado correctamente.";
+            return RedirectToAction(nameof(Index)); // por defecto lista de activos
         }
 
         // ===================== Helpers =====================
@@ -379,13 +381,13 @@ namespace SistemaBodega.Controllers
             ViewData["BodegaId"] = new SelectList(bodegas, "Id", "Nombre", bodegaId);
         }
 
-        private bool AlquilerExists(int id) => _context.Alquileres.Any(e => e.Id == id);
+        private bool AlquilerExists(int id) =>
+            _context.Alquileres.IgnoreQueryFilters().Any(e => e.Id == id);
 
         private async Task GuardarContratoSiCorresponde(Alquiler model, string? anteriorPath = null)
         {
             if (model.ContratoArchivo == null || model.ContratoArchivo.Length == 0)
             {
-                // Si no subieron un archivo nuevo en Edit, conservar el anterior
                 if (!string.IsNullOrWhiteSpace(anteriorPath))
                     model.ContratoFilePath = anteriorPath;
                 return;
@@ -399,11 +401,9 @@ namespace SistemaBodega.Controllers
                 return;
             }
 
-            // Crear carpeta si no existe
             var folder = Path.Combine(_env.WebRootPath, "contratos");
             Directory.CreateDirectory(folder);
 
-            // Nombre único
             var fileName = $"{Guid.NewGuid():N}{ext}";
             var fullPath = Path.Combine(folder, fileName);
 
@@ -412,7 +412,6 @@ namespace SistemaBodega.Controllers
                 await model.ContratoArchivo.CopyToAsync(stream);
             }
 
-            // Borrar anterior si había
             if (!string.IsNullOrWhiteSpace(anteriorPath))
             {
                 var oldFull = Path.Combine(_env.WebRootPath, anteriorPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
@@ -420,9 +419,9 @@ namespace SistemaBodega.Controllers
                     System.IO.File.Delete(oldFull);
             }
 
-            // Guardar ruta relativa
             model.ContratoFilePath = $"/contratos/{fileName}";
         }
     }
 }
+
 

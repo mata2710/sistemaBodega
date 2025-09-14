@@ -1,23 +1,24 @@
 ﻿@model SistemaBodega.Models.Usuario
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
     ViewData["Title"] = "Editar usuario";
 
-    // Valores iniciales para el preview (saneados)
+    // Valores iniciales para preview
     string? nombre = string.IsNullOrWhiteSpace(Model?.NombreCompleto) ? null : Model!.NombreCompleto;
     string? correo = string.IsNullOrWhiteSpace(Model?.Correo) ? null : Model!.Correo;
     string? rol = string.IsNullOrWhiteSpace(Model?.Rol) ? null : Model!.Rol;
+    string? cedula = string.IsNullOrWhiteSpace(Model?.Cedula) ? null : Model!.Cedula;
+    string? telefono = string.IsNullOrWhiteSpace(Model?.Telefono) ? null : Model!.Telefono;
 
-    // ✅ Foto actual (si no hay, usa la de perfil por defecto)
     var fotoUrl = Url.Content(string.IsNullOrWhiteSpace(Model?.FotoFilePath)
         ? "~/img/perfil.png"
-        : "~/" + Model.FotoFilePath);
+        : "~/" + Model!.FotoFilePath);
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
 <style>
-    /* ===== Estructura y layout ===== */
     .section-title {
         font-size: 1rem;
         font-weight: 600;
@@ -41,7 +42,6 @@
             margin-top: 0 !important;
         }
 
-    /* ===== Botones ===== */
     .btn-save {
         background: #437057 !important;
         color: #fff !important;
@@ -73,12 +73,10 @@
             box-shadow: 0 0 0 .2rem rgba(220,60,34,.25) !important;
         }
 
-    /* ===== Input groups con iconos ===== */
     .input-group-text i {
         opacity: .85;
     }
 
-    /* ===== Grid mini para resumen ===== */
     .dl-grid {
         display: grid;
         grid-template-columns: 160px 1fr;
@@ -97,7 +95,12 @@
             margin: 0;
         }
 
-    /* ===== Badge "Pendiente" ===== */
+    .pv-wrap {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        hyphens: auto;
+    }
+
     .badge-pending {
         background: #EAC8A6;
         color: #3d2b12;
@@ -108,14 +111,6 @@
         font-size: .85rem;
     }
 
-    /* Evitar desbordes en correos largos del preview (ajuste solicitado) */
-    #pvCorreo {
-        overflow-wrap: anywhere;
-        word-break: break-word;
-        hyphens: auto;
-    }
-
-    /* ✅ Estilos mínimos para la foto (sin tocar el resto) */
     .avatar-mini {
         width: 64px;
         height: 64px;
@@ -123,6 +118,33 @@
         object-fit: cover;
         border: 1px solid #e5e7eb;
     }
+
+    .has-toggle {
+        position: relative;
+    }
+
+    .toggle-pass {
+        position: absolute;
+        right: .75rem;
+        top: 0;
+        bottom: 0;
+        margin: auto 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+        .toggle-pass i {
+            color: var(--brand) !important;
+            font-size: 1.2rem !important;
+            line-height: 1;
+        }
 </style>
 
 <div class="page-tools mt-3 mb-3">
@@ -137,32 +159,37 @@
     <div class="col-lg-8">
         <div class="card shadow-sm">
             <div class="card-body">
-                <!-- ✅ enctype para permitir subir imagen -->
                 <form asp-controller="Admin" asp-action="EditarUsuario" method="post" enctype="multipart/form-data" novalidate>
                     @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
 
-                    <input type="hidden" name="Id" value="@Model.Id" />
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger rounded-3 mb-3"
+                         role="alert"
+                         style="display:@(ViewData.ModelState.IsValid ? "none" : "block")">
+                        Revisa los campos marcados en rojo.
+                    </div>
 
-                    <!-- ✅ Bloque para cambiar la imagen (solo agregado) -->
+                    <input type="hidden" name="id" value="@Model.Id" />
+
+                    <!-- Foto -->
                     <div class="mb-3 d-flex align-items-center gap-3">
                         <img id="pvFoto" src="@fotoUrl" alt="Foto" class="avatar-mini" />
                         <div>
-                            <label for="inFoto" class="btn btn-sm btn-outline-secondary mb-1">
-                                <i class="bi bi-image"></i> Cambiar foto
+                            <label for="inFoto" class="btn btn-sm btn-primary mb-1">
+                                <i class="bi bi-image"></i> Subir foto
                             </label>
                             <input type="file" id="inFoto" name="Foto" accept="image/*" class="d-none" />
                             <div class="form-text">PNG, JPG (máx. 2&nbsp;MB)</div>
                         </div>
                     </div>
-                    <!-- /bloque imagen -->
 
+                    <!-- Nombre -->
                     <div class="mb-3">
                         <label for="inNombre" class="form-label">Nombre completo</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-person"></i></span>
                             <input type="text"
-                                   name="NombreCompleto"
+                                   name="nombreCompleto"
                                    id="inNombre"
                                    class="form-control"
                                    value="@Model.NombreCompleto"
@@ -172,12 +199,13 @@
                         <span class="text-danger small">@Html.ValidationMessage("NombreCompleto")</span>
                     </div>
 
+                    <!-- Correo -->
                     <div class="mb-3">
                         <label for="inCorreo" class="form-label">Correo electrónico</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                             <input type="email"
-                                   name="Correo"
+                                   name="correo"
                                    id="inCorreo"
                                    class="form-control"
                                    value="@Model.Correo"
@@ -188,19 +216,90 @@
                         <span class="text-danger small">@Html.ValidationMessage("Correo")</span>
                     </div>
 
+                    <!-- Rol -->
                     <div class="mb-3">
-                        <label for="inRol" class="form-label">Rol</label>
+                        <label class="form-label" for="inRol">Rol</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-person-gear"></i></span>
-                            <select asp-for="Rol" name="Rol" id="inRol" class="form-select" required>
-                                <option value="Empleado">Empleado</option>
-                                <option value="Administrador">Administrador</option>
+                            <select asp-for="Rol"
+                                    id="inRol"
+                                    class="form-select"
+                                    asp-items="@(new SelectList(new[] { "Empleado", "Administrador" }, Model?.Rol))"
+                                    name="rol"
+                                    required>
                             </select>
                         </div>
                         <span class="text-danger small">@Html.ValidationMessage("Rol")</span>
                     </div>
 
-                    <div class="d-flex flex-wrap gap-2 mt-3">
+                    <!-- Cédula y Teléfono -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="inCedula" class="form-label">Número de cédula</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                <input type="text"
+                                       name="cedula"
+                                       id="inCedula"
+                                       class="form-control"
+                                       value="@Model.Cedula"
+                                       placeholder="3-101-123456"
+                                       inputmode="numeric" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="inTelefono" class="form-label">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="text"
+                                       name="telefono"
+                                       id="inTelefono"
+                                       class="form-control"
+                                       value="@Model.Telefono"
+                                       placeholder="8888-8888"
+                                       inputmode="tel" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cambio de contraseña (opcional) -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label for="inNewPass" class="form-label">Nueva contraseña</label>
+                            <div class="has-toggle">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                    <input type="password"
+                                           name="nuevaContrasena"
+                                           id="inNewPass"
+                                           class="form-control"
+                                           placeholder="Dejar en blanco si no cambia" />
+                                </div>
+                                <button type="button" class="toggle-pass" data-target="#inNewPass" aria-label="Mostrar/ocultar">
+                                    <i class="bi bi-eye-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="inConfirmPass" class="form-label">Confirmar contraseña</label>
+                            <div class="has-toggle">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                                    <input type="password"
+                                           name="confirmarContrasena"
+                                           id="inConfirmPass"
+                                           class="form-control"
+                                           placeholder="Repite la contraseña" />
+                                </div>
+                                <button type="button" class="toggle-pass" data-target="#inConfirmPass" aria-label="Mostrar/ocultar">
+                                    <i class="bi bi-eye-slash"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Si completas ambos campos, se actualizará la contraseña.</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
                         <button type="submit" class="btn btn-save">
                             <i class="bi bi-check2"></i> Guardar cambios
                         </button>
@@ -213,45 +312,79 @@
         </div>
     </div>
 
-    <!-- Columna derecha: preview en vivo -->
+    <!-- Columna derecha: preview -->
     <div class="col-lg-4">
         <div class="card shadow-sm">
             <div class="card-body">
                 <div class="section-title">Resumen (preview)</div>
                 <dl class="dl-grid">
                     <dt>Nombre</dt>
-                    <dd id="pvNombre">
+                    <dd id="pvNombre" class="pv-wrap">
                         @if (nombre == null)
                         {
                             <span class="badge-pending">Pendiente</span>
+                            ;
                         }
                         else
                         {
+
                             @nombre
                         }
                     </dd>
 
                     <dt>Correo</dt>
-                    <dd id="pvCorreo">
+                    <dd id="pvCorreo" class="pv-wrap">
                         @if (correo == null)
                         {
                             <span class="badge-pending">Pendiente</span>
+                            ;
                         }
                         else
                         {
+
                             @correo
                         }
                     </dd>
 
                     <dt>Rol</dt>
-                    <dd id="pvRol">
+                    <dd id="pvRol" class="pv-wrap">
                         @if (rol == null)
                         {
                             <span class="badge-pending">Pendiente</span>
+                            ;
                         }
                         else
                         {
+
                             @rol
+                        }
+                    </dd>
+
+                    <dt>Cédula</dt>
+                    <dd id="pvCedula" class="pv-wrap">
+                        @if (cedula == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                            ;
+                        }
+                        else
+                        {
+
+                            @cedula
+                        }
+                    </dd>
+
+                    <dt>Teléfono</dt>
+                    <dd id="pvTelefono" class="pv-wrap">
+                        @if (telefono == null)
+                        {
+                            <span class="badge-pending">Pendiente</span>
+                            ;
+                        }
+                        else
+                        {
+
+                            @telefono
                         }
                     </dd>
                 </dl>
@@ -268,13 +401,17 @@
         (function () {
             const PEND = '<span class="badge-pending">Pendiente</span>';
 
-            const $nombre = document.getElementById('inNombre');
-            const $correo = document.getElementById('inCorreo');
-            const $rol    = document.getElementById('inRol');
+            const $nombre   = document.getElementById('inNombre');
+            const $correo   = document.getElementById('inCorreo');
+            const $rol      = document.getElementById('inRol');
+            const $cedula   = document.getElementById('inCedula');
+            const $telefono = document.getElementById('inTelefono');
 
-            const $pvNombre = document.getElementById('pvNombre');
-            const $pvCorreo = document.getElementById('pvCorreo');
-            const $pvRol    = document.getElementById('pvRol');
+            const $pvNombre   = document.getElementById('pvNombre');
+            const $pvCorreo   = document.getElementById('pvCorreo');
+            const $pvRol      = document.getElementById('pvRol');
+            const $pvCedula   = document.getElementById('pvCedula');
+            const $pvTelefono = document.getElementById('pvTelefono');
 
             const val = el => (el && el.value ? el.value.trim() : '');
             const setHTML = (el, html) => { if (el) el.innerHTML = html; };
@@ -283,12 +420,16 @@
             function upNombre(){ const v = val($nombre); v ? setText($pvNombre, v) : setHTML($pvNombre, PEND); }
             function upCorreo(){ const v = val($correo); v ? setText($pvCorreo, v) : setHTML($pvCorreo, PEND); }
             function upRol(){ const v = val($rol); v ? setText($pvRol, v) : setHTML($pvRol, PEND); }
+            function upCedula(){ const v = val($cedula); v ? setText($pvCedula, v) : setHTML($pvCedula, PEND); }
+            function upTelefono(){ const v = val($telefono); v ? setText($pvTelefono, v) : setHTML($pvTelefono, PEND); }
 
-            if ($nombre) $nombre.addEventListener('input', upNombre);
-            if ($correo) $correo.addEventListener('input', upCorreo);
-            if ($rol)    $rol.addEventListener('change', upRol);
+            if ($nombre)   $nombre.addEventListener('input', upNombre);
+            if ($correo)   $correo.addEventListener('input', upCorreo);
+            if ($rol)      $rol.addEventListener('change', upRol);
+            if ($cedula)   $cedula.addEventListener('input', upCedula);
+            if ($telefono) $telefono.addEventListener('input', upTelefono);
 
-            // ✅ Preview de la foto seleccionada
+            // Preview de foto seleccionada
             const $inFoto = document.getElementById('inFoto');
             const $pvFoto = document.getElementById('pvFoto');
             if ($inFoto && $pvFoto) {
@@ -302,10 +443,25 @@
                 });
             }
 
+            // Toggle ojos
+            document.querySelectorAll('.toggle-pass').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const targetSel = this.getAttribute('data-target');
+                    const input = document.querySelector(targetSel);
+                    if (!input) return;
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        if (icon) { icon.classList.remove('bi-eye-slash'); icon.classList.add('bi-eye'); }
+                    } else {
+                        input.type = 'password';
+                        if (icon) { icon.classList.remove('bi-eye'); icon.classList.add('bi-eye-slash'); }
+                    }
+                });
+            });
+
             // init
-            upNombre(); upCorreo(); upRol();
+            upNombre(); upCorreo(); upRol(); upCedula(); upTelefono();
         })();
     </script>
 }
-
-

@@ -39,5 +39,16 @@ namespace SistemaBodega.Models
         [Display(Name = "Comentarios de la Administración")]
         [DataType(DataType.MultilineText)]
         public string? ComentariosAdministracion { get; set; }
+
+        // ===== Soft-delete =====
+        [Display(Name = "Activo")]
+        public bool IsActive { get; set; } = true;
+
+        [Display(Name = "Fecha de Desactivación")]
+        public DateTime? DeactivatedAt { get; set; }
+
+        [Display(Name = "Desactivado por")]
+        [StringLength(150)]
+        public string? DeactivatedBy { get; set; }
     }
 }

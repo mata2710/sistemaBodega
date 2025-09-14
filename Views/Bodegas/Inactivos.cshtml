@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Http
 
 @{
-    ViewData["Title"] = "Bodegas";
+    ViewData["Title"] = "Bodegas inactivas";
     var rol = Context.Session.GetString("Rol");
 
     string filtroNombre = ViewBag.FiltroNombre as string ?? string.Empty;
@@ -28,25 +28,81 @@
     bool selRes = string.Equals(filtroEstado, "Reservada", System.StringComparison.OrdinalIgnoreCase);
 }
 
+<style>
+    /* Solo lo que NO está ya en site.css */
+    .card-filters {
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: .75rem;
+    }
+
+    /* Badges de estado (disponible/ocupada/reservada) */
+    .badge-state {
+        display: inline-block;
+        padding: .25rem .6rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        border: 1px solid transparent;
+    }
+
+    .state-available {
+        background: #E7F6EC;
+        color: #1F7A39;
+        border-color: #BDE4C7;
+    }
+
+    .state-occupied {
+        background: #fdecea;
+        color: #b42318;
+        border-color: #f5c2c7;
+    }
+
+    .state-reserved {
+        background: #fff4cc;
+        color: #664d03;
+        border-color: #ffec99;
+    }
+
+    /* Ordenables del thead (estética ligera) */
+    .table-pro thead a.th-sort {
+        color: #212529 !important;
+        text-decoration: none !important;
+        font-weight: 600;
+    }
+
+        .table-pro thead a.th-sort:hover {
+            color: #111 !important;
+            text-decoration: none !important;
+        }
+
+    .table-pro thead .th-sort i {
+        font-size: .9rem;
+        opacity: .9;
+        color: #6c757d;
+        margin-left: .25rem;
+    }
+</style>
+
 <!-- Encabezado -->
 <div class="page-tools mt-3 mb-3 justify-content-between">
     <div>
-        <h1 class="m-0">Bodegas</h1>
+        <h1 class="m-0">Bodegas inactivas</h1>
         <div class="text-muted">Total: @Model.TotalItems</div>
     </div>
 
-    @if (rol == "Administrador")
-    {
-        <!-- ⚠️ Mantener SIEMPRE este orden: 1) Crear (verde), 2) Ver inactivas (naranja) -->
-        <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2">
+        @* ⚠️ Mantener SIEMPRE este orden para colores por posición (site.css):
+           1) Crear (verde)  2) Volver a Activos (naranja) *@
+        @if (rol == "Administrador")
+        {
             <a asp-action="Create" class="btn">
                 <i class="bi bi-plus-lg me-1"></i> Crear Bodega
             </a>
-            <a asp-action="Inactivos" class="btn">
-                <i class="bi bi-eye-slash me-1"></i> Ver inactivas
-            </a>
-        </div>
-    }
+        }
+        <a asp-action="Index" class="btn">
+            <i class="bi bi-arrow-left-circle me-1"></i> Volver a Activos
+        </a>
+    </div>
 </div>
 
 @if (TempData["Success"] is string ok && !string.IsNullOrWhiteSpace(ok))
@@ -65,7 +121,7 @@
 }
 
 <!-- Filtros -->
-<form method="get" class="card card-filters shadow-sm mb-3">
+<form method="get" class="card card-filters shadow-sm mb-3" asp-action="Inactivos">
     <div class="card-body">
         <div class="row g-2 align-items-end">
             <div class="col-md-6">
@@ -84,10 +140,10 @@
             </div>
         </div>
 
-        <!-- Pills rápidas (Estado) -->
+        <!-- Pills rápidas (usa estilos globales .filters-quick / .filter-pill) -->
         <div class="filters-quick mt-3">
             <a class="filter-pill @(selTodos ? "active" : "")"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="1"
                asp-route-pageSize="@Model.PageSize"
                asp-route-nombre="@filtroNombre"
@@ -97,7 +153,7 @@
                asp-route-dir="@sortDir">Todas</a>
 
             <a class="filter-pill @(selDisp ? "active" : "")"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="1"
                asp-route-pageSize="@Model.PageSize"
                asp-route-nombre="@filtroNombre"
@@ -107,7 +163,7 @@
                asp-route-dir="@sortDir">Disponible</a>
 
             <a class="filter-pill @(selOc ? "active" : "")"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="1"
                asp-route-pageSize="@Model.PageSize"
                asp-route-nombre="@filtroNombre"
@@ -117,7 +173,7 @@
                asp-route-dir="@sortDir">Ocupada</a>
 
             <a class="filter-pill @(selRes ? "active" : "")"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="1"
                asp-route-pageSize="@Model.PageSize"
                asp-route-nombre="@filtroNombre"
@@ -140,7 +196,7 @@
             <tr>
                 <th>
                     <a class="th-sort"
-                       asp-action="Index"
+                       asp-action="Inactivos"
                        asp-route-sort="nombre"
                        asp-route-dir="@nextNombre"
                        asp-route-page="1"
@@ -157,7 +213,7 @@
                 </th>
                 <th>
                     <a class="th-sort"
-                       asp-action="Index"
+                       asp-action="Inactivos"
                        asp-route-sort="complejo"
                        asp-route-dir="@nextComplejo"
                        asp-route-page="1"
@@ -174,7 +230,7 @@
                 </th>
                 <th>
                     <a class="th-sort"
-                       asp-action="Index"
+                       asp-action="Inactivos"
                        asp-route-sort="estado"
                        asp-route-dir="@nextEstado"
                        asp-route-page="1"
@@ -191,7 +247,7 @@
                 </th>
                 <th class="text-nowrap">
                     <a class="th-sort"
-                       asp-action="Index"
+                       asp-action="Inactivos"
                        asp-route-sort="area"
                        asp-route-dir="@nextArea"
                        asp-route-page="1"
@@ -208,7 +264,7 @@
                 </th>
                 <th class="text-nowrap">
                     <a class="th-sort"
-                       asp-action="Index"
+                       asp-action="Inactivos"
                        asp-route-sort="pm2"
                        asp-route-dir="@nextPm2"
                        asp-route-page="1"
@@ -225,7 +281,7 @@
                 </th>
                 <th class="text-nowrap">
                     <a class="th-sort"
-                       asp-action="Index"
+                       asp-action="Inactivos"
                        asp-route-sort="precio"
                        asp-route-dir="@nextPrecio"
                        asp-route-page="1"
@@ -273,24 +329,19 @@
                         <td class="text-nowrap">@(item.Precio.HasValue ? "$ " + item.Precio.Value.ToString("N2") : "—")</td>
 
                         <td class="td-center">
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn-icon details" title="Detalles" aria-label="Detalles">
-                                <i class="bi bi-eye"></i>
-                            </a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn-icon details" title="Detalles" aria-label="Detalles"><i class="bi bi-eye"></i></a>
                             @if (rol == "Administrador")
                             {
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon edit" title="Editar" aria-label="Editar">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon edit" title="Editar" aria-label="Editar"><i class="bi bi-pencil-square"></i></a>
 
-                                <!-- Desactivar (soft-delete) -->
-                                <form asp-action="Desactivar"
+                                <!-- ♻️ Reactivar -->
+                                <form asp-action="Activar"
                                       asp-route-id="@item.Id"
                                       method="post"
-                                      class="d-inline"
-                                      onsubmit="return confirm('¿Desactivar esta bodega?');">
+                                      class="d-inline">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn-icon deactivate" title="Desactivar" aria-label="Desactivar">
-                                        <i class="bi bi-slash-circle"></i>
+                                    <button type="submit" class="btn-icon activate" title="Reactivar" aria-label="Reactivar">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
                                     </button>
                                 </form>
                             }
@@ -300,7 +351,7 @@
             }
             else
             {
-                <tr><td colspan="7" class="text-center text-muted py-4">No hay bodegas que coincidan con el filtro.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-4">No hay bodegas inactivas que coincidan con el filtro.</td></tr>
             }
         </tbody>
     </table>
@@ -311,7 +362,7 @@
         Mostrando @startRow – @endRow de @Model.TotalItems
     </div>
 
-    <form method="get" class="d-flex align-items-center gap-2 pager-center">
+    <form method="get" class="d-flex align-items-center gap-2 pager-center" asp-action="Inactivos">
         <label class="small text-muted mb-0" for="pageSizeSelect">Pág.</label>
         <select id="pageSizeSelect" name="pageSize" class="form-select form-select-sm" onchange="this.form.submit()">
             @{
@@ -321,11 +372,13 @@
             {
                 if (Model.PageSize == s)
                 {
-                    <option value="@s" selected="selected">@s</option>
+                    <option value="@s" selected>@s</option>
+                    ;
                 }
                 else
                 {
                     <option value="@s">@s</option>
+                    ;
                 }
             }
         </select>
@@ -341,7 +394,7 @@
     <ul class="pagination mb-0 pager-right">
         <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
             <a class="page-link"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="@(Model.Page - 1)"
                asp-route-pageSize="@Model.PageSize"
                asp-route-nombre="@filtroNombre"
@@ -355,7 +408,7 @@
         {
             <li class="page-item @(p == Model.Page ? "active" : "")">
                 <a class="page-link"
-                   asp-action="Index"
+                   asp-action="Inactivos"
                    asp-route-page="@p"
                    asp-route-pageSize="@Model.PageSize"
                    asp-route-nombre="@filtroNombre"
@@ -368,7 +421,7 @@
 
         <li class="page-item @(Model.Page >= totalPages ? "disabled" : "")">
             <a class="page-link"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="@(Model.Page + 1)"
                asp-route-pageSize="@Model.PageSize"
                asp-route-nombre="@filtroNombre"

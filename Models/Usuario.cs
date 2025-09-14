@@ -1,23 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace SistemaBodega.Models;
-
-public partial class Usuario
+namespace SistemaBodega.Models
 {
-    public int Id { get; set; }
+    public partial class Usuario
+    {
+        public int Id { get; set; }
 
-    public string NombreCompleto { get; set; } = null!;
+        [Required, StringLength(100)]
+        public string NombreCompleto { get; set; } = null!;
 
-    public string Correo { get; set; } = null!;
+        [Required, StringLength(100), EmailAddress]
+        public string Correo { get; set; } = null!;
 
-    public string Contrasena { get; set; } = null!;
+        [Required, StringLength(100)]
+        public string Contrasena { get; set; } = null!;
 
-    public string Rol { get; set; } = null!;
+        [Required, StringLength(50)]
+        public string Rol { get; set; } = null!;
 
-    public string? TokenRecuperacion { get; set; }
+        [StringLength(100)]
+        public string? TokenRecuperacion { get; set; }
 
-    public string? FotoFilePath { get; set; }
+        [StringLength(260)]
+        public string? FotoFilePath { get; set; }
 
-    public virtual ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
+        [Display(Name = "Número de cédula")]
+        [StringLength(50)]
+        public string? Cedula { get; set; }
+
+        [Display(Name = "Teléfono")]
+        [StringLength(30)]
+        public string? Telefono { get; set; }
+
+        public virtual ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
+    }
 }

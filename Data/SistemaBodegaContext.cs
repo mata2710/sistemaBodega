@@ -27,18 +27,16 @@ namespace SistemaBodega.Data
             modelBuilder.Entity<Bodega>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.ToTable("Bodega"); // coincide con la tabla real en SQL
+                entity.ToTable("Bodega");
 
                 entity.Property(e => e.Nombre).HasMaxLength(100);
                 entity.Property(e => e.Ubicacion).HasMaxLength(150);
                 entity.Property(e => e.Complejo).HasMaxLength(100);
                 entity.Property(e => e.Estado).HasMaxLength(50);
 
-                // Columnas base
                 entity.Property(e => e.AreaM2).HasColumnType("decimal(10, 2)");
                 entity.Property(e => e.PrecioAlquilerPorM2).HasColumnType("decimal(10, 2)");
 
-                // Columna calculada PERSISTED
                 entity.Property(e => e.Precio)
                       .HasColumnType("decimal(10, 2)")
                       .HasComputedColumnSql(
@@ -64,6 +62,8 @@ namespace SistemaBodega.Data
 
                 entity.Property(e => e.RepresentanteLegal).HasMaxLength(150);
                 entity.Property(e => e.Actividad).HasMaxLength(100);
+
+                // Soft-delete por convención (partial)
             });
 
             // ======================
@@ -74,16 +74,30 @@ namespace SistemaBodega.Data
                 entity.ToTable("Mantenimientos");
                 entity.HasKey(e => e.Id);
 
-                entity.Property(e => e.FechaMantenimiento).HasColumnType("date");               // ← NUEVO: guardar solo fecha
-                entity.Property(e => e.TipoMantenimiento).HasMaxLength(50);                     // Mantener acorde a la BD
+                entity.Property(e => e.FechaMantenimiento).HasColumnType("date");
+                entity.Property(e => e.TipoMantenimiento).HasMaxLength(50);
                 entity.Property(e => e.EmpresaResponsable).HasMaxLength(100);
                 entity.Property(e => e.Costo).HasColumnType("decimal(10, 2)");
-                entity.Property(e => e.ComentariosAdministracion).HasColumnType("nvarchar(max)"); // ← NUEVO: texto largo
+                entity.Property(e => e.ComentariosAdministracion).HasColumnType("nvarchar(max)");
 
                 entity.HasOne(d => d.Bodega)
                       .WithMany(p => p.Mantenimientos)
                       .HasForeignKey(d => d.IdBodega)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                // ===== CAMBIOS para soft-delete (opcionales si ya existen en tu modelo) =====
+                entity.Property(e => e.IsActive)
+                      .HasColumnType("bit")
+                      .HasDefaultValue(true);
+
+                entity.Property(e => e.DeactivatedAt)
+                      .HasColumnType("datetime2")
+                      .IsRequired(false);
+
+                entity.Property(e => e.DeactivatedBy)
+                      .HasMaxLength(150)
+                      .IsUnicode(false)
+                      .IsRequired(false);
             });
 
             // ======================
@@ -138,6 +152,7 @@ namespace SistemaBodega.Data
                 entity.Property(e => e.NombreCompleto).HasMaxLength(100);
                 entity.Property(e => e.Rol).HasMaxLength(50);
                 entity.Property(e => e.TokenRecuperacion).HasMaxLength(100).IsUnicode(false);
+                // Soft-delete por convención (partial)
             });
 
             // ======================
@@ -151,14 +166,12 @@ namespace SistemaBodega.Data
                 entity.Property(e => e.FechaInicio).HasColumnType("date");
                 entity.Property(e => e.FechaFin).HasColumnType("date");
 
-                // Económicos / texto
                 entity.Property(e => e.AreaM2).HasColumnType("decimal(10, 2)");
                 entity.Property(e => e.PrecioPorM2).HasColumnType("decimal(10, 2)");
                 entity.Property(e => e.PrecioAlquiler).HasColumnType("decimal(10, 2)");
                 entity.Property(e => e.AumentoAnualPorcentaje).HasColumnType("decimal(5, 2)");
                 entity.Property(e => e.Observaciones).HasColumnType("nvarchar(max)");
 
-                // Ruta del archivo de contrato
                 entity.Property(e => e.ContratoFilePath).HasMaxLength(300);
 
                 entity.HasOne(e => e.Bodega)
@@ -171,6 +184,19 @@ namespace SistemaBodega.Data
                       .HasForeignKey(e => e.ClienteId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
+            // ======================
+            // GLOBAL QUERY FILTERS (Soft-delete)
+            // ======================
+            modelBuilder.Entity<Usuario>().HasQueryFilter(u => u.IsActive);
+            modelBuilder.Entity<Cliente>().HasQueryFilter(c => c.IsActive);
+            modelBuilder.Entity<Alquiler>().HasQueryFilter(a => a.Activo);
+            modelBuilder.Entity<Bodega>().HasQueryFilter(b => b.IsActive);
+
+            // 👇 NUEVO: solo mantenimientos activos por defecto
+            modelBuilder.Entity<Mantenimiento>().HasQueryFilter(m => m.IsActive);
+
+            // Si agregas IsActive a otras entidades, puedes sumar más filtros aquí
 
             OnModelCreatingPartial(modelBuilder);
         }

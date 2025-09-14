@@ -230,38 +230,156 @@ namespace SistemaBodega.Controllers
         }
 
         // =========================================================
-        // GET: Mantenimientos/Delete/5
+        // (NUEVO) GET: Mantenimientos/Inactivos (mismos filtros + paginación)
         // =========================================================
         [AuthorizeRol("Administrador")]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Inactivos(
+            int? bodegaId,
+            string? tipo,
+            string? empresa,
+            DateTime? desde,
+            DateTime? hasta,
+            string? q,
+            int page = 1,
+            int pageSize = 25)
         {
-            if (id == null) return NotFound();
+            if (page < 1) page = 1;
+            if (pageSize < 5) pageSize = 25;
 
-            var mantenimiento = await _context.Mantenimientos
+            var query = _context.Mantenimientos
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Include(m => m.Bodega)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Where(m => !m.IsActive) // Solo inactivos
+                .AsQueryable();
 
-            if (mantenimiento == null) return NotFound();
+            if (bodegaId.HasValue && bodegaId.Value > 0)
+                query = query.Where(m => m.IdBodega == bodegaId.Value);
 
-            return View(mantenimiento);
+            if (!string.IsNullOrWhiteSpace(tipo))
+            {
+                var t = tipo.Trim();
+                query = query.Where(m => m.TipoMantenimiento != null && EF.Functions.Like(m.TipoMantenimiento, $"%{t}%"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(empresa))
+            {
+                var e = empresa.Trim();
+                query = query.Where(m => m.EmpresaResponsable != null && EF.Functions.Like(m.EmpresaResponsable, $"%{e}%"));
+            }
+
+            if (desde.HasValue)
+                query = query.Where(m => m.FechaMantenimiento >= desde.Value.Date);
+
+            if (hasta.HasValue)
+                query = query.Where(m => m.FechaMantenimiento <= hasta.Value.Date.AddDays(1).AddTicks(-1));
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var s = q.Trim();
+                query = query.Where(m =>
+                    (m.ComentariosAdministracion != null && EF.Functions.Like(m.ComentariosAdministracion, $"%{s}%")) ||
+                    (m.TipoMantenimiento != null && EF.Functions.Like(m.TipoMantenimiento, $"%{s}%")) ||
+                    (m.EmpresaResponsable != null && EF.Functions.Like(m.EmpresaResponsable, $"%{s}%")) ||
+                    (m.Bodega != null && (
+                        EF.Functions.Like(m.Bodega.Nombre, $"%{s}%") ||
+                        (m.Bodega.Ubicacion != null && EF.Functions.Like(m.Bodega.Ubicacion, $"%{s}%"))
+                    ))
+                );
+            }
+
+            ViewBag.BodegasFiltro = await _context.Bodegas
+                .AsNoTracking()
+                .OrderBy(b => b.Nombre)
+                .Select(b => new { b.Id, Nombre = b.Nombre + " - " + b.Ubicacion })
+                .ToListAsync();
+
+            ViewBag.FiltroBodegaId = bodegaId;
+            ViewBag.FiltroTipo = tipo;
+            ViewBag.FiltroEmpresa = empresa;
+            ViewBag.FiltroDesde = desde?.ToString("yyyy-MM-dd");
+            ViewBag.FiltroHasta = hasta?.ToString("yyyy-MM-dd");
+            ViewBag.FiltroQ = q;
+
+            var total = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(m => m.FechaMantenimiento)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var vm = new PagedResult<Mantenimiento>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = total
+            };
+
+            return View(vm);
         }
 
         // =========================================================
-        // POST: Mantenimientos/Delete/5
+        // (REEMPLAZO DE DELETE) POST: Mantenimientos/Desactivar/5
         // =========================================================
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizeRol("Administrador")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Desactivar(int id)
         {
-            var mantenimiento = await _context.Mantenimientos.FindAsync(id);
-            if (mantenimiento != null)
+            var mantenimiento = await _context.Mantenimientos
+                .FirstOrDefaultAsync(m => m.Id == id && m.IsActive);
+
+            if (mantenimiento == null)
             {
-                _context.Mantenimientos.Remove(mantenimiento);
-                await _context.SaveChangesAsync();
+                TempData["Mensaje"] = "Mantenimiento no encontrado o ya inactivo.";
+                return RedirectToAction(nameof(Index));
             }
+
+            mantenimiento.IsActive = false;
+
+            // Si tu modelo/BD tiene estas columnas opcionales, las seteas:
+            // mantenimiento.DeactivatedAt = DateTime.UtcNow;
+            // mantenimiento.DeactivatedBy = (HttpContext.Session.GetString("UsuarioNombre")
+            //     ?? HttpContext.Session.GetString("UsuarioCorreo")
+            //     ?? User?.Identity?.Name
+            //     ?? "Desconocido");
+
+            await _context.SaveChangesAsync();
+
+            TempData["Mensaje"] = "Mantenimiento desactivado correctamente.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // =========================================================
+        // (NUEVO) POST: Mantenimientos/Activar/5
+        // =========================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRol("Administrador")]
+        public async Task<IActionResult> Activar(int id)
+        {
+            var mantenimiento = await _context.Mantenimientos
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (mantenimiento == null)
+            {
+                TempData["Mensaje"] = "Mantenimiento no encontrado.";
+                return RedirectToAction(nameof(Inactivos));
+            }
+
+            mantenimiento.IsActive = true;
+
+            // Si usas campos opcionales de auditoría:
+            // mantenimiento.DeactivatedAt = null;
+            // mantenimiento.DeactivatedBy = null;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Mensaje"] = "Mantenimiento reactivado correctamente.";
+            return RedirectToAction(nameof(Inactivos));
         }
 
         // ===================== Helpers =====================

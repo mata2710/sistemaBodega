@@ -1,0 +1,413 @@
+﻿@model SistemaBodega.Models.Usuario
+
+@{
+    ViewData["Title"] = "Crear usuario";
+
+    // Foto inicial (si no hay, avatar por defecto)
+    var fotoUrl = Url.Content(string.IsNullOrWhiteSpace(Model?.FotoFilePath)
+        ? "~/img/perfil.png"
+        : "~/" + Model!.FotoFilePath);
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+<style>
+    /* ===== Estructura y layout (mismo estilo que "Crear cliente") ===== */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: .75rem;
+        padding-left: .65rem;
+        border-left: 4px solid #00809D;
+    }
+
+    .card.shadow-sm {
+        border: 1px solid rgba(0,0,0,.06);
+    }
+
+    .page-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+    }
+
+        .page-tools .btn {
+            margin-top: 0 !important;
+        }
+
+    /* ===== Botones (coherente con otras vistas) ===== */
+    .btn-save {
+        background: #437057 !important; /* verde */
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-save:hover {
+            background: #3a614c !important;
+            color: #fff !important;
+        }
+
+        .btn-save:focus {
+            box-shadow: 0 0 0 .2rem rgba(67,112,87,.25) !important;
+        }
+
+    .btn-cancel {
+        background: #DC3C22 !important; /* rojo */
+        color: #fff !important;
+        border: 0 !important;
+    }
+
+        .btn-cancel:hover {
+            background: #C3341E !important;
+            color: #fff !important;
+        }
+
+        .btn-cancel:focus {
+            box-shadow: 0 0 0 .2rem rgba(220,60,34,.25) !important;
+        }
+
+    /* Botón "Subir foto" en AZUL (primario) => usa .btn-primary del site */
+    .btn-upload {
+    }
+
+    /* ===== Inputs con icono ===== */
+    .input-group-text i {
+        opacity: .85;
+    }
+
+    /* ===== Grid del preview (mismo que clientes) ===== */
+    .dl-grid {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        row-gap: .35rem;
+        column-gap: 1rem;
+    }
+
+        .dl-grid dt {
+            color: #6c757d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .dl-grid dd {
+            margin: 0;
+            /* Evitar desbordes en textos largos del preview */
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+    /* Badge "Pendiente" (mismo estilo) */
+    .badge-pending {
+        background: #EAC8A6;
+        color: #3d2b12;
+        border: 1px solid #EAC8A6;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+    }
+
+    /* Avatar mini de preview de foto */
+    .avatar-mini {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #e5e7eb;
+    }
+
+    /* ===== Toggle ojo contraseña (usa las clases globales de tu site) ===== */
+    .has-toggle {
+        position: relative;
+    }
+    /* En tu site ya existe .toggle-pass con centrado vertical; lo respetamos */
+    /* Sólo reforzamos que el botón tenga ancho/alto clickable cómodos */
+    .toggle-pass {
+        width: 2rem;
+        height: 2rem;
+    }
+</style>
+
+<div class="page-tools mt-3 mb-3">
+    <h2 class="mb-0">Crear usuario</h2>
+    <a asp-controller="Admin" asp-action="Usuarios" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left-short"></i> Volver al listado
+    </a>
+</div>
+
+<div class="row g-3">
+    <!-- Columna izquierda: formulario -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form asp-controller="Admin" asp-action="CrearUsuario" method="post" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger rounded-3 mb-3"
+                         role="alert"
+                         style="display:@(ViewData.ModelState.IsValid ? "none" : "block")">
+                        Revisa los campos marcados en rojo.
+                    </div>
+
+                    <!-- Foto -->
+                    <div class="mb-3 d-flex align-items-center gap-3">
+                        <img id="pvFoto" src="@fotoUrl" alt="Foto" class="avatar-mini" />
+                        <div>
+                            <label for="inFoto" class="btn btn-sm btn-primary btn-upload mb-1">
+                                <i class="bi bi-image"></i> Subir foto
+                            </label>
+                            <input type="file" id="inFoto" name="Foto" accept="image/*" class="d-none" />
+                            <div class="form-text">PNG, JPG (máx. 2&nbsp;MB)</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="NombreCompleto" class="form-label">Nombre completo</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input asp-for="NombreCompleto"
+                                   class="form-control form-control-lg"
+                                   id="inNombre"
+                                   placeholder="Nombre y apellidos"
+                                   autocomplete="name" />
+                        </div>
+                        <span asp-validation-for="NombreCompleto" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Correo" class="form-label">Correo electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Correo"
+                                       class="form-control form-control-lg"
+                                       id="inCorreo"
+                                       placeholder="usuario@dominio.com"
+                                       autocomplete="email" />
+                            </div>
+                            <span asp-validation-for="Correo" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Cedula" class="form-label">Número de cédula</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                <input asp-for="Cedula"
+                                       class="form-control form-control-lg"
+                                       id="inCedula"
+                                       placeholder="Cédula o identificación" />
+                            </div>
+                            <span asp-validation-for="Cedula" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label asp-for="Telefono" class="form-label">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input asp-for="Telefono"
+                                       class="form-control form-control-lg"
+                                       id="inTelefono"
+                                       placeholder="8888-8888"
+                                       inputmode="tel"
+                                       autocomplete="tel" />
+                            </div>
+                            <span asp-validation-for="Telefono" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Rol" class="form-label">Rol</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-gear"></i></span>
+                                <select asp-for="Rol" id="inRol" class="form-select form-select-lg" required>
+                                    <option value="Empleado" selected>Empleado</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="Rol" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Contraseña</label>
+                            <div class="has-toggle">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                    <input type="password"
+                                           name="Contrasena"
+                                           id="inPass"
+                                           class="form-control form-control-lg"
+                                           placeholder="******"
+                                           autocomplete="new-password"
+                                           required />
+                                </div>
+                                <button type="button" class="toggle-pass" data-target="inPass" aria-label="Mostrar u ocultar contraseña">
+                                    <i class="bi bi-eye-slash"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Mínimo 6 caracteres (recomendado).</div>
+                            <span class="text-danger small" data-valmsg-for="Contrasena"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Confirmar contraseña</label>
+                            <div class="has-toggle">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                    <input type="password"
+                                           id="inPass2"
+                                           class="form-control form-control-lg"
+                                           placeholder="******"
+                                           autocomplete="new-password"
+                                           required />
+                                </div>
+                                <button type="button" class="toggle-pass" data-target="inPass2" aria-label="Mostrar u ocultar confirmación">
+                                    <i class="bi bi-eye-slash"></i>
+                                </button>
+                            </div>
+                            <span class="text-danger small" id="errConfirm"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button type="submit" class="btn btn-save btn-lg">
+                            <i class="bi bi-check2"></i> Guardar usuario
+                        </button>
+                        <a asp-controller="Admin" asp-action="Usuarios" class="btn btn-cancel btn-lg">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna derecha: preview -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="section-title">Resumen (preview)</div>
+                <dl class="dl-grid">
+                    <dt>Nombre</dt>
+                    <dd id="pvNombre"><span class="badge-pending">Pendiente</span></dd>
+
+                    <dt>Correo</dt>
+                    <dd id="pvCorreo"><span class="badge-pending">Pendiente</span></dd>
+
+                    <dt>Cédula</dt>
+                    <dd id="pvCedula"><span class="badge-pending">Pendiente</span></dd>
+
+                    <dt>Teléfono</dt>
+                    <dd id="pvTelefono"><span class="badge-pending">Pendiente</span></dd>
+
+                    <dt>Rol</dt>
+                    <dd id="pvRol">@(!string.IsNullOrWhiteSpace(Model?.Rol) ? Model!.Rol : "Empleado")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        (function () {
+            // ===== Preview en vivo =====
+            const PEND = '<span class="badge-pending">Pendiente</span>';
+            const $inNombre   = document.getElementById('inNombre');
+            const $inCorreo   = document.getElementById('inCorreo');
+            const $inCedula   = document.getElementById('inCedula');
+            const $inTelefono = document.getElementById('inTelefono');
+            const $inRol      = document.getElementById('inRol');
+
+            const $pvNombre   = document.getElementById('pvNombre');
+            const $pvCorreo   = document.getElementById('pvCorreo');
+            const $pvCedula   = document.getElementById('pvCedula');
+            const $pvTelefono = document.getElementById('pvTelefono');
+            const $pvRol      = document.getElementById('pvRol');
+
+            function val(el){ return (el && el.value ? el.value.trim() : ''); }
+            function setHTML(el, html){ if (el) el.innerHTML = html; }
+            function setText(el, txt){ if (el) el.textContent = txt; }
+
+            function upNombre(){ const v = val($inNombre); v ? setText($pvNombre, v) : setHTML($pvNombre, PEND); }
+            function upCorreo(){ const v = val($inCorreo); v ? setText($pvCorreo, v) : setHTML($pvCorreo, PEND); }
+            function upCedula(){ const v = val($inCedula); v ? setText($pvCedula, v) : setHTML($pvCedula, PEND); }
+            function upTelefono(){ const v = val($inTelefono); v ? setText($pvTelefono, v) : setHTML($pvTelefono, PEND); }
+            function upRol(){ const v = val($inRol); v ? setText($pvRol, v) : setHTML($pvRol, PEND); }
+
+            [$inNombre,$inCorreo,$inCedula,$inTelefono].forEach(inp => {
+                if (inp) inp.addEventListener('input', () => {
+                    if (inp === $inNombre) upNombre();
+                    else if (inp === $inCorreo) upCorreo();
+                    else if (inp === $inCedula) upCedula();
+                    else if (inp === $inTelefono) upTelefono();
+                });
+            });
+            if ($inRol) $inRol.addEventListener('change', upRol);
+
+            // init preview
+            upNombre(); upCorreo(); upCedula(); upTelefono(); upRol();
+
+            // ===== Preview de foto =====
+            const $inFoto = document.getElementById('inFoto');
+            const $pvFoto = document.getElementById('pvFoto');
+            if ($inFoto && $pvFoto) {
+                $inFoto.addEventListener('change', function (e) {
+                    const files = e.target.files || [];
+                    if (files.length > 0) {
+                        const file = files[0];
+                        const url = URL.createObjectURL(file);
+                        $pvFoto.src = url;
+                    }
+                });
+            }
+
+            // ===== Toggle ojo (centrado y funcional como en Login) =====
+            document.querySelectorAll('.toggle-pass').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const id = btn.getAttribute('data-target');
+                    const input = document.getElementById(id);
+                    if (!input) return;
+                    const isPwd = input.type === 'password';
+                    input.type = isPwd ? 'text' : 'password';
+                    const icon = btn.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('bi-eye');
+                        icon.classList.toggle('bi-eye-slash');
+                    }
+                });
+            });
+
+            // ===== Validación cliente: confirmar contraseña =====
+            const $form = document.querySelector('form');
+            const $pass1 = document.getElementById('inPass');
+            const $pass2 = document.getElementById('inPass2');
+            const $err   = document.getElementById('errConfirm');
+
+            if ($form && $pass1 && $pass2 && $err) {
+                function checkMatch() {
+                    if (!$pass1.value || !$pass2.value) { $err.textContent = ''; return true; }
+                    const ok = $pass1.value === $pass2.value;
+                    $err.textContent = ok ? '' : 'Las contraseñas no coinciden.';
+                    return ok;
+                }
+                $pass1.addEventListener('input', checkMatch);
+                $pass2.addEventListener('input', checkMatch);
+                $form.addEventListener('submit', function (ev) {
+                    if (!checkMatch()) {
+                        ev.preventDefault();
+                        $pass2.focus();
+                    }
+                });
+            }
+        })();
+    </script>
+}
+
+

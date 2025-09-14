@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Http
 
 @{
-    ViewData["Title"] = "Clientes";
+    ViewData["Title"] = "Clientes Inactivos";
     var rol = Context?.Session?.GetString("Rol");
     var q = ViewBag.q as string ?? string.Empty;
 
@@ -52,22 +52,31 @@
 <!-- Encabezado -->
 <div class="page-tools mt-3 mb-3 justify-content-between">
     <div>
-        <h1 class="m-0">Clientes</h1>
+        <h1 class="m-0">Clientes (Inactivos)</h1>
         <div class="text-muted">Total: @Model.TotalItems</div>
     </div>
 
-    @if (rol == "Administrador")
-    {
-        <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2">
+        @* ⚠️ Mantén SIEMPRE este orden: 1) Crear (verde), 2) Volver a Activos (naranja) *@
+        @if (rol == "Administrador")
+        {
             <a asp-action="Create" class="btn">
                 <i class="bi bi-plus-lg me-1"></i> Crear Cliente
             </a>
-            <a asp-action="Inactivos" class="btn">
-                <i class="bi bi-eye-slash me-1"></i> Ver inactivos
-            </a>
-        </div>
-    }
+        }
+        <a asp-action="Index" class="btn">
+            <i class="bi bi-arrow-left-circle me-1"></i> Volver a Activos
+        </a>
+    </div>
 </div>
+
+@if (TempData["Mensaje"] is string msg && !string.IsNullOrWhiteSpace(msg))
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @msg
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 <!-- Filtros -->
 <form method="get" class="card card-filters shadow-sm mb-3">
@@ -88,6 +97,7 @@
             </div>
         </div>
 
+        <!-- Reset a página 1 preservando pageSize -->
         <input type="hidden" name="page" value="1" />
         <input type="hidden" name="pageSize" value="@Model.PageSize" />
     </div>
@@ -98,10 +108,11 @@
     <table class="table-pro">
         <thead>
             <tr>
-                <th style="width:34%">Nombre</th>
-                <th class="text-nowrap" style="width:18%">Cédula jurídica</th>
+                <th style="width:26%">Nombre</th>
+                <th class="text-nowrap" style="width:16%">Cédula jurídica</th>
                 <th class="text-nowrap" style="width:14%">Teléfono</th>
                 <th style="width:18%">Email</th>
+                <th class="text-nowrap" style="width:18%">Desactivado</th>
                 <th class="td-center" style="width:16%">Acciones</th>
             </tr>
         </thead>
@@ -114,7 +125,9 @@
                     var cedula = string.IsNullOrWhiteSpace(c.Identificacion) ? null : c.Identificacion;
                     var tel = string.IsNullOrWhiteSpace(c.Telefono) ? null : c.Telefono;
                     var mail = string.IsNullOrWhiteSpace(c.Email) ? null : c.Email;
+
                     <tr>
+                        <!-- NOMBRE -->
                         <td class="td-truncate" title="@(nombre ?? "Pendiente")">
                             @if (nombre == null)
                             {
@@ -122,9 +135,18 @@
                             }
                             else
                             {
-                                <a asp-action="Details" asp-route-id="@c.Id">@nombre</a>
+                                @if (rol == "Administrador")
+                                {
+                                    <a asp-action="Edit" asp-route-id="@c.Id">@nombre</a>
+                                }
+                                else
+                                {
+                                    @nombre
+                                }
                             }
                         </td>
+
+                        <!-- CÉDULA -->
                         <td class="text-nowrap" title="@(cedula ?? "Pendiente")">
                             @if (cedula == null)
                             {
@@ -136,6 +158,8 @@
                                 @cedula
                             }
                         </td>
+
+                        <!-- TELÉFONO -->
                         <td class="text-nowrap" title="@(tel ?? "Pendiente")">
                             @if (tel == null)
                             {
@@ -147,6 +171,8 @@
                                 @tel
                             }
                         </td>
+
+                        <!-- EMAIL -->
                         <td title="@(mail ?? "Pendiente")">
                             @if (mail == null)
                             {
@@ -157,30 +183,40 @@
                                 <a href="mailto:@mail">@mail</a>
                             }
                         </td>
-                        <td class="td-center">
-                            <a asp-action="Details" asp-route-id="@c.Id" class="btn-icon details" title="Detalles" aria-label="Detalles">
-                                <i class="bi bi-eye"></i>
-                            </a>
 
+                        <!-- DESACTIVADO -->
+                        <td class="text-nowrap">
+                            @(c.DeactivatedAt?.ToLocalTime().ToString("g") ?? "-")
+                        </td>
+
+                        <!-- ACCIONES -->
+                        <td class="td-center">
                             @if (rol == "Administrador")
                             {
-                                <a asp-action="Edit" asp-route-id="@c.Id" class="btn-icon edit" title="Editar" aria-label="Editar">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
+                                <div class="d-flex justify-content-center">
+                                    <!-- ✏️ Editar -->
+                                    <a asp-action="Edit"
+                                       asp-route-id="@c.Id"
+                                       class="btn-icon edit me-1"
+                                       title="Editar"
+                                       aria-label="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
 
-                                <form asp-action="Desactivar"
-                                      asp-route-id="@c.Id"
-                                      method="post"
-                                      class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit"
-                                            class="btn-icon deactivate"
-                                            title="Desactivar"
-                                            aria-label="Desactivar"
-                                            onclick="return confirm('¿Desactivar este cliente?');">
-                                        <i class="bi bi-person-slash"></i>
-                                    </button>
-                                </form>
+                                    <!-- ♻️ Reactivar -->
+                                    <form asp-action="Activar"
+                                          asp-route-id="@c.Id"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn-icon activate"
+                                                title="Reactivar"
+                                                aria-label="Reactivar">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             }
                         </td>
                     </tr>
@@ -189,14 +225,14 @@
             else
             {
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">No se encontraron clientes.</td>
+                    <td colspan="6" class="text-center text-muted py-4">No se encontraron clientes inactivos.</td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
 
-<!-- Paginación -->
+<!-- Barra inferior -->
 <nav aria-label="Paginación" class="pager-bar mt-2">
     <div class="small text-muted pager-left">
         Mostrando @startRow – @endRow de @Model.TotalItems
@@ -220,6 +256,7 @@
                 }
             }
         </select>
+        <!-- preserva búsqueda y reset a página 1 -->
         <input type="hidden" name="q" value="@q" />
         <input type="hidden" name="page" value="1" />
     </form>
@@ -227,7 +264,7 @@
     <ul class="pagination mb-0 pager-right">
         <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
             <a class="page-link"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="@(Model.Page - 1)"
                asp-route-pageSize="@Model.PageSize"
                asp-route-q="@q">Anterior</a>
@@ -237,7 +274,7 @@
         {
             <li class="page-item @(p == Model.Page ? "active" : "")">
                 <a class="page-link"
-                   asp-action="Index"
+                   asp-action="Inactivos"
                    asp-route-page="@p"
                    asp-route-pageSize="@Model.PageSize"
                    asp-route-q="@q">@p</a>
@@ -246,7 +283,7 @@
 
         <li class="page-item @(Model.Page >= totalPages ? "disabled" : "")">
             <a class="page-link"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="@(Model.Page + 1)"
                asp-route-pageSize="@Model.PageSize"
                asp-route-q="@q">Siguiente</a>

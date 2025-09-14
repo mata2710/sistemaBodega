@@ -3,12 +3,12 @@
 @using System.Globalization
 
 @{
-    ViewData["Title"] = "Mantenimientos";
+    ViewData["Title"] = "Mantenimientos inactivos";
     var rol = Context?.Session?.GetString("Rol");
 
     var cr = new CultureInfo("es-CR");
 
-    // Filtros (preservados)
+    // Filtros (igual que en Index)
     string q = (ViewBag.q as string) ?? (Context?.Request?.Query["q"].ToString() ?? "");
     string tipo = (ViewBag.tipo as string) ?? (Context?.Request?.Query["tipo"].ToString() ?? "");
 
@@ -22,25 +22,33 @@
                     .ToList()
                  ?? new List<string>());
 
+    // Base fija de filtros visibles SIEMPRE
+    var baseTipos = new[] { "Correctivo", "Inspección", "Limpieza" };
+
+    // Extras (cualquier tipo adicional que venga del backend)
+    var extras = tipos
+        .Where(t => !baseTipos.Any(b => string.Equals(b, t, System.StringComparison.OrdinalIgnoreCase)))
+        .ToList();
+
+    bool selTodos = string.IsNullOrEmpty(tipo);
+
     int totalPages = Math.Max(1, (int)Math.Ceiling((decimal)(Model?.TotalItems ?? 0) / (Model?.PageSize ?? 10)));
     int startRow = (Model?.TotalItems ?? 0) == 0 ? 0 : (((Model!.Page - 1) * Model!.PageSize) + 1);
     int endRow = Math.Min(Model!.Page * Model!.PageSize, Model.TotalItems);
-
-    bool selTodos = string.IsNullOrEmpty(tipo);
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
 <style>
-    /* Solo estilos que NO están en site.css */
+    /* Solo lo que NO está ya en site.css */
     .card-filters {
         border: 1px solid rgba(0,0,0,.06);
         border-radius: .75rem;
     }
 
     .badge-soft-accent {
-        background: #E6F4F1;
-        color: #166f6b;
+        background: #FDEDE9;
+        color: #a23a2c;
         font-weight: 600;
         border-radius: .5rem;
         padding: .25rem .5rem;
@@ -50,35 +58,38 @@
 <!-- Encabezado -->
 <div class="page-tools mt-3 mb-3 justify-content-between">
     <div>
-        <h1 class="m-0">Mantenimientos</h1>
+        <h1 class="m-0">Mantenimientos inactivos</h1>
         <div class="text-muted">Total: @Model.TotalItems</div>
     </div>
 
     <div class="d-flex align-items-center gap-2">
-        @* Mantener SIEMPRE este orden para que site.css aplique colores por posición:
-           1) Crear (verde)  2) Ver inactivos (naranja) *@
         @if (rol == "Administrador")
         {
-            <a asp-action="Create" class="btn">
+            <a asp-action="Create" class="btn btn-create">
                 <i class="bi bi-plus-lg me-1"></i> Crear Mantenimiento
             </a>
-            <a asp-action="Inactivos" class="btn">
-                <i class="bi bi-eye-slash me-1"></i> Ver inactivos
-            </a>
         }
+        <a asp-action="Index"
+           asp-route-page="1"
+           asp-route-pageSize="@Model.PageSize"
+           asp-route-q="@q"
+           asp-route-tipo="@tipo"
+           class="btn btn-volver-activos">
+            <i class="bi bi-arrow-left-circle me-1"></i> Volver a Activos
+        </a>
     </div>
 </div>
 
 @if (TempData["Mensaje"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
         @TempData["Mensaje"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
     </div>
 }
 
-<!-- Filtros -->
-<form method="get" class="card card-filters shadow-sm mb-3">
+<!-- Filtros (mismo look que Index) -->
+<form method="get" class="card card-filters shadow-sm mb-3" asp-action="Inactivos">
     <div class="card-body p-3 p-md-4">
         <div class="row g-2 g-md-3 align-items-end">
             <!-- Buscar -->
@@ -97,7 +108,7 @@
         <!-- Pills rápidas (Tipo) -->
         <div class="filters-quick mt-3">
             <a class="filter-pill @(selTodos ? "active" : "")"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="1"
                asp-route-pageSize="@Model.PageSize"
                asp-route-q="@q"
@@ -105,11 +116,26 @@
                 Todos
             </a>
 
-            @foreach (var t in tipos)
+            @* Base fija *@
+            @foreach (var b in baseTipos)
             {
-                var isActive = string.Equals(t, tipo, System.StringComparison.Ordinal);
+                var isActive = string.Equals(b, tipo, System.StringComparison.OrdinalIgnoreCase);
                 <a class="filter-pill @(isActive ? "active" : "")"
-                   asp-action="Index"
+                   asp-action="Inactivos"
+                   asp-route-page="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-q="@q"
+                   asp-route-tipo="@b">
+                    @b
+                </a>
+            }
+
+            @* Extras (si los hay) *@
+            @foreach (var t in extras)
+            {
+                var isActive = string.Equals(t, tipo, System.StringComparison.OrdinalIgnoreCase);
+                <a class="filter-pill @(isActive ? "active" : "")"
+                   asp-action="Inactivos"
                    asp-route-page="1"
                    asp-route-pageSize="@Model.PageSize"
                    asp-route-q="@q"
@@ -137,7 +163,7 @@
                     <th>Responsable</th>
                     <th>Bodega</th>
                     <th>Comentarios</th>
-                    <th class="td-center" style="width:240px">Acciones</th>
+                    <th class="td-center" style="width:200px">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -159,24 +185,23 @@
                             <td>@(item.Bodega?.Nombre ?? "—")</td>
                             <td title="@item.ComentariosAdministracion">@comentario</td>
                             <td class="td-center">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-icon details" title="Detalles" aria-label="Detalles">
+                                <a asp-action="Details"
+                                   asp-route-id="@item.Id"
+                                   asp-route-q="@q"
+                                   asp-route-tipo="@tipo"
+                                   asp-route-page="@Model.Page"
+                                   asp-route-pageSize="@Model.PageSize"
+                                   class="btn-icon details" title="Detalles" aria-label="Detalles">
                                     <i class="bi bi-eye"></i>
                                 </a>
+
                                 @if (rol == "Administrador")
                                 {
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon edit" title="Editar" aria-label="Editar">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-
-                                    <!-- Desactivar (soft-delete) -->
-                                    <form asp-action="Desactivar" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    <!-- ♻️ Reactivar (verde consistente) -->
+                                    <form asp-action="Activar" asp-route-id="@item.Id" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit"
-                                                class="btn-icon deactivate"
-                                                title="Desactivar"
-                                                aria-label="Desactivar"
-                                                onclick="return confirm('¿Desea desactivar este mantenimiento?');">
-                                            <i class="bi bi-slash-circle"></i>
+                                        <button type="submit" class="btn-icon activate" title="Reactivar" aria-label="Reactivar">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
                                         </button>
                                     </form>
                                 }
@@ -187,7 +212,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-5">No hay mantenimientos registrados.</td>
+                        <td colspan="7" class="text-center text-muted py-5">No hay mantenimientos inactivos.</td>
                     </tr>
                 }
             </tbody>
@@ -195,13 +220,13 @@
     </div>
 </div>
 
-<!-- Paginación -->
+<!-- Paginación (misma estructura que Index) -->
 <nav aria-label="Paginación" class="pager-bar mt-2">
     <div class="small text-muted pager-left">
         Mostrando @startRow – @endRow de @Model.TotalItems
     </div>
 
-    <form method="get" class="d-flex align-items-center gap-2 pager-center">
+    <form method="get" class="d-flex align-items-center gap-2 pager-center" asp-action="Inactivos">
         <label class="small text-muted mb-0" for="pageSizeSelect">Pág.</label>
         <select id="pageSizeSelect" name="pageSize" class="form-select form-select-sm" onchange="this.form.submit()">
             @{
@@ -230,7 +255,7 @@
     <ul class="pagination mb-0 pager-right">
         <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
             <a class="page-link"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="@(Model.Page - 1)"
                asp-route-pageSize="@Model.PageSize"
                asp-route-q="@q"
@@ -241,7 +266,7 @@
         {
             <li class="page-item @(p == Model.Page ? "active" : "")">
                 <a class="page-link"
-                   asp-action="Index"
+                   asp-action="Inactivos"
                    asp-route-page="@p"
                    asp-route-pageSize="@Model.PageSize"
                    asp-route-q="@q"
@@ -251,7 +276,7 @@
 
         <li class="page-item @(Model.Page >= totalPages ? "disabled" : "")">
             <a class="page-link"
-               asp-action="Index"
+               asp-action="Inactivos"
                asp-route-page="@(Model.Page + 1)"
                asp-route-pageSize="@Model.PageSize"
                asp-route-q="@q"
@@ -259,4 +284,3 @@
         </li>
     </ul>
 </nav>
-

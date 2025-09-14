@@ -10,14 +10,14 @@
     int startRow = Model.TotalItems == 0 ? 0 : ((Model.Page - 1) * Model.PageSize) + 1;
     int endRow = Math.Min(Model.Page * Model.PageSize, Model.TotalItems);
 
-    bool chkActivos = string.Equals(Context?.Request?.Query["activos"], "true", StringComparison.OrdinalIgnoreCase);
+    // ✅ Cambiamos la semántica: si llega activos=false => ver inactivos
+    bool verInactivos = string.Equals(Context?.Request?.Query["activos"], "false", StringComparison.OrdinalIgnoreCase);
     bool chkRenov = string.Equals(Context?.Request?.Query["renovacion"], "true", StringComparison.OrdinalIgnoreCase);
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
 <style>
-    /* ===== Botones de acción con iconos ===== */
     .btn-icon {
         display: inline-flex;
         align-items: center;
@@ -27,106 +27,99 @@
         border-radius: 8px;
         text-decoration: none;
         border: none;
-        margin-left: .25rem
+        margin-left: .25rem;
+        cursor: pointer;
     }
 
         .btn-icon i {
             font-size: 1.05rem;
-            color: #fff
+            color: #fff;
         }
 
         .btn-icon.details {
-            background: #00809D
+            background: #00809D;
         }
 
         .btn-icon.edit {
-            background: #FFD700
+            background: #FFD700;
         }
 
             .btn-icon.edit i {
-                color: #111
+                color: #111;
             }
 
-        .btn-icon.delete {
-            background: #DC3C22
-        }
-
         .btn-icon:hover {
-            filter: brightness(.95)
+            filter: brightness(.95);
         }
 
-    /* ===== Tabla ===== */
     .table-pro {
-        width: 100%
+        width: 100%;
     }
 
         .table-pro th, .table-pro td {
             padding: .65rem .8rem;
-            vertical-align: middle
+            vertical-align: middle;
         }
 
     .td-center {
-        text-align: center
+        text-align: center;
     }
 
     .td-truncate {
         max-width: 360px;
         white-space: nowrap;
         overflow: hidden;
-        text-overflow: ellipsis
+        text-overflow: ellipsis;
     }
 
-    /* ===== Barra inferior ===== */
     .pager-bar {
         display: flex;
         align-items: center;
         gap: .75rem;
-        flex-wrap: wrap
+        flex-wrap: wrap;
     }
 
     .pager-left {
-        margin-right: auto
+        margin-right: auto;
     }
 
     .pager-center {
         margin-left: auto;
-        margin-right: auto
+        margin-right: auto;
     }
 
     .pager-right {
-        margin-left: auto
+        margin-left: auto;
     }
 
-    /* ===== Links marca ===== */
     .link-accent {
         color: #00809D;
-        text-decoration: none
+        text-decoration: none;
     }
 
         .link-accent:hover {
             color: #00748A;
-            text-decoration: underline
+            text-decoration: underline;
         }
 
-    /* ===== Card de filtros (igual a Clientes) ===== */
     .page-tools {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: .75rem
+        gap: .75rem;
     }
 
         .page-tools .btn {
-            margin-top: 0 !important
+            margin-top: 0 !important;
         }
 
     .card-filters {
         border: 1px solid rgba(0,0,0,.06);
-        border-radius: .75rem
+        border-radius: .75rem;
     }
 
     .search-group {
-        position: relative
+        position: relative;
     }
 
         .search-group .btn-search {
@@ -142,29 +135,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer
+            cursor: pointer;
         }
 
             .search-group .btn-search i {
                 color: #00809D;
-                font-size: 1.1rem
+                font-size: 1.1rem;
             }
 
             .search-group .btn-search:hover i {
-                color: #00748A
+                color: #00748A;
             }
 
         .search-group .form-control.pe-5 {
-            padding-right: 2.5rem !important
+            padding-right: 2.5rem !important;
         }
 
-    /* Badges coherentes */
     .badge-ok {
         background: #e6f4f1;
         color: #166f6b;
         padding: .3rem .55rem;
         border-radius: .6rem;
-        font-weight: 600
+        font-weight: 600;
     }
 
     .badge-danger {
@@ -172,11 +164,10 @@
         color: #b42318;
         padding: .3rem .55rem;
         border-radius: .6rem;
-        font-weight: 600
+        font-weight: 600;
     }
 </style>
 
-<!-- Encabezado -->
 <div class="page-tools mt-3 mb-3">
     <div>
         <h1 class="m-0">Alquileres</h1>
@@ -192,35 +183,31 @@
     </div>
 </div>
 
-<!-- Filtros en card -->
 <form method="get" class="card card-filters shadow-sm mb-3">
     <div class="card-body">
         <div class="row g-2 align-items-end">
             <div class="col-md-6">
                 <label class="form-label">Buscar</label>
                 <div class="search-group">
-                    <input type="search"
-                           name="q"
-                           value="@q"
-                           class="form-control pe-5"
-                           placeholder="Cliente, bodega, ubicación..." />
-                    <button type="submit" class="btn-search" aria-label="Buscar">
-                        <i class="bi bi-search"></i>
-                    </button>
+                    <input type="search" name="q" value="@q" class="form-control pe-5" placeholder="Cliente, bodega, ubicación..." />
+                    <button type="submit" class="btn-search" aria-label="Buscar"><i class="bi bi-search"></i></button>
                 </div>
             </div>
 
             <div class="col-md-3">
+                <!-- ✅ Switch ahora muestra INACTIVOS cuando está encendido -->
                 <div class="form-check form-switch mt-4">
                     <input class="form-check-input"
                            type="checkbox"
-                           id="fActivos"
+                           id="fInactivos"
                            name="activos"
-                           value="true"
-                           @(chkActivos ? "checked" : null)
+                           value="false"
+                           @(ViewBag.VerInactivos == true ? "checked" : "")
                            onchange="this.form.submit()" />
-                    <label class="form-check-label" for="fActivos">Solo activos</label>
+                    <input type="hidden" name="activos" value="true" />
+                    <label class="form-check-label" for="fInactivos">Ver inactivos</label>
                 </div>
+
             </div>
 
             <div class="col-md-3">
@@ -237,7 +224,6 @@
             </div>
         </div>
 
-        <!-- Preserva tamaño de página y reinicia a la 1 -->
         <input type="hidden" name="page" value="1" />
         <input type="hidden" name="pageSize" value="@Model.PageSize" />
     </div>
@@ -275,22 +261,26 @@
                             @if (item.RenovacionAutomatica)
                             {
                                 <span class="badge-ok">Sí</span>
+                                ;
                             }
                             else
                             {
 
                                 <span class="badge-danger">No</span>
+                                ;
                             }
                         </td>
                         <td class="td-center">
                             @if (item.Activo)
                             {
                                 <span class="badge-ok">Activo</span>
+                                ;
                             }
                             else
                             {
 
                                 <span class="badge-danger">Inactivo</span>
+                                ;
                             }
                         </td>
                         <td class="td-center">
@@ -298,7 +288,7 @@
                             @if (rol == "Administrador")
                             {
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon edit" title="Editar" aria-label="Editar"><i class="bi bi-pencil-square"></i></a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn-icon delete" title="Eliminar" aria-label="Eliminar"><i class="bi bi-trash3"></i></a>
+                                @* Botón de eliminar removido *@
                             }
                         </td>
                     </tr>
@@ -306,9 +296,7 @@
             }
             else
             {
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">No hay alquileres registrados.</td>
-                </tr>
+                <tr><td colspan="7" class="text-center text-muted py-4">No hay alquileres registrados.</td></tr>
             }
         </tbody>
     </table>
@@ -327,22 +315,17 @@
             }
             @foreach (var s in sizes)
             {
-                if (Model.PageSize == s)
-                {
-                    <option value="@s" selected="selected">@s</option>
-                }
-                else
-                {
-                    <option value="@s">@s</option>
-                }
+                <option value="@s" selected="@(Model.PageSize == s)">@s</option>
             }
         </select>
+
         <!-- Preservar búsqueda y filtros y reset a página 1 -->
         <input type="hidden" name="q" value="@q" />
         <input type="hidden" name="page" value="1" />
-        @if (chkActivos)
+        @* ✅ Si estamos viendo inactivos, persistimos activos=false *@
+        @if (verInactivos)
         {
-            <input type="hidden" name="activos" value="true" />
+            <input type="hidden" name="activos" value="false" />
         }
         @if (chkRenov)
         {
@@ -357,7 +340,7 @@
                asp-route-page="@(Model.Page - 1)"
                asp-route-pageSize="@Model.PageSize"
                asp-route-q="@q"
-               asp-route-activos="@(chkActivos ? "true" : null)"
+               asp-route-activos="@(verInactivos ? "false" : null)"
                asp-route-renovacion="@(chkRenov ? "true" : null)">Anterior</a>
         </li>
 
@@ -369,7 +352,7 @@
                    asp-route-page="@p"
                    asp-route-pageSize="@Model.PageSize"
                    asp-route-q="@q"
-                   asp-route-activos="@(chkActivos ? "true" : null)"
+                   asp-route-activos="@(verInactivos ? "false" : null)"
                    asp-route-renovacion="@(chkRenov ? "true" : null)">@p</a>
             </li>
         }
@@ -380,8 +363,9 @@
                asp-route-page="@(Model.Page + 1)"
                asp-route-pageSize="@Model.PageSize"
                asp-route-q="@q"
-               asp-route-activos="@(chkActivos ? "true" : null)"
+               asp-route-activos="@(verInactivos ? "false" : null)"
                asp-route-renovacion="@(chkRenov ? "true" : null)">Siguiente</a>
         </li>
     </ul>
 </nav>
+

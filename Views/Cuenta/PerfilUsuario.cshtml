@@ -2,9 +2,9 @@
 @{
     ViewData["Title"] = "Perfil de Usuario";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
     var rol = ViewBag.Rol as string ?? "Empleado";
 
-    // ✅ Ruta de foto: usa la guardada o la imagen por defecto
     var fotoUrl = Url.Content(string.IsNullOrWhiteSpace(Model?.FotoFilePath)
         ? "~/img/perfil.png"
         : "~/" + Model.FotoFilePath);
@@ -13,7 +13,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
 <style>
-    /* ===== Estructura ===== */
     .page-title {
         margin: 0;
     }
@@ -23,7 +22,6 @@
         border-radius: .75rem;
     }
 
-    /* ===== Botones ===== */
     .btn-save {
         background: #437057 !important;
         color: #fff !important;
@@ -39,28 +37,6 @@
             box-shadow: 0 0 0 .2rem rgba(67,112,87,.25) !important;
         }
 
-    /* Administrar usuarios: AMARILLO siempre, sin azul en hover */
-    .btn-admin,
-    .btn-admin:hover,
-    .btn-admin:focus,
-    .btn-admin:active,
-    .btn-admin:visited {
-        background: #FFD700 !important;
-        color: #111 !important;
-        border: 0 !important;
-        text-decoration: none !important;
-    }
-
-        .btn-admin:hover {
-            filter: brightness(.95);
-        }
-
-            .btn-admin i,
-            .btn-admin:hover i,
-            .btn-admin:focus i {
-                color: #111 !important;
-            }
-
     .btn-home {
         background: #00809D !important;
         color: #fff !important;
@@ -72,7 +48,6 @@
             color: #fff !important;
         }
 
-    /* ===== Avatar circular + botón ===== */
     .avatar-uploader {
         position: relative;
         width: 112px;
@@ -106,9 +81,13 @@
             line-height: 1;
             white-space: nowrap;
             cursor: pointer;
+            text-decoration: none;
         }
 
-    /* Badges suaves */
+            .avatar-uploader .avatar-edit:hover {
+                background: #00748A;
+            }
+
     .badge-soft-accent {
         background: #E7F6FC;
         color: #0B6073;
@@ -128,6 +107,10 @@
             color: #00748A;
             text-decoration: underline;
         }
+
+    .input-group-text i {
+        opacity: .85;
+    }
 </style>
 
 <div class="container py-4">
@@ -141,7 +124,7 @@
         <div class="d-flex gap-2">
             @if (rol == "Administrador")
             {
-                <a href="/Admin/Usuarios" class="btn btn-admin">
+                <a href="/Admin/Usuarios" class="btn btn-warning" style="color:#111;border:0">
                     <i class="bi bi-people me-1"></i> Administrar usuarios
                 </a>
             }
@@ -167,9 +150,8 @@
             <div class="row g-4 align-items-center mb-4">
                 <div class="col-auto">
                     <div class="avatar-uploader">
-                        <!-- ✅ usa la foto del usuario si existe -->
                         <img id="fotoPreview" src="@fotoUrl" alt="Foto de perfil">
-                        <label for="foto" class="avatar-edit">Cambiar foto</label>
+                        <label for="foto" class="avatar-edit"><i class="bi bi-image me-1"></i> Cambiar foto</label>
                     </div>
                 </div>
                 <div class="col">
@@ -184,7 +166,8 @@
 
             <form method="post" asp-action="ActualizarPerfil" enctype="multipart/form-data" novalidate>
                 @Html.AntiForgeryToken()
-                <input type="hidden" name="Id" value="@Model.Id" />
+
+                <input asp-for="Id" type="hidden" />
                 <input type="file" id="foto" name="Foto" accept="image/*" class="d-none" />
 
                 <div asp-validation-summary="ModelOnly"
@@ -194,28 +177,53 @@
                     Revisa los campos marcados en rojo.
                 </div>
 
+                <!-- Datos básicos -->
                 <div class="row g-3">
                     <div class="col-12">
-                        <label for="NombreCompleto" class="form-label fw-semibold">Nombre completo</label>
-                        <input type="text" name="NombreCompleto" id="NombreCompleto"
-                               class="form-control form-control-lg"
-                               value="@Model.NombreCompleto"
-                               placeholder="Nombre y apellidos" required />
-                        <span class="text-danger small">@Html.ValidationMessage("NombreCompleto")</span>
+                        <label asp-for="NombreCompleto" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input asp-for="NombreCompleto" class="form-control form-control-lg" placeholder="Nombre y apellidos" />
+                        </div>
+                        <span asp-validation-for="NombreCompleto" class="text-danger small"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label for="Correo" class="form-label fw-semibold">Correo electrónico</label>
-                        <input type="email" name="Correo" id="Correo"
-                               class="form-control form-control-lg"
-                               value="@Model.Correo"
-                               placeholder="tu@correo.com" autocomplete="email" required />
-                        <span class="text-danger small">@Html.ValidationMessage("Correo")</span>
+                        <label asp-for="Correo" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Correo" class="form-control form-control-lg" placeholder="tu@correo.com" autocomplete="email" />
+                        </div>
+                        <span asp-validation-for="Correo" class="text-danger small"></span>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Rol</label>
-                        <input type="text" class="form-control form-control-lg" value="@Model.Rol" disabled />
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-gear"></i></span>
+                            <input class="form-control form-control-lg" value="@Model.Rol" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cédula y Teléfono (pre-cargados y editables) -->
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <label asp-for="Cedula" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                            <input asp-for="Cedula" class="form-control form-control-lg" placeholder="Ej.: 1-2345-6789" inputmode="numeric" />
+                        </div>
+                        <span asp-validation-for="Cedula" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Telefono" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                            <input asp-for="Telefono" class="form-control form-control-lg" placeholder="8888-8888" inputmode="tel" />
+                        </div>
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
                     </div>
                 </div>
 

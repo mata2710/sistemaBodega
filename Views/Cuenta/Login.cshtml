@@ -3,7 +3,6 @@
 }
 
 <div class="login-wrap bg-white">
-    <!-- Banda superior con color de acento -->
     <div class="accent-bar"></div>
 
     <div class="container d-flex align-items-center justify-content-center min-vh-100">
@@ -11,7 +10,9 @@
             <div class="card-body p-4 p-md-5">
 
                 <div class="text-center mb-4">
-                    <div class="brand-circle mx-auto mb-3">SB</div>
+                    <div class="photo-frame mx-auto mb-3">
+                        <span class="fw-bold">SB</span>
+                    </div>
                     <h1 class="h3 fw-bold mb-1">Industrias Unidas S.A</h1>
                     <p class="text-muted mb-0">Accede a tu cuenta</p>
                 </div>
@@ -30,23 +31,26 @@
                         <div class="form-text">Usa el correo registrado en el sistema.</div>
                     </div>
 
-                    <div class="mb-2 position-relative">
+                    <div class="mb-2">
                         <label for="contrasena" class="form-label fw-semibold">Contraseña</label>
-                        <input id="contrasena" type="password" name="contrasena" class="form-control form-control-lg pe-5" placeholder="••••••••" required />
 
-                        <!-- Botón ojo: de eye-slash (oculta) a eye (visible) -->
-                        <button type="button"
-                                class="btn btn-sm btn-link toggle-pass"
-                                aria-label="Mostrar u ocultar contraseña"
-                                data-target="#contrasena">
-                            <i class="fa-solid fa-eye-slash"></i>
-                        </button>
+                        <!-- 🔧 Wrapper solo para input + botón -->
+                        <div class="has-toggle">
+                            <input id="contrasena" type="password" name="contrasena"
+                                   class="form-control form-control-lg" placeholder="••••••••" required />
+
+                            <button type="button"
+                                    class="toggle-pass"
+                                    aria-label="Mostrar u ocultar contraseña"
+                                    aria-pressed="false"
+                                    data-target="#contrasena">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-accent btn-lg fw-semibold">
-                            Ingresar
-                        </button>
+                        <button type="submit" class="btn-ingresar">Ingresar</button>
                     </div>
 
                     <div class="text-center mt-3">
@@ -82,20 +86,20 @@
             const icon = btn.querySelector('i');
 
             btn.addEventListener('click', function () {
-                const oculto = input.type === 'password';
-                input.type = oculto ? 'text' : 'password';
+                const isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
 
-                // Cambia el icono: eye-slash (oculta) <-> eye (visible)
-                if (oculto) {
+                if (isHidden) {
                     icon.classList.remove('fa-eye-slash');
                     icon.classList.add('fa-eye');
                     btn.setAttribute('aria-label', 'Ocultar contraseña');
+                    btn.setAttribute('aria-pressed', 'true');
                 } else {
                     icon.classList.remove('fa-eye');
                     icon.classList.add('fa-eye-slash');
                     btn.setAttribute('aria-label', 'Mostrar contraseña');
+                    btn.setAttribute('aria-pressed', 'false');
                 }
-
                 input.focus();
             });
         })();
